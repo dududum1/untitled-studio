@@ -187,8 +187,23 @@
 
             <!-- Histogram Overlay -->
             <div id="histogram-container"
-                class="absolute top-4 right-4 w-48 h-28 rounded-lg overflow-hidden bg-midnight/80 border border-glass-border hidden">
+                class="absolute top-4 right-4 w-48 rounded-lg overflow-hidden bg-midnight/80 border border-glass-border hidden z-50">
                 <canvas id="histogram-canvas" width="192" height="112"></canvas>
+                <div class="flex items-center justify-between px-2 py-1.5 border-t border-glass-border">
+                    <button id="auto-enhance-btn"
+                        class="flex items-center gap-1 px-2 py-1 rounded bg-hot-pink/20 hover:bg-hot-pink/40 text-hot-pink text-[10px] font-bold transition-all"
+                        title="Auto-Enhance (Magic Wand)">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
+                        </svg>
+                        Auto
+                    </button>
+                    <label class="flex items-center gap-1 text-[10px] text-gray-400 cursor-pointer">
+                        <input type="checkbox" id="clipping-toggle" class="accent-hot-pink w-3 h-3">
+                        Clip
+                    </label>
+                </div>
             </div>
 
             <!-- Before/After Label -->
@@ -279,6 +294,16 @@
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+        </button>
+
+        <!-- Histogram (Mobile) -->
+        <button id="toggle-histogram-mobile-btn"
+            class="p-4 rounded-xl bg-glass border border-glass-border text-gray-400 hover:text-white hover:bg-glass-border transition-all flex-shrink-0"
+            title="Toggle Histogram">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
         </button>
 
@@ -635,6 +660,21 @@
                         </div>
                         <input type="range" id="halation" class="studio-slider" min="0" max="100" step="1" value="0">
                     </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Diffusion</label>
+                            <span class="slider-value" data-for="diffusion">0</span>
+                        </div>
+                        <input type="range" id="diffusion" class="studio-slider" min="0" max="100" step="1" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Barrel Distortion</label>
+                            <span class="slider-value" data-for="barrelDistortion">0</span>
+                        </div>
+                        <input type="range" id="barrelDistortion" class="studio-slider" min="-100" max="100" step="1"
+                            value="0">
+                    </div>
                 </div>
 
                 <!-- 2. GRAIN SUB-PANEL -->
@@ -667,6 +707,21 @@
                             <span class="slider-value" data-for="grainSize">1.0</span>
                         </div>
                         <input type="range" id="grainSize" class="studio-slider" min="0.5" max="3" step="0.1" value="1">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Noise Color</label>
+                            <span class="slider-value" data-for="noiseColorHue">0</span>
+                        </div>
+                        <input type="range" id="noiseColorHue" class="studio-slider" min="0" max="360" step="1"
+                            value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>AI Denoise</label>
+                            <span class="slider-value" data-for="denoise">0</span>
+                        </div>
+                        <input type="range" id="denoise" class="studio-slider" min="0" max="100" step="1" value="0">
                     </div>
                 </div>
 
@@ -730,6 +785,14 @@
                                 <span class="slider-value" data-for="scratches">0</span>
                             </div>
                             <input type="range" id="scratches" class="studio-slider" min="0" max="100" step="1"
+                                value="0">
+                        </div>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Film Gate Weave</label>
+                                <span class="slider-value" data-for="filmGateWeave">0</span>
+                            </div>
+                            <input type="range" id="filmGateWeave" class="studio-slider" min="0" max="100" step="1"
                                 value="0">
                         </div>
                     </div>
@@ -806,6 +869,14 @@
                             <span class="slider-value" data-for="asciiSize">0</span>
                         </div>
                         <input type="range" id="asciiSize" class="studio-slider" min="0" max="2" step="0.01" value="0">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Posterize</label>
+                            <span class="slider-value" data-for="posterize">0</span>
+                        </div>
+                        <input type="range" id="posterize" class="studio-slider" min="0" max="100" step="1" value="0">
                     </div>
                 </div>
 
@@ -921,6 +992,13 @@
             <div id="presets-panel" class="panel hidden h-full flex flex-col">
                 <div id="preset-categories" class="flex gap-2 mb-2 overflow-x-auto pb-2 scrollbar-hide flex-shrink-0">
                     <button class="preset-category active" data-category="all">All</button>
+                    <button class="preset-category" data-category="favorites">
+                        <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        Favorites
+                    </button>
                     <button class="preset-category" data-category="custom">My Presets</button>
                     <button class="preset-category" data-category="kodak">Kodak</button>
                     <button class="preset-category" data-category="fuji">Fuji</button>
@@ -1273,19 +1351,45 @@
         </div>
     </div>
 
-    <!-- Export Progress Modal -->
+    <!-- Export Progress Modal (Enhanced) -->
     <div id="export-modal"
         class="fixed inset-0 z-[100] bg-midnight/90 backdrop-blur-sm flex items-center justify-center hidden">
-        <div class="text-center">
-            <div class="progress-ring mx-auto mb-6">
-                <svg class="w-32 h-32 transform -rotate-90">
-                    <circle class="progress-ring-bg" cx="64" cy="64" r="56" stroke-width="8" fill="none" />
-                    <circle class="progress-ring-fill" cx="64" cy="64" r="56" stroke-width="8" fill="none"
-                        stroke-dasharray="351.86" stroke-dashoffset="351.86" />
-                </svg>
-                <span class="progress-text">0%</span>
+        <div
+            class="bg-glass backdrop-blur-glass border border-glass-border rounded-2xl p-6 w-[28rem] max-w-[95vw] max-h-[85vh] overflow-hidden flex flex-col">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-white">Exporting</h3>
+                <span id="export-eta" class="text-sm text-gray-400">Calculating...</span>
             </div>
-            <p class="text-gray-400 font-medium">Exporting your masterpiece...</p>
+
+            <!-- Overall Progress -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between text-sm mb-1">
+                    <span class="text-gray-400">Overall Progress</span>
+                    <span id="export-overall-text" class="text-hot-pink font-bold">0 / 0</span>
+                </div>
+                <div class="h-2 bg-glass-border rounded-full overflow-hidden">
+                    <div id="export-overall-bar"
+                        class="h-full bg-gradient-to-r from-hot-pink to-deep-blue transition-all duration-300"
+                        style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Image Queue (scrollable) -->
+            <div id="export-queue" class="flex-1 overflow-y-auto space-y-2 max-h-64 scrollbar-hide mb-4">
+                <!-- Image items will be inserted here dynamically -->
+            </div>
+
+            <!-- Current Status -->
+            <div class="text-center py-3 border-t border-glass-border">
+                <p id="export-status" class="text-sm text-gray-400">Preparing export...</p>
+            </div>
+
+            <!-- Cancel Button -->
+            <button id="export-cancel-btn"
+                class="w-full py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all">
+                Cancel Export
+            </button>
         </div>
     </div>
 
@@ -1359,6 +1463,7 @@
     <script src="js/crop-tool.js?v=14"></script>
     <script src="js/gesture-handler.js?v=14"></script>
     <script src="js/export-manager.js?v=14"></script>
+    <script src="js/raw-decoder.js?v=14"></script>
     <script src="js/webgl-engine.js?v=14"></script>
     <script src="js/app.js?v=14"></script>
 

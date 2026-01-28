@@ -102,6 +102,16 @@ const Shaders = {
 
         // ASCII
         uniform float u_asciiSize; // 0.0 to 2.0 (density)
+
+        // New FX (Phase 7)
+        uniform float u_posterize;        // 0-100: Color reduction (2-256 levels)
+        uniform float u_diffusion;        // 0-100: Pro-Mist / Soft glow on highlights
+        uniform float u_barrelDistortion; // -100 to 100: Lens distortion (neg=pincushion, pos=barrel)
+        uniform float u_filmGateWeave;    // 0-100: Frame wobble/jitter
+        uniform float u_splitToneBalance; // -100 to 100: Shadows vs Highlights bias
+        uniform float u_noiseColorHue;    // 0-360: Tint hue for grain
+        uniform bool u_showClipping;      // Show clipping warnings (red=blown, blue=crushed)
+        uniform float u_denoise;          // 0-100: AI Denoise (bilateral filter)
         
         in vec2 v_texCoord;
         out vec4 fragColor;
@@ -630,6 +640,125 @@ const Shaders = {
             float f = amount / 100.0 * 0.3;
             return c + f * (1.0 - c);
         }
+
+        // ============ NEW FX (Phase 7) ============
+        
+        // Posterize: Reduce color levels for retro/pop-art look
+        vec3 applyPosterize(vec3 c, float amount) {
+            if (amount <= 0.0) return c;
+            
+            // amount 0-100 maps to 256 levels down to 2 levels
+            float levels = mix(256.0, 2.0, amount / 100.0);
+            return floor(c * levels) / (levels - 1.0);
+        }
+        
+        // Diffusion / Pro-Mist: Soft glow on highlights
+        vec3 applyDiffusion(vec3 c, float amount, vec2 uv) {
+            if (amount <= 0.0) return c;
+            
+            float intensity = amount / 100.0;
+            float lum = dot(c, vec3(0.299, 0.587, 0.114));
+            
+            // Highlight mask (only glow bright areas)
+            float highlightMask = smoothstep(0.5, 1.0, lum);
+            
+            // Simple blur approximation (box blur)
+            vec2 texel = 1.0 / u_resolution;
+            vec3 blur = vec3(0.0);
+            float blurRadius = intensity * 8.0;
+            
+            for (float x = -2.0; x <= 2.0; x += 1.0) {
+                for (float y = -2.0; y <= 2.0; y += 1.0) {
+                    blur += texture(u_image, uv + vec2(x, y) * texel * blurRadius).rgb;
+                }
+            }
+            blur /= 25.0;
+            
+            // Blend: Add glow to highlights
+            vec3 glow = blur * highlightMask * intensity;
+            return c + glow * 0.5;
+        }
+        
+        // Barrel Distortion: Lens distortion effect
+        vec2 applyBarrelDistortion(vec2 uv, float amount) {
+            if (abs(amount) < 0.01) return uv;
+            
+            vec2 center = vec2(0.5);
+            vec2 coord = uv - center;
+            float dist = length(coord);
+            
+            // amount: -100 = pincushion, +100 = barrel
+            float k = amount / 100.0 * 0.3;
+            float distorted = dist * (1.0 + k * dist * dist);
+            
+            return center + normalize(coord) * distorted;
+        }
+        
+        // Film Gate Weave: Subtle frame wobble
+        vec2 applyFilmGateWeave(vec2 uv, float amount, float time) {
+            if (amount <= 0.0) return uv;
+            
+            float intensity = amount / 100.0 * 0.005;
+            
+            // Slow random wobble using time
+            float wobbleX = sin(time * 3.7) * cos(time * 2.3) * intensity;
+            float wobbleY = cos(time * 4.1) * sin(time * 1.9) * intensity;
+            
+            return uv + vec2(wobbleX, wobbleY);
+        }
+        
+        // Noise Color: Tint the film grain with a hue
+        vec3 applyNoiseColorTint(vec3 grainColor, float hue) {
+            if (hue <= 0.0) return grainColor;
+            
+            // Convert hue (0-360) to RGB tint
+            float h = hue / 360.0;
+            vec3 tint = hsl2rgb(vec3(h, 0.6, 0.5));
+            
+            return grainColor * tint;
+        }
+        
+        // AI Denoise: Bilateral filter approximation
+        // Reduces noise while preserving edges by considering both spatial and color distance
+        vec3 applyDenoise(vec3 c, vec2 uv, float amount) {
+            if (amount <= 0.0) return c;
+            
+            float intensity = amount / 100.0;
+            vec2 texel = 1.0 / u_resolution;
+            
+            // Bilateral filter parameters
+            float spatialSigma = 2.0 + intensity * 4.0;  // Larger = more blur
+            float rangeSigma = 0.1 + intensity * 0.15;   // Larger = less edge preservation
+            
+            vec3 sum = vec3(0.0);
+            float weightSum = 0.0;
+            
+            // Sample in a 5x5 kernel (optimized for WebGL performance)
+            int radius = 2;
+            
+            for (int x = -radius; x <= radius; x++) {
+                for (int y = -radius; y <= radius; y++) {
+                    vec2 offset = vec2(float(x), float(y)) * texel * spatialSigma;
+                    vec3 neighbor = texture(u_image, uv + offset).rgb;
+                    
+                    // Spatial weight (Gaussian based on distance)
+                    float spatialDist = length(vec2(float(x), float(y)));
+                    float spatialWeight = exp(-(spatialDist * spatialDist) / (2.0 * spatialSigma * spatialSigma));
+                    
+                    // Range weight (Gaussian based on color difference)
+                    float colorDist = distance(c, neighbor);
+                    float rangeWeight = exp(-(colorDist * colorDist) / (2.0 * rangeSigma * rangeSigma));
+                    
+                    // Combined bilateral weight
+                    float weight = spatialWeight * rangeWeight;
+                    
+                    sum += neighbor * weight;
+                    weightSum += weight;
+                }
+            }
+            
+            return sum / max(weightSum, 0.001);
+        }
         
         vec3 applySharpen(sampler2D tex, vec2 uv, float amount) {
             if (amount <= 0.0) return texture(tex, uv).rgb;
@@ -699,8 +828,20 @@ const Shaders = {
                 return;
             }
             
+            // === UV DISTORTIONS (Phase 7) ===
+            // Apply barrel distortion and film gate weave before sampling
+            uv = applyBarrelDistortion(uv, u_barrelDistortion);
+            uv = applyFilmGateWeave(uv, u_filmGateWeave, u_time);
+            
+            // Clamp UV to prevent sampling outside image
+            uv = clamp(uv, 0.0, 1.0);
+            
             // Sample with optional sharpening
             vec3 color = applySharpen(u_image, uv, u_sharpness);
+            
+            // === AI DENOISE (before other adjustments) ===
+            // Apply early to prevent noise amplification by later adjustments
+            color = applyDenoise(color, uv, u_denoise);
             
             // === TONE CURVE (before other adjustments) ===
             color = applyToneCurve(color, u_toneCurveLUT, u_useToneCurve, u_toneCurveChannel);
@@ -751,6 +892,10 @@ const Shaders = {
                 vec3 lutColor = texture(u_lut3d, color).rgb;
                 color = mix(color, lutColor, u_lutOpacity);
             }
+
+            // === NEW FX (Phase 7) ===
+            color = applyDiffusion(color, u_diffusion, uv);
+            color = applyPosterize(color, u_posterize);
 
             // === ASCII ===
             // This replaces the whole visual, so do it last or near last
@@ -842,6 +987,22 @@ const Shaders = {
             
             // Final safety clamp
             color = clamp(color, 0.0, 1.0);
+            
+            // === CLIPPING WARNINGS ===
+            // Show red for blown highlights (>0.99), blue for crushed blacks (<0.01)
+            if (u_showClipping) {
+                float maxC = max(color.r, max(color.g, color.b));
+                float minC = min(color.r, min(color.g, color.b));
+                
+                // Blown highlights - flash red
+                if (maxC > 0.99) {
+                    color = vec3(1.0, 0.0, 0.0);
+                }
+                // Crushed blacks - flash blue
+                else if (minC < 0.01) {
+                    color = vec3(0.0, 0.0, 1.0);
+                }
+            }
             
             fragColor = vec4(color, 1.0);
         }

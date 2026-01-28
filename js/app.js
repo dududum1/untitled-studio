@@ -24,6 +24,7 @@ class UntitledStudio {
         this.currentAdjustments = null;
         this.currentPreset = null;
         this.customPresets = [];
+        this.favoritePresets = JSON.parse(localStorage.getItem('favoritePresets') || '[]');
         this.museMode = localStorage.getItem('museMode') === 'true';
 
         // Initialize Startup Toast
@@ -512,6 +513,9 @@ class UntitledStudio {
             histogramContainer: document.getElementById('histogram-container'),
             histogramCanvas: document.getElementById('histogram-canvas'),
             toggleHistogramBtn: document.getElementById('toggle-histogram-btn'),
+            toggleHistogramMobileBtn: document.getElementById('toggle-histogram-mobile-btn'),
+            autoEnhanceBtn: document.getElementById('auto-enhance-btn'),
+            clippingToggle: document.getElementById('clipping-toggle'),
 
             // History
             historySidebar: document.getElementById('history-sidebar'),
@@ -858,6 +862,22 @@ class UntitledStudio {
         // Histogram toggle
         on(this.elements.toggleHistogramBtn, 'click', () => this.toggleHistogram());
 
+        // Auto-Enhance button (Magic Wand in histogram)
+        on(this.elements.autoEnhanceBtn, 'click', () => {
+            this.autoEnhance();
+            this.showToast('Auto-Enhance applied ✨');
+        });
+
+        // Clipping warnings toggle
+        on(this.elements.clippingToggle, 'change', (e) => {
+            if (this.engine) {
+                this.engine.setAdjustment('showClipping', e.target.checked);
+            }
+        });
+
+        // Mobile histogram toggle
+        on(this.elements.toggleHistogramMobileBtn, 'click', () => this.toggleHistogram());
+
         // History toggle
         on(this.elements.toggleHistoryBtn, 'click', () => this.toggleHistory());
         on(this.elements.closeHistoryBtn, 'click', () => this.toggleHistory(false));
@@ -1039,7 +1059,15 @@ class UntitledStudio {
             return;
         }
 
-        const imageFiles = files.filter(f => f.type.startsWith('image/'));
+        // Filter for regular images AND RAW files
+        const imageFiles = files.filter(f => {
+            // Regular images
+            if (f.type.startsWith('image/')) return true;
+            // RAW files (check by extension using RawDecoder)
+            if (window.RawDecoder && window.RawDecoder.isRawFile(f)) return true;
+            return false;
+        });
+
         if (imageFiles.length === 0) return;
 
         const maxImages = 10;
@@ -1111,16 +1139,41 @@ class UntitledStudio {
 
     async addImage(file) {
         const id = Date.now() + Math.random().toString(36).substr(2, 9);
-        const thumbnailUrl = await this.createThumbnail(file);
+
+        // Check if this is a RAW file and decode it
+        let processedFile = file;
+        let isRaw = false;
+
+        if (window.RawDecoder && window.RawDecoder.isRawFile(file)) {
+            isRaw = true;
+            const formatName = window.RawDecoder.getFormatName(file.name);
+            this.showToast(`Decoding ${formatName}...`);
+
+            try {
+                const decodedBlob = await window.RawDecoder.decode(file);
+                // Create a new File object from the decoded blob
+                const baseName = file.name.replace(/\.[^.]+$/, '');
+                processedFile = new File([decodedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
+                this.showToast(`✓ ${formatName} decoded successfully`);
+            } catch (error) {
+                console.error('[addImage] RAW decode failed:', error);
+                this.showToast(`⚠️ Failed to decode ${file.name}`, 'error');
+                return null;
+            }
+        }
+
+        const thumbnailUrl = await this.createThumbnail(processedFile);
 
         // Cache URL immediately
-        const url = URL.createObjectURL(file);
+        const url = URL.createObjectURL(processedFile);
         this.blobCache.set(id, url);
 
         const imageData = {
             id,
-            name: file.name,
-            file,
+            name: file.name, // Keep original name for display
+            file: processedFile,
+            originalFile: isRaw ? file : null, // Keep reference to original RAW if applicable
+            isRaw,
             thumbnailUrl,
             adjustments: { ...this.currentAdjustments },
             createdAt: Date.now()
@@ -1131,12 +1184,12 @@ class UntitledStudio {
 
         // Async Save to DB
         // Don't await this to keep UI responsive
-        storage.fileToBase64(file).then(base64 => {
+        storage.fileToBase64(processedFile).then(base64 => {
             storage.saveImage({
                 ...imageData,
                 fileData: base64, // Save the heavy data
-                file: undefined   // Don't save the File object (IDB can't clone it easily exactly? Actually IDB can store Blobs directly in modern browsers.)
-                // But storage.js is using base64. Stick to that for now to avoid major refactor.
+                file: undefined,   // Don't save the File object
+                originalFile: undefined // Don't save original RAW to DB (too large)
             }).catch(err => console.error('Auto-save failed:', err));
         });
 
@@ -1681,6 +1734,15 @@ class UntitledStudio {
         }
     }
 
+    toggleClipping() {
+        if (!this.engine) return;
+        const current = this.engine.adjustments.showClipping || false;
+        this.engine.setAdjustment('showClipping', !current);
+        if (this.elements.clippingToggle) {
+            this.elements.clippingToggle.checked = !current;
+        }
+    }
+
     applyCrop() {
         if (!this.cropTool || this.activeIndex < 0 || !this.engine) return;
 
@@ -1738,9 +1800,22 @@ class UntitledStudio {
 
         if (category === 'custom') {
             presetsToRender = this.customPresets;
+        } else if (category === 'favorites') {
+            // Get all presets that are in favorites
+            const allCats = ['kodak', 'fuji', 'ilford', 'cinestill', 'disposable', 'bw', 'slide', 'instant', 'cinema', 'experimental', 'cinematic', 'vintage', 'modern', 'moody', 'dreamy', 'editorial', 'nature'];
+            if (this.museMode) allCats.push('muse');
+
+            allCats.forEach(cat => {
+                if (FilmPresets[cat]) {
+                    const catPresets = FilmPresets[cat].filter(p => this.favoritePresets.includes(p.name));
+                    presetsToRender = presetsToRender.concat(catPresets);
+                }
+            });
+            // Also check custom presets
+            presetsToRender = presetsToRender.concat(this.customPresets.filter(p => this.favoritePresets.includes(p.name)));
         } else if (category === 'all') {
             // Flatten all categories for the wheel
-            const allCats = ['kodak', 'fuji', 'ilford', 'cinestill', 'disposable', 'bw', 'slide', 'instant', 'cinema', 'experimental', 'cinematic', 'vintage', 'modern', 'moody', 'dreamy'];
+            const allCats = ['kodak', 'fuji', 'ilford', 'cinestill', 'disposable', 'bw', 'slide', 'instant', 'cinema', 'experimental', 'cinematic', 'vintage', 'modern', 'moody', 'dreamy', 'editorial', 'nature'];
             if (this.museMode) allCats.push('muse');
 
             allCats.forEach(cat => {
@@ -1786,8 +1861,17 @@ class UntitledStudio {
                 `<div style="background-color: ${color}; filter: ${filter};"></div>`
             ).join('');
 
+            const isFavorite = this.favoritePresets.includes(preset.name);
+            const starClass = isFavorite ? 'text-yellow-400' : 'text-gray-500 opacity-0 group-hover:opacity-100';
+
             return `
-            <div class="wheel-card" data-preset="${preset.name}">
+            <div class="wheel-card group" data-preset="${preset.name}">
+                <button class="favorite-star absolute top-1 right-1 z-10 p-1 rounded-full bg-black/30 hover:bg-black/50 ${starClass} transition-all" 
+                    data-preset-name="${preset.name}" title="Toggle Favorite">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                </button>
                 <div class="wheel-card-preview preset-swatch-grid">
                     ${swatchesHtml}
                 </div>
@@ -1834,10 +1918,45 @@ class UntitledStudio {
 
         // 4. Click to scroll to item
         wheel.querySelectorAll('.wheel-card').forEach(card => {
-            card.addEventListener('click', () => {
+            card.addEventListener('click', (e) => {
+                // Don't scroll if clicking the star button
+                if (e.target.closest('.favorite-star')) return;
                 card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             });
         });
+
+        // 5. Favorite star click handlers
+        wheel.querySelectorAll('.favorite-star').forEach(star => {
+            star.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const presetName = star.dataset.presetName;
+                this.toggleFavorite(presetName, star);
+            });
+        });
+    }
+
+    toggleFavorite(presetName, starElement = null) {
+        const index = this.favoritePresets.indexOf(presetName);
+        if (index > -1) {
+            // Remove from favorites
+            this.favoritePresets.splice(index, 1);
+            if (starElement) {
+                starElement.classList.remove('text-yellow-400');
+                starElement.classList.add('text-gray-500', 'opacity-0', 'group-hover:opacity-100');
+            }
+            this.showToast(`Removed "${presetName}" from favorites`);
+        } else {
+            // Add to favorites
+            this.favoritePresets.push(presetName);
+            if (starElement) {
+                starElement.classList.add('text-yellow-400');
+                starElement.classList.remove('text-gray-500', 'opacity-0', 'group-hover:opacity-100');
+            }
+            this.showToast(`Added "${presetName}" to favorites ⭐`);
+        }
+
+        // Persist to localStorage
+        localStorage.setItem('favoritePresets', JSON.stringify(this.favoritePresets));
     }
 
     applyPreset(name) {

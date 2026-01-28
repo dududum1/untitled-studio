@@ -81,7 +81,17 @@ class WebGLEngine {
             scanlineIntensity: 0,
 
             // LUT
-            lutOpacity: 100
+            lutOpacity: 100,
+
+            // New FX (Phase 7)
+            posterize: 0,
+            diffusion: 0,
+            barrelDistortion: 0,
+            filmGateWeave: 0,
+            splitToneBalance: 0,
+            noiseColorHue: 0,
+            showClipping: false,
+            denoise: 0
         };
 
         // Tone curve state
@@ -848,6 +858,16 @@ class WebGLEngine {
 
         // ASCII
         gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_asciiSize'), adj.asciiSize || 0);
+
+        // New FX (Phase 7)
+        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_posterize'), adj.posterize || 0);
+        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_diffusion'), adj.diffusion || 0);
+        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_barrelDistortion'), adj.barrelDistortion || 0);
+        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_filmGateWeave'), adj.filmGateWeave || 0);
+        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_splitToneBalance'), adj.splitToneBalance || 0);
+        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_noiseColorHue'), adj.noiseColorHue || 0);
+        gl.uniform1i(gl.getUniformLocation(this.programs.main, 'u_showClipping'), adj.showClipping ? 1 : 0);
+        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_denoise'), adj.denoise || 0);
 
         if (this.overlayTexture) {
             gl.activeTexture(gl.TEXTURE2);
