@@ -108,8 +108,6 @@ class UntitledStudio {
 
         // Initialize
         this.init();
-        // initMasks is called inside init() typically, but initSecretMode is new.
-        // Let's call them here to be safe or check init()
         this.initSecretMode();
     }
 
@@ -261,6 +259,7 @@ class UntitledStudio {
             this.initGestures();
             this.initScrubbing(); // Mobile Extra 1
             this.initOLED();      // Mobile Extra 2
+            this.initMasks();     // Masking System
             this.initVibePack();  // Retro Vibe Pack
 
             await this.loadSavedImages().catch(err => console.warn('Failed to load saved images:', err));
@@ -813,6 +812,52 @@ class UntitledStudio {
         on(this.elements.savePresetBtn, 'click', () => this.showSavePresetModal());
         on(this.elements.savePresetCancel, 'click', () => this.hideSavePresetModal());
         on(this.elements.savePresetConfirm, 'click', () => this.saveCustomPreset());
+
+        // Masking Listeners
+        on(this.elements.addMaskBtn, 'click', () => this.addMask('linear')); // Default to linear
+        on(this.elements.deleteMaskBtn, 'click', () => this.deleteMask());
+
+        on(this.elements.maskOverlayToggle, 'change', (e) => {
+            if (this.engine) this.engine.setShowMaskOverlay(e.target.checked);
+        });
+
+        on(this.elements.maskInvert, 'change', (e) => {
+            this.updateMask({ invert: e.target.checked });
+        });
+
+        // Mask Sliders
+        if (this.elements.maskSliders) {
+            this.elements.maskSliders.forEach(slider => {
+                on(slider, 'input', (e) => {
+                    const prop = e.target.id.replace('mask-', '');
+                    this.updateMask({ [prop]: parseFloat(e.target.value) });
+
+                    // Update display
+                    const disp = document.querySelector(`.slider-value[data-for="${e.target.id}"]`);
+                    if (disp) disp.textContent = parseFloat(e.target.value).toFixed(2);
+                });
+            });
+        }
+
+        // Mask List Delegation
+        if (this.elements.maskList) {
+            on(this.elements.maskList, 'click', (e) => {
+                const item = e.target.closest('.mask-item');
+                if (!item) return;
+
+                const id = item.dataset.id;
+
+                // Toggle Button
+                if (e.target.closest('.mask-toggle-btn')) {
+                    e.stopPropagation();
+                    this.toggleMask(id);
+                    return;
+                }
+
+                // Activate
+                this.activateMask(id);
+            });
+        }
 
         // Toggle UI
         if (this.elements.toggleUIBtn) {
@@ -1377,11 +1422,17 @@ class UntitledStudio {
             btn.classList.toggle('active', btn.dataset.tab === tabName);
         });
 
+        let found = false;
         this.elements.panels.forEach(panel => {
             const isActive = panel.id === `${tabName}-panel`;
+            if (isActive) found = true;
             panel.classList.toggle('active', isActive);
             panel.classList.toggle('hidden', !isActive);
         });
+
+        if (!found) {
+            console.warn(`Tab panel not found: ${tabName}-panel`);
+        }
 
         // Show/hide crop overlay
         if (tabName === 'crop' && this.cropTool && this.activeIndex >= 0 && this.engine && this.engine.canvas) {
@@ -1660,7 +1711,10 @@ class UntitledStudio {
         const FilmPresets = window.FilmPresets;
         const getPresetsByCategory = window.getPresetsByCategory;
 
-        if (!wheel) return;
+        if (!wheel) {
+            console.error('Preset wheel element not found');
+            return;
+        }
 
         // Cleanup old observer
         if (this.wheelObserver) {
@@ -1668,10 +1722,12 @@ class UntitledStudio {
         }
 
         if (!FilmPresets) {
+            console.error('FilmPresets database missing');
             wheel.innerHTML = '<div class="text-red-500 text-xs p-4">Error: DB missing</div>';
             return;
         }
 
+        try {
         // 1. Get List of Presets
         let presetsToRender = [];
 
@@ -1777,6 +1833,10 @@ class UntitledStudio {
                 card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             });
         });
+        } catch (error) {
+            console.error('Error populating presets:', error);
+            wheel.innerHTML = '<div class="text-red-500 text-xs p-4">Error loading presets</div>';
+        }
     }
 
     applyPreset(name) {
