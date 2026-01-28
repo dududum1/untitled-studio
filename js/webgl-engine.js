@@ -16,6 +16,8 @@ class WebGLEngine {
         this.fbos = {};     // Stores framebuffers
         this.textures = {}; // Stores FBO textures
         this.overlayTexture = null; // Phase 3: Texture overlay
+        this.lutTexture = null; // Option 2: Custom 3D LUT
+        this.useLUT = false;    // Option 2: LUT Flag
         this.isReady = false;
         this.currentImage = null;
         this.animationFrame = null;
@@ -60,8 +62,8 @@ class WebGLEngine {
             dehaze: 0,
             clarity: 0,
             chromaticAberration: 0,
-            chromaticAberration: 0,
             halation: 0,
+            asciiSize: 0, // Added ASCII
             bloomStrength: 0,
             bloomThreshold: 70,
             grainGlobal: 1.0,
@@ -76,7 +78,10 @@ class WebGLEngine {
             pixelateSize: 0,
             glitchStrength: 0,
             ditherStrength: 0,
-            scanlineIntensity: 0
+            scanlineIntensity: 0,
+
+            // LUT
+            lutOpacity: 100
         };
 
         // Tone curve state
@@ -305,8 +310,12 @@ class WebGLEngine {
             'u_dehaze', 'u_clarity', 'u_chromaticAberration',
             'u_overlayTexture', 'u_useOverlay', 'u_overlayOpacity', 'u_overlayBlendMode',
             'u_lightLeak', 'u_scratches', 'u_filmSeed',
+            'u_overlayTexture', 'u_useOverlay', 'u_overlayOpacity', 'u_overlayBlendMode',
+            'u_lightLeak', 'u_scratches', 'u_filmSeed',
             // Secret FX
-            'u_pixelateSize', 'u_glitchStrength', 'u_ditherStrength', 'u_scanlineIntensity'
+            'u_pixelateSize', 'u_glitchStrength', 'u_ditherStrength', 'u_scanlineIntensity',
+            // LUT
+            'u_lut3d', 'u_useLUT', 'u_lutOpacity'
         ];
 
         uniformNames.forEach(name => {
@@ -836,6 +845,10 @@ class WebGLEngine {
         } else {
             gl.uniform1i(this.uniforms.u_useToneCurve, 0);
         }
+
+        // ASCII
+        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_asciiSize'), adj.asciiSize || 0);
+
         if (this.overlayTexture) {
             gl.activeTexture(gl.TEXTURE2);
             gl.bindTexture(gl.TEXTURE_2D, this.overlayTexture);
@@ -844,6 +857,16 @@ class WebGLEngine {
         } else {
             gl.uniform1i(this.uniforms.u_useOverlay, 0);
         }
+
+        if (this.lutTexture && this.useLUT) {
+            gl.activeTexture(gl.TEXTURE3);
+            gl.bindTexture(gl.TEXTURE_3D, this.lutTexture);
+            gl.uniform1i(gl.getUniformLocation(this.programs.main, 'u_useLUT'), 1);
+        } else {
+            gl.uniform1i(gl.getUniformLocation(this.programs.main, 'u_useLUT'), 0);
+        }
+        // Always set sampler3D to unit 3 to avoid conflict with sampler2D on unit 0
+        gl.uniform1i(gl.getUniformLocation(this.programs.main, 'u_lut3d'), 3);
 
         this.setMainUniforms(gl, adj);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -961,6 +984,66 @@ class WebGLEngine {
         gl.uniform1f(this.uniforms.u_lightLeak, v(adj.lightLeak));
         gl.uniform1f(this.uniforms.u_scratches, v(adj.scratches));
         gl.uniform1f(this.uniforms.u_filmSeed, v(adj.filmSeed));
+
+        // LUT
+        gl.uniform1f(this.uniforms.u_lutOpacity, v(adj.lutOpacity) / 100.0);
+    }
+
+    /**
+     * Load a 3D LUT
+     * @param {Float32Array} data - RGB data
+     * @param {number} size - Cube size (e.g. 33)
+     */
+    loadLUT(data, size) {
+        const gl = this.gl;
+
+        if (this.lutTexture) {
+            gl.deleteTexture(this.lutTexture);
+        }
+
+        try {
+            this.lutTexture = gl.createTexture();
+            gl.activeTexture(gl.TEXTURE3);
+            gl.bindTexture(gl.TEXTURE_3D, this.lutTexture);
+
+            // Set params
+            gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE); // R coordinate for 3D
+            gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+            // Upload 3D texture
+            // Internal format: RGB16F or RGB32F for precision, or RGB8. 
+            // Standard .cube is float.
+            gl.texImage3D(
+                gl.TEXTURE_3D,
+                0,                  // Level
+                gl.RGB16F,          // Internal Format (Half float is usually enough and faster)
+                size, size, size,   // Width, Height, Depth
+                0,                  // Border
+                gl.RGB,             // Source Format
+                gl.FLOAT,           // Source Type
+                data                // Source Data
+            );
+
+            this.useLUT = true;
+            console.log(`✓ LUT loaded: ${size}x${size}x${size}`);
+            this.render();
+
+        } catch (e) {
+            console.error('Failed to load 3D LUT:', e);
+            this.useLUT = false;
+        }
+    }
+
+    removeLUT() {
+        if (this.lutTexture) {
+            this.gl.deleteTexture(this.lutTexture);
+            this.lutTexture = null;
+        }
+        this.useLUT = false;
+        this.render();
     }
 
     /**
@@ -1180,6 +1263,9 @@ class WebGLEngine {
         }
         if (this.toneCurveLUT) {
             this.gl.deleteTexture(this.toneCurveLUT);
+        }
+        if (this.lutTexture) {
+            this.gl.deleteTexture(this.lutTexture);
         }
         if (this.program) {
             this.gl.deleteProgram(this.program);

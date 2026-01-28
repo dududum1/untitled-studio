@@ -111,6 +111,9 @@ class UntitledStudio {
         // initMasks is called inside init() typically, but initSecretMode is new.
         // Let's call them here to be safe or check init()
         this.initSecretMode();
+
+        // LUT Parser
+        this.lutParser = new LUTParser();
     }
 
     hapticFeedback(type = 'light') {
@@ -246,6 +249,8 @@ class UntitledStudio {
         try {
             try {
                 this.initEngine();
+                // Initialize Export Manager
+                this.exportManager = new ExportManager(this.engine);
             } catch (e) {
                 console.error('WebGL Engine init failed:', e);
                 // Don't halt the app; allow presets to load
@@ -474,6 +479,8 @@ class UntitledStudio {
             curvePanel: document.getElementById('curve-panel'),
             colorPanel: document.getElementById('color-panel'),
             effectsPanel: document.getElementById('effects-panel'),
+            fxSubTabBtns: document.querySelectorAll('.fx-subtab-btn'), // New
+            fxSubPanels: document.querySelectorAll('.fx-subpanel'),    // New
             cropPanel: document.getElementById('crop-panel'),
             presetsPanel: document.getElementById('presets-panel'),
 
@@ -511,6 +518,13 @@ class UntitledStudio {
             historyList: document.getElementById('history-list'),
             closeHistoryBtn: document.getElementById('close-history-btn'),
             toggleHistoryBtn: document.getElementById('toggle-history-btn'),
+
+            // Custom LUT
+            lutInput: document.getElementById('lut-input'),
+            lutControls: document.getElementById('lut-controls'),
+            lutName: document.getElementById('lut-name'),
+            removeLutBtn: document.getElementById('remove-lut-btn'),
+            importLutBtn: document.getElementById('import-lut-btn'),
 
             // Effects - Texture Overlay
             textureInput: document.getElementById('texture-input'),
@@ -698,6 +712,11 @@ class UntitledStudio {
         on(this.elements.importHeroBtn, 'click', () => this.openFilePicker());
         on(this.elements.fileInput, 'change', (e) => this.handleFileSelect(e));
 
+        // LUT Import
+        on(this.elements.importLutBtn, 'click', () => this.elements.lutInput.click());
+        on(this.elements.lutInput, 'change', (e) => this.handleLUTUpload(e));
+        on(this.elements.removeLutBtn, 'click', () => this.removeLUT());
+
         // Drag and drop
         if (this.elements.canvasContainer) {
             const el = this.elements.canvasContainer;
@@ -733,6 +752,13 @@ class UntitledStudio {
         this.elements.tabBtns.forEach(btn => {
             on(btn, 'click', () => this.switchTab(btn.dataset.tab));
         });
+
+        // FX Sub-tab navigation
+        if (this.elements.fxSubTabBtns) {
+            this.elements.fxSubTabBtns.forEach(btn => {
+                on(btn, 'click', () => this.switchFxSubTab(btn.dataset.subtab));
+            });
+        }
 
         // Slider inputs (all studio-sliders)
         document.querySelectorAll('.studio-slider').forEach(slider => {
@@ -1372,6 +1398,30 @@ class UntitledStudio {
         gl.clear(gl.COLOR_BUFFER_BIT);
     }
 
+    switchFxSubTab(subTabId) {
+        // Toggle Buttons
+        if (this.elements.fxSubTabBtns) {
+            this.elements.fxSubTabBtns.forEach(btn => {
+                const isActive = btn.dataset.subtab === subTabId;
+                btn.classList.toggle('active', isActive);
+                btn.classList.toggle('bg-white/10', isActive);
+                btn.classList.toggle('text-white', isActive);
+                btn.classList.toggle('text-gray-400', !isActive);
+            });
+        }
+
+        // Toggle Panels
+        if (this.elements.fxSubPanels) {
+            this.elements.fxSubPanels.forEach(panel => {
+                if (panel.id === `fx-${subTabId}`) {
+                    panel.classList.remove('hidden');
+                } else {
+                    panel.classList.add('hidden');
+                }
+            });
+        }
+    }
+
     switchTab(tabName) {
         this.elements.tabBtns.forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tabName);
@@ -1388,6 +1438,17 @@ class UntitledStudio {
             this.cropTool.show(this.engine.canvas.width, this.engine.canvas.height);
         } else if (this.cropTool) {
             this.cropTool.hide();
+        }
+
+        // FX Tab Specific: Default to Optics if no active subtab or just as a reset
+        if (tabName === 'effects') {
+            // Only if none active? Or always default to first? Let's default if none active.
+            // But wait, user might have left it on another tab. We should probably keep state or default to optics if first load.
+            // Checking if any subtab btn has active class
+            const activeBtn = document.querySelector('.fx-subtab-btn.active');
+            if (!activeBtn) {
+                this.switchFxSubTab('optics');
+            }
         }
     }
 
@@ -2030,7 +2091,11 @@ class UntitledStudio {
         const format = this.elements.exportFormat.value;
         const quality = this.exportSettings.quality / 100;
 
-        this.elements.exportModal.classList.remove('hidden');
+        const btn = this.elements.exportBtn;
+        const originalText = btn.innerHTML;
+        const modal = this.elements.exportModal;
+
+        modal.classList.remove('hidden');
         this.updateExportProgress(0);
 
         const updateProgress = (progress) => {
@@ -2896,6 +2961,53 @@ class UntitledStudio {
                 this.populatePresets('secret');
             });
         }
+    }
+
+    async handleLUTUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const text = event.target.result;
+            try {
+                const lut = this.lutParser.parse(text);
+
+                // Update Engine
+                this.engine.loadLUT(lut.data, lut.size);
+
+                // Update UI
+                if (this.engine.useLUT) {
+                    this.state = this.state || {}; // Safety
+                    if (!this.state.adjustments) this.state.adjustments = this.engine.getAdjustments();
+                    this.state.adjustments.lutOpacity = 100;
+
+                    this.elements.lutControls.classList.remove('hidden');
+                    this.elements.removeLutBtn.classList.remove('hidden');
+                    if (this.elements.lutName) this.elements.lutName.textContent = lut.title || file.name;
+
+                    // Update Slider UI
+                    const opSlider = document.getElementById('lutOpacity');
+                    const opVal = document.querySelector('[data-for="lutOpacity"]');
+                    if (opSlider) opSlider.value = 100;
+                    if (opVal) opVal.textContent = "1.00";
+                }
+
+            } catch (err) {
+                console.error("LUT Parse Error", err);
+                alert("Failed to parse .cube file. Ensure it is a valid 3D LUT.");
+            }
+        };
+        reader.readAsText(file);
+        // Reset input
+        e.target.value = '';
+    }
+
+    removeLUT() {
+        if (this.engine) this.engine.removeLUT();
+        this.elements.lutControls.classList.add('hidden');
+        this.elements.removeLutBtn.classList.add('hidden');
+        if (this.elements.lutName) this.elements.lutName.textContent = '';
     }
 }
 // Handle B key release for Before/After

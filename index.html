@@ -49,7 +49,8 @@
         }
     </script>
 
-    <!-- Custom Styles -->
+    <!-- Custom Scripts -->
+    <script src="js/lut-parser.js"></script>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -410,6 +411,32 @@
 
             <!-- COLOR Tab -->
             <div id="color-panel" class="panel hidden">
+                <!-- Custom LUT -->
+                <div class="mb-6 pb-4 border-b border-glass-border">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-sm font-semibold text-gray-300">3D LUT (.cube)</label>
+                        <div class="flex gap-2">
+                            <button id="remove-lut-btn"
+                                class="text-xs text-red-400 hover:text-red-300 hidden">Remove</button>
+                            <button id="import-lut-btn"
+                                class="text-xs bg-glass hover:bg-glass-border px-2 py-1 rounded text-moonstone">+
+                                Import</button>
+                            <input type="file" id="lut-input" accept=".cube" hidden>
+                        </div>
+                    </div>
+                    <div id="lut-controls" class="hidden">
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Opacity</label>
+                                <span class="slider-value" data-for="lutOpacity">1.0</span>
+                            </div>
+                            <input type="range" id="lutOpacity" class="studio-slider" min="0" max="100" step="1"
+                                value="100">
+                        </div>
+                        <div id="lut-name" class="text-[10px] text-gray-500 mt-1 truncate"></div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="slider-group">
                         <div class="slider-header">
@@ -521,7 +548,27 @@
 
             <!-- EFFECTS Tab -->
             <div id="effects-panel" class="panel hidden">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Sub-tab Navigation (Pill Style) -->
+                <div class="flex gap-2 mb-6 overflow-x-auto scrollbar-hide pb-1 border-b border-glass-border">
+                    <button
+                        class="fx-subtab-btn active px-3 py-1.5 rounded-lg bg-white/10 text-white text-xs font-semibold whitespace-nowrap hover:bg-white/20 transition-all"
+                        data-subtab="optics">Optics</button>
+                    <button
+                        class="fx-subtab-btn px-3 py-1.5 rounded-lg text-gray-400 text-xs font-semibold whitespace-nowrap hover:bg-white/10 hover:text-white transition-all"
+                        data-subtab="grain">Grain</button>
+                    <button
+                        class="fx-subtab-btn px-3 py-1.5 rounded-lg text-gray-400 text-xs font-semibold whitespace-nowrap hover:bg-white/10 hover:text-white transition-all"
+                        data-subtab="vibe">Vibe</button>
+                    <button
+                        class="fx-subtab-btn px-3 py-1.5 rounded-lg text-gray-400 text-xs font-semibold whitespace-nowrap hover:bg-white/10 hover:text-white transition-all"
+                        data-subtab="digital">Digital</button>
+                    <button
+                        class="fx-subtab-btn px-3 py-1.5 rounded-lg text-gray-400 text-xs font-semibold whitespace-nowrap hover:bg-white/10 hover:text-white transition-all"
+                        data-subtab="texture">Texture</button>
+                </div>
+
+                <!-- 1. OPTICS SUB-PANEL -->
+                <div id="fx-optics" class="fx-subpanel active grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="slider-group">
                         <div class="slider-header">
                             <label>Dehaze</label>
@@ -542,35 +589,6 @@
                             <span class="slider-value" data-for="sharpness">0</span>
                         </div>
                         <input type="range" id="sharpness" class="studio-slider" min="0" max="100" step="1" value="0">
-                    </div>
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Global Grain</label>
-                            <span class="slider-value" data-for="grainGlobal">1.0</span>
-                        </div>
-                        <input type="range" id="grainGlobal" class="studio-slider" min="0" max="2" step="0.1" value="1">
-                    </div>
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Shadow Grain</label>
-                            <span class="slider-value" data-for="grainShadow">0</span>
-                        </div>
-                        <input type="range" id="grainShadow" class="studio-slider" min="0" max="100" step="1" value="0">
-                    </div>
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Highlight Grain</label>
-                            <span class="slider-value" data-for="grainHighlight">0</span>
-                        </div>
-                        <input type="range" id="grainHighlight" class="studio-slider" min="0" max="100" step="1"
-                            value="0">
-                    </div>
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Grain Size</label>
-                            <span class="slider-value" data-for="grainSize">1.0</span>
-                        </div>
-                        <input type="range" id="grainSize" class="studio-slider" min="0.5" max="3" step="0.1" value="1">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
@@ -619,11 +637,44 @@
                     </div>
                 </div>
 
-                <!-- Phase 5: Vibe Module -->
-                <div class="mt-6 pt-4 border-t border-glass-border">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">The Vibe Studio</h3>
+                <!-- 2. GRAIN SUB-PANEL -->
+                <div id="fx-grain" class="fx-subpanel hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Global Grain</label>
+                            <span class="slider-value" data-for="grainGlobal">1.0</span>
+                        </div>
+                        <input type="range" id="grainGlobal" class="studio-slider" min="0" max="2" step="0.1" value="1">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Shadow Grain</label>
+                            <span class="slider-value" data-for="grainShadow">0</span>
+                        </div>
+                        <input type="range" id="grainShadow" class="studio-slider" min="0" max="100" step="1" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Highlight Grain</label>
+                            <span class="slider-value" data-for="grainHighlight">0</span>
+                        </div>
+                        <input type="range" id="grainHighlight" class="studio-slider" min="0" max="100" step="1"
+                            value="0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Grain Size</label>
+                            <span class="slider-value" data-for="grainSize">1.0</span>
+                        </div>
+                        <input type="range" id="grainSize" class="studio-slider" min="0.5" max="3" step="0.1" value="1">
+                    </div>
+                </div>
+
+                <!-- 3. VIBE SUB-PANEL -->
+                <div id="fx-vibe" class="fx-subpanel hidden">
+                    <!-- Log Area for aesthetics -->
                     <div id="log-area"
-                        class="relative z-10 bg-black border-2 border-neon-green-dim p-4 h-36 overflow-y-auto font-mono text-base shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]">
+                        class="relative z-10 bg-black border-2 border-neon-green-dim p-4 h-24 overflow-y-auto font-mono text-xs shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] mb-4">
                     </div>
 
                     <div class="slider-group mb-4">
@@ -656,29 +707,31 @@
                         </div>
                     </div>
 
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Dust & Scratches</label>
-                            <span class="slider-value" data-for="vibe-dust">0</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Dust & Scratches</label>
+                                <span class="slider-value" data-for="vibe-dust">0</span>
+                            </div>
+                            <input type="range" id="vibe-dust" class="studio-slider" min="0" max="100" step="1"
+                                value="0">
                         </div>
-                        <input type="range" id="vibe-dust" class="studio-slider" min="0" max="100" step="1" value="0">
-                    </div>
-
-                    <!-- Procedural Defects -->
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Light Leaks</label>
-                            <span class="slider-value" data-for="lightLeak">0</span>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Light Leaks</label>
+                                <span class="slider-value" data-for="lightLeak">0</span>
+                            </div>
+                            <input type="range" id="lightLeak" class="studio-slider" min="0" max="100" step="1"
+                                value="0">
                         </div>
-                        <input type="range" id="lightLeak" class="studio-slider" min="0" max="100" step="1" value="0">
-                    </div>
-
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Film Scratches</label>
-                            <span class="slider-value" data-for="scratches">0</span>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Film Scratches</label>
+                                <span class="slider-value" data-for="scratches">0</span>
+                            </div>
+                            <input type="range" id="scratches" class="studio-slider" min="0" max="100" step="1"
+                                value="0">
                         </div>
-                        <input type="range" id="scratches" class="studio-slider" min="0" max="100" step="1" value="0">
                     </div>
 
                     <button id="randomize-seed-btn"
@@ -689,8 +742,6 @@
                         </svg>
                         Shuffle Defects
                     </button>
-
-
 
                     <div class="slider-group mt-4">
                         <div class="flex items-center justify-between">
@@ -710,52 +761,57 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Digital Defects (Previously Secret) -->
-                    <div class="mt-6 pt-4 border-t border-glass-border">
-                        <label class="text-sm font-semibold text-gray-300 mb-3 block">Digital FX</label>
-
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label>Glitch</label>
-                                <span class="slider-value" data-for="glitchStrength">0</span>
-                            </div>
-                            <input type="range" id="glitchStrength" class="studio-slider" min="0" max="100" step="1"
-                                value="0">
+                <!-- 4. DIGITAL SUB-PANEL -->
+                <div id="fx-digital" class="fx-subpanel hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Glitch</label>
+                            <span class="slider-value" data-for="glitchStrength">0</span>
                         </div>
+                        <input type="range" id="glitchStrength" class="studio-slider" min="0" max="100" step="1"
+                            value="0">
+                    </div>
 
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label>Pixelate</label>
-                                <span class="slider-value" data-for="pixelateSize">0</span>
-                            </div>
-                            <input type="range" id="pixelateSize" class="studio-slider" min="0" max="20" step="1"
-                                value="0">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Pixelate</label>
+                            <span class="slider-value" data-for="pixelateSize">0</span>
                         </div>
+                        <input type="range" id="pixelateSize" class="studio-slider" min="0" max="20" step="1" value="0">
+                    </div>
 
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label>Dither</label>
-                                <span class="slider-value" data-for="ditherStrength">0</span>
-                            </div>
-                            <input type="range" id="ditherStrength" class="studio-slider" min="0" max="100" step="1"
-                                value="0">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Dither</label>
+                            <span class="slider-value" data-for="ditherStrength">0</span>
                         </div>
+                        <input type="range" id="ditherStrength" class="studio-slider" min="0" max="100" step="1"
+                            value="0">
+                    </div>
 
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label>Scanlines</label>
-                                <span class="slider-value" data-for="scanlineIntensity">0</span>
-                            </div>
-                            <input type="range" id="scanlineIntensity" class="studio-slider" min="0" max="100" step="1"
-                                value="0">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Scanlines</label>
+                            <span class="slider-value" data-for="scanlineIntensity">0</span>
                         </div>
+                        <input type="range" id="scanlineIntensity" class="studio-slider" min="0" max="100" step="1"
+                            value="0">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>ASCII</label>
+                            <span class="slider-value" data-for="asciiSize">0</span>
+                        </div>
+                        <input type="range" id="asciiSize" class="studio-slider" min="0" max="2" step="0.01" value="0">
                     </div>
                 </div>
 
-                <!-- Texture Overlay Section -->
-                <div class="mt-6 pt-4 border-t border-glass-border">
-                    <div class="flex items-center justify-between mb-3">
+                <!-- 5. TEXTURE SUB-PANEL -->
+                <div id="fx-texture" class="fx-subpanel hidden">
+                    <div class="flex items-center justify-between mb-3 border-b border-glass-border pb-2">
                         <label class="text-sm font-semibold text-gray-300">Texture Overlay</label>
                         <input type="file" id="texture-input" accept="image/png,image/jpeg" hidden>
                         <div class="flex gap-2">
@@ -877,6 +933,8 @@
                     <button class="preset-category" data-category="experimental">Experimental</button>
                     <button class="preset-category" data-category="moody">Moody</button>
                     <button class="preset-category" data-category="dreamy">Dreamy</button>
+                    <button class="preset-category" data-category="editorial">Editorial</button>
+                    <button class="preset-category" data-category="nature">Nature</button>
                     <button id="save-preset-btn"
                         class="ml-auto px-3 py-1 rounded-lg bg-hot-pink/20 text-hot-pink text-sm font-semibold hover:bg-hot-pink/30 flex-shrink-0">
                         + Save

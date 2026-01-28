@@ -92,14 +92,91 @@ const Shaders = {
         // Vibe Procedural (Phase 6)
         uniform float u_lightLeak;
         uniform float u_scratches;
+
         uniform float u_filmSeed;
 
+        // Custom LUT
+        uniform mediump sampler3D u_lut3d;
+        uniform bool u_useLUT;
+        uniform float u_lutOpacity;
+
+        // ASCII
+        uniform float u_asciiSize; // 0.0 to 2.0 (density)
         
         in vec2 v_texCoord;
         out vec4 fragColor;
         
         // ============ FILM SCIENCE MATH ============
         
+        // Procedural 3x5 font (numbers + punct)
+        // Returns 1.0 if pixel is part of char, 0.0 otherwise
+        float getCharacter(int n, vec2 p) {
+            // p is 0..1 inside the char cell
+            // map to 3x5 grid
+            int x = int(p.x * 3.0);
+            int y = int((1.0 - p.y) * 5.0); // flip y for bit reading
+            
+            if (x < 0 || x > 2 || y < 0 || y > 4) return 0.0;
+            
+            // Bitmask for chars (very simplified set: . : ; + * % @ #)
+            // 15 bits per char (3 cols * 5 rows)
+            
+            int bits = 0;
+            
+            if (n == 0) bits = 0;     // space
+            if (n == 1) bits = 4096;  // . (bottom left-ish) -> actually let's use int array logic 
+            // Reuse logic: rows top to bottom
+            
+            // 8 levels of brightness
+            // 0: space
+            if (n == 1) bits = 2; // . (very bottom)
+            if (n == 2) bits = 10; // :
+            if (n == 3) bits = 21546; // - 
+            if (n == 4) bits = 4658; // +
+            if (n == 5) bits = 11111; // * (placeholder) -> let's try 15 bits integer
+            
+            // Let's use a simpler "density" check for 3x5
+            // 15 pixels. 
+            // n=0 (dark) -> 0 pixels
+            // n=1 .. n=7 (bright)
+            
+            // Simpler: Just hardcode a few shapes manually
+            // n is brightness level 0..7
+            
+            if (n == 0) return 0.0;
+            
+            // .
+            if (n == 1) {
+                if (x==1 && y==4) return 1.0;
+            }
+            // :
+            if (n == 2) {
+                if (x==1 && (y==1 || y==4)) return 1.0;
+            }
+            // ;
+            if (n == 3) {
+                if (x==1 && (y==1 || y==4 || y==3)) return 1.0;
+            }
+            // +
+            if (n == 4) {
+                 if ((x==1 && y>0 && y<4) || (y==2)) return 1.0;
+            }
+            // o
+            if (n == 5) {
+                if (y==0 || y==4 || x==0 || x==2) return 1.0;
+            }
+            // #
+            if (n == 6) {
+                if (x==1 || y==1 || y==3) return 1.0;
+            }
+            // @ (fill)
+            if (n == 7) {
+                return 1.0;
+            }
+            
+            return 0.0;
+        }
+
         vec3 rgb2cmy(vec3 rgb) {
             return 1.0 - rgb;
         }
@@ -667,6 +744,73 @@ const Shaders = {
             
             // === HSL MIXER ===
             color = applyHSLMixer(color);
+
+            // === CUSTOM 3D LUT ===
+            // Applied after color grading but before texture/grain
+            if (u_useLUT) {
+                vec3 lutColor = texture(u_lut3d, color).rgb;
+                color = mix(color, lutColor, u_lutOpacity);
+            }
+
+            // === ASCII ===
+            // This replaces the whole visual, so do it last or near last
+            if (u_asciiSize > 0.01) {
+                float density = u_asciiSize * 100.0; // Slider 0-2 -> 0-200 chars width
+                if (density < 10.0) density = 10.0;
+
+                vec2 charGrid = vec2(density, density * (u_resolution.y / u_resolution.x) * 1.6); // Aspect correction
+                
+                vec2 charPos = floor(uv * charGrid) / charGrid;
+                vec2 charUV = fract(uv * charGrid);
+                
+                // Sample brightness at center of char
+                vec3 pixel = texture(u_image, charPos + (0.5/charGrid)).rgb;
+                // Apply current effects to it?
+                // Ideally we sample 'color' but 'color' is global var. 
+                // Since this is a post-process effect, technically we should have been modifying 'color' all along.
+                // But texture(u_image) gets ORIGINAL.
+                // We should assume 'color' IS the current pixel processed so far? 
+                
+                // IMPORTANT: The shader structure modifies 'color' in place. 
+                // To pixelate/ascii, we essentially need to "re-sample" the PROCESSED color at a quantized position.
+                // BUT we can't easily jump back in the pipeline.
+                // Workaround: We pixelate the UVs used for earlier steps? No, that breaks everything.
+                // Real ASCII usually requires a 2nd pass or simply applying it on top of the "current" color result.
+                // Since we can't re-run the whole pipeline for a neighbor pixel, 
+                // we will just use the CURRENT pixel's brightness to pick a char, 
+                // and draw a predefined color (e.g. green or white) or the pixel's color.
+                
+                // Let's go with "Draw simplistic ASCII on top of result":
+                float gray = dot(color, vec3(0.299, 0.587, 0.114));
+                int charIndex = int(gray * 7.99); 
+                
+                // We need quantized brightness though to make it look blocky
+                // But since we can't query neighbors, we'll just check if *this* pixel falls into the char shape 
+                // determined by *its own* coordinate quantization?
+                // This is tricky in a single pass without texture lookups.
+                // Better approach for single pass:
+                // 1. Quantize UV
+                // 2. We can't know the brightness of the "cell" without a texture lookup of the *result*.
+                //    Since we don't have a computed texture of the result yet, we can only lookup the INPUT texture.
+                //    So ASCII will verify based on INPUT image 
+                //    (or we accept that effects applied *before* ASCII won't influence char shape, only char color if we use it).
+                
+                vec3 quantizedSource = texture(u_image, charPos + (0.5/charGrid)).rgb;
+                // Apply basic luminance check on source
+                float qGray = dot(quantizedSource, vec3(0.299, 0.587, 0.114));
+                
+                int idx = int(qGray * 8.0);
+                float isChar = getCharacter(idx, charUV);
+                
+                // Replace color
+                // Matrix style: Green text on black
+                // Or just white text on black? Or text * color?
+                // Let's do colored text on black background
+                color = isChar * quantizedSource; 
+                
+                // Optional: Matrix green tint
+                // color = isChar * vec3(0.0, 1.0, 0.2) * qGray;
+            }
 
             // === TEXTURE OVERLAY ===
             color = applyOverlay(color, uv, u_overlayTexture, u_useOverlay, u_overlayOpacity, u_overlayBlendMode);
