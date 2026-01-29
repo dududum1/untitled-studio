@@ -652,6 +652,43 @@ class UntitledStudio {
         if (this.elements.canvasContainer) {
             this.cropTool = new CropTool(this.elements.canvasContainer, (settings) => {
                 console.log('Crop settings changed:', settings);
+                // Apply rotation and flip from Crop Tool
+                if (settings.rotation !== undefined) this.engine.setAdjustment('rotation', settings.rotation);
+                if (settings.flipH !== undefined) this.engine.setAdjustment('flipX', settings.flipH ? 1 : 0);
+                if (settings.flipV !== undefined) this.engine.setAdjustment('flipY', settings.flipV ? 1 : 0);
+            });
+        }
+
+        // Rotation Controls
+        const rotateSlider = document.getElementById('rotation');
+        const rotateCCW = document.getElementById('rotate-ccw-btn');
+        const rotateCW = document.getElementById('rotate-cw-btn');
+
+        if (rotateSlider) {
+            rotateSlider.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                this.engine.setAdjustment('rotation', val);
+            });
+            // Double click to reset
+            rotateSlider.addEventListener('dblclick', () => {
+                rotateSlider.value = 0;
+                this.engine.setAdjustment('rotation', 0);
+            });
+        }
+
+        if (rotateCCW && rotateSlider) {
+            rotateCCW.addEventListener('click', () => {
+                let val = parseFloat(rotateSlider.value) - 5;
+                rotateSlider.value = val;
+                this.engine.setAdjustment('rotation', val);
+            });
+        }
+
+        if (rotateCW && rotateSlider) {
+            rotateCW.addEventListener('click', () => {
+                let val = parseFloat(rotateSlider.value) + 5;
+                rotateSlider.value = val;
+                this.engine.setAdjustment('rotation', val);
             });
         }
     }
@@ -683,7 +720,124 @@ class UntitledStudio {
         }
     }
 
+    initFrameControls() {
+        const toggle = document.getElementById('border-toggle');
+        const controls = document.getElementById('border-controls');
+        const widthSlider = document.getElementById('borderWidth');
+        const colorInput = document.getElementById('borderColor');
+        const presets = document.querySelectorAll('.border-color-preset');
+
+        const hexToRgb = (hex) => {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? [
+                parseInt(result[1], 16) / 255,
+                parseInt(result[2], 16) / 255,
+                parseInt(result[3], 16) / 255
+            ] : [1, 1, 1];
+        };
+
+        if (toggle) {
+            toggle.addEventListener('change', (e) => {
+                const enabled = e.target.checked;
+                this.engine.setAdjustment('borderEnabled', enabled);
+                if (controls) {
+                    controls.style.opacity = enabled ? '1' : '0.5';
+                    controls.style.pointerEvents = enabled ? 'auto' : 'none';
+                }
+            });
+        }
+
+        if (widthSlider) {
+            widthSlider.addEventListener('input', (e) => {
+                this.engine.setAdjustment('borderWidth', parseFloat(e.target.value));
+            });
+        }
+
+        if (colorInput) {
+            colorInput.addEventListener('input', (e) => {
+                this.engine.setAdjustment('borderColor', hexToRgb(e.target.value));
+            });
+        }
+
+        presets.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const color = btn.dataset.color;
+                if (colorInput) colorInput.value = color;
+                this.engine.setAdjustment('borderColor', hexToRgb(color));
+            });
+        });
+    }
+
+    initSplitViewControls() {
+        const toggle = document.getElementById('split-view-toggle');
+        const sliderContainer = document.getElementById('split-slider-container');
+        const slider = document.getElementById('split-slider');
+        const splitLine = document.getElementById('split-line');
+
+        if (toggle) {
+            toggle.addEventListener('change', (e) => {
+                const enabled = e.target.checked;
+                if (sliderContainer) {
+                    sliderContainer.classList.toggle('hidden', !enabled);
+                }
+                if (enabled) {
+                    // Start at center
+                    if (slider) slider.value = 0.5;
+                    this.engine.setAdjustment('splitPos', 0.5);
+                    if (splitLine) splitLine.style.left = '50%';
+                } else {
+                    this.engine.setAdjustment('splitPos', -1.0);
+                }
+            });
+        }
+
+        if (slider) {
+            slider.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                this.engine.setAdjustment('splitPos', val);
+                if (splitLine) splitLine.style.left = `${val * 100}%`;
+            });
+        }
+    }
+
+    initUniversalSliders() {
+        // Generic handler for ALL sliders to catch missing connections (like Digital FX)
+        document.querySelectorAll('.studio-slider').forEach(slider => {
+            slider.addEventListener('input', (e) => {
+                let name = e.target.dataset.name || e.target.dataset.for || e.target.id;
+
+                // Map ID/Name to Engine Key
+                const map = {
+                    'pixelate': 'pixelateSize',
+                    'glitch': 'glitchStrength',
+                    'ascii': 'asciiSize',
+                    'dither': 'ditherStrength',
+                    // Add matches for other potential mismatches
+                    'scanline': 'scanlineIntensity'
+                };
+
+                if (map[name]) name = map[name];
+
+                // If specific listeners exist, this runs twice (harmless)
+                // If NO listener exists, this saves the day
+                if (name) {
+                    const value = parseFloat(e.target.value);
+                    this.engine.setAdjustment(name, value);
+
+                    // Update label if sibling exists
+                    const label = e.target.parentElement?.querySelector('.slider-value');
+                    if (label) label.textContent = value;
+                }
+            });
+        });
+        console.log('✓ Universal Sliders Initialized');
+    }
+
     setupEventListeners() {
+        this.initCropTool();
+        this.initFrameControls();
+        this.initSplitViewControls();
+        this.initUniversalSliders(); // Fix Missing FX
         const on = (el, event, handler) => {
             if (el) el.addEventListener(event, handler);
         };

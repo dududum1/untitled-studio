@@ -93,7 +93,11 @@ class WebGLEngine {
             splitToneBalance: 0,
             noiseColorHue: 0,
             showClipping: false,
-            denoise: 0
+            denoise: 0,
+            splitPos: -1,
+            rotation: 0,
+            flipX: false,
+            flipY: false
         };
 
         // Tone curve state
@@ -332,7 +336,15 @@ class WebGLEngine {
             // Secret FX
             'u_pixelateSize', 'u_glitchStrength', 'u_ditherType', 'u_ditherDepth', 'u_ditherStrength', 'u_scanlineIntensity',
             // LUT
-            'u_lut3d', 'u_useLUT', 'u_lutOpacity'
+            'u_lut3d', 'u_useLUT', 'u_lutOpacity',
+            'u_rotation',
+            // Borders
+            'u_useBorder', 'u_borderWidth', 'u_borderColor',
+            // Split View
+            'u_originalImage', 'u_splitPos',
+            'u_contentRotation', 'u_contentFlipX', 'u_contentFlipY',
+            // Flip
+            'u_flipX', 'u_flipY'
         ];
 
         uniformNames.forEach(name => {
@@ -677,7 +689,13 @@ class WebGLEngine {
             // Bloom / Grain V2
             bloomStrength: 0,
             bloomThreshold: 70,
+            bloomThreshold: 70,
             grainGlobal: 1.0,
+
+            // Overlays
+            overlayOpacity: 0,
+            overlayBlendMode: 0,
+            showClipping: false,
 
             // Vibe Procedural
             lightLeak: 0,
@@ -687,8 +705,33 @@ class WebGLEngine {
             // Secret FX
             pixelateSize: 0,
             glitchStrength: 0,
+            ditherType: 0,
+            ditherDepth: 8,
             ditherStrength: 0,
-            scanlineIntensity: 0
+            asciiSize: 0,
+            scanlineIntensity: 0,
+            rotation: 0,
+
+            // Phase 7 FX
+            posterize: 0,
+            diffusion: 0,
+            barrelDistortion: 0,
+            filmGateWeave: 0,
+            splitToneBalance: 0,
+            noiseColorHue: 0,
+            denoise: 0,
+
+            // Split View
+            splitPos: -1.0,
+
+            // Flip
+            flipX: 0, // Using 0 for consistency with uniform type (int)
+            flipY: 0,
+
+            // Borders
+            borderEnabled: false,
+            borderWidth: 0,
+            borderColor: [1, 1, 1]
         };
         this.useToneCurve = false;
         this.overlayTexture = null; // Prevent sticky overlays
@@ -827,8 +870,38 @@ class WebGLEngine {
         gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_ditherStrength'), adj.ditherStrength || 0);
         gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_scanlineIntensity'), adj.scanlineIntensity || 0);
 
+        // Border Uniforms
+        gl.uniform1i(gl.getUniformLocation(this.programs.composite, 'u_useBorder'), this.adjustments.borderEnabled ? 1 : 0);
+        gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_borderWidth'), (this.adjustments.borderWidth || 0) / 100.0); // %
+        gl.uniform3fv(gl.getUniformLocation(this.programs.composite, 'u_borderColor'), this.adjustments.borderColor || [1, 1, 1]);
+
+        gl.uniform2f(gl.getUniformLocation(this.programs.composite, 'u_resolution'), width, height);
         gl.uniform2f(gl.getUniformLocation(this.programs.composite, 'u_resolution'), width, height);
         gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_time'), performance.now() / 1000);
+
+        // Ensure NO rotation/flip in composite pass (shared vertex shader)
+        gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_rotation'), 0.0);
+        gl.uniform1i(gl.getUniformLocation(this.programs.composite, 'u_flipX'), 0);
+        gl.uniform1i(gl.getUniformLocation(this.programs.composite, 'u_flipY'), 0);
+
+        // Split View Binding
+        gl.activeTexture(gl.TEXTURE6);
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+
+        // Explicitly set the uniform to Unit 6
+        const origLoc = gl.getUniformLocation(this.programs.composite, 'u_originalImage');
+        gl.uniform1i(origLoc, 6);
+
+        // Pass content transforms for Original Image Logic
+        gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_contentRotation'), this.adjustments.rotation || 0);
+        gl.uniform1i(gl.getUniformLocation(this.programs.composite, 'u_contentFlipX'), this.adjustments.flipX ? 1 : 0);
+        gl.uniform1i(gl.getUniformLocation(this.programs.composite, 'u_contentFlipY'), this.adjustments.flipY ? 1 : 0);
+
+        if (this.adjustments.splitPos !== undefined && this.adjustments.splitPos >= 0) {
+            gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_splitPos'), this.adjustments.splitPos);
+        } else {
+            gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_splitPos'), -1.0);
+        }
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
@@ -841,7 +914,7 @@ class WebGLEngine {
         }
 
         // 6. Render Vibe Pass (Phase 5)
-        this.renderVibePass();
+        // this.renderVibePass(); // DISABLED: Overwrites Composite/Split View logic
     }
 
     renderPass(adj, fbo) {
@@ -876,7 +949,12 @@ class WebGLEngine {
         gl.uniform1f(this.uniforms.u_splitToneBalance, adj.splitToneBalance || 0);
         gl.uniform1f(this.uniforms.u_noiseColorHue, adj.noiseColorHue || 0);
         gl.uniform1i(this.uniforms.u_showClipping, adj.showClipping ? 1 : 0);
+        gl.uniform1i(this.uniforms.u_showClipping, adj.showClipping ? 1 : 0);
         gl.uniform1f(this.uniforms.u_denoise, adj.denoise || 0);
+
+        // Rotation (Degrees to Radians)
+        const rad = (adj.rotation || 0) * (Math.PI / 180.0);
+        gl.uniform1f(this.uniforms.u_rotation, rad);
 
         if (this.overlayTexture) {
             gl.activeTexture(gl.TEXTURE2);
@@ -956,6 +1034,11 @@ class WebGLEngine {
         gl.uniform1f(this.uniforms.u_time, performance.now() / 1000);
         gl.uniform2f(this.uniforms.u_resolution, this.canvas.width, this.canvas.height);
         gl.uniform1i(this.uniforms.u_showOriginal, this.showOriginal ? 1 : 0);
+
+        // Transform (Vertex)
+        gl.uniform1f(this.uniforms.u_rotation, v(adj.rotation));
+        gl.uniform1i(this.uniforms.u_flipX, adj.flipX ? 1 : 0);
+        gl.uniform1i(this.uniforms.u_flipY, adj.flipY ? 1 : 0);
 
         // Tonal
         gl.uniform1f(this.uniforms.u_exposure, v(adj.exposure));

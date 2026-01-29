@@ -4,7 +4,7 @@
  * v2: Added Phase 2 modules and placeholder assets
  */
 
-const CACHE_NAME = 'untitled-studio-v14';
+const CACHE_NAME = 'untitled-studio-v16';
 const STATIC_ASSETS = [
     '/',
     '/index.html',

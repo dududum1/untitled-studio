@@ -12,11 +12,29 @@ const Shaders = {
         in vec2 a_position;
         in vec2 a_texCoord;
         
+        uniform float u_rotation; // Rotation in radians
+        uniform int u_flipX;      // 1 = flip, 0 = no
+        uniform int u_flipY;      // 1 = flip, 0 = no
+        
         out vec2 v_texCoord;
         
         void main() {
             gl_Position = vec4(a_position, 0.0, 1.0);
-            v_texCoord = a_texCoord;
+            
+            // Rotate UV around center (0.5, 0.5)
+            vec2 center = vec2(0.5, 0.5);
+            vec2 uv = a_texCoord - center;
+            
+            // Apply Flip (before rotation? or after? Crop tool usually does flip THEN rotation in local space, or vice versa?
+            // Usually Flip is applied to the image axis.
+            if (u_flipX > 0) uv.x = -uv.x;
+            if (u_flipY > 0) uv.y = -uv.y;
+            
+            float c = cos(u_rotation);
+            float s = sin(u_rotation);
+            mat2 rot = mat2(c, -s, s, c);
+            
+            v_texCoord = (rot * uv) + center;
         }
     `,
 
@@ -1498,12 +1516,20 @@ const Shaders = {
         uniform float u_grainHighlight;
         uniform vec2 u_resolution;
         uniform float u_time;
+        
+        // Border Uniforms
+        uniform int u_useBorder;
+        uniform float u_borderWidth;
+        uniform vec3 u_borderColor;
 
         // Secret FX placeholders to prevent warnings if valid
         uniform float u_pixelateSize;
         uniform float u_glitchStrength;
         uniform float u_ditherStrength;
         uniform float u_scanlineIntensity;
+
+        uniform float u_splitPos; // 0.0-1.0, -1 = disabled
+        uniform sampler2D u_originalImage;
 
         in vec2 v_texCoord;
         out vec4 fragColor;
@@ -1512,8 +1538,26 @@ const Shaders = {
             return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
         }
 
+        uniform float u_contentRotation;
+        uniform int u_contentFlipX;
+        uniform int u_contentFlipY;
+
         void main() {
             vec2 uv = v_texCoord;
+            
+            // Force usage of u_originalImage to prevent optimization culling
+            vec4 forceOrig = texture(u_originalImage, uv) * 0.0001;
+            
+            // Border Logic
+            if (u_useBorder > 0) {
+                float w = u_borderWidth;
+                if (uv.x < w || uv.x > 1.0 - w || uv.y < w || uv.y > 1.0 - w) {
+                    fragColor = vec4(u_borderColor, 1.0);
+                    return;
+                }
+                uv = (uv - w) / (1.0 - 2.0 * w);
+            }
+            
             vec3 base = texture(u_image, uv).rgb;
             vec3 bloom = texture(u_bloom, uv).rgb;
 
@@ -1527,7 +1571,37 @@ const Shaders = {
             float intensity = mix(u_grainShadow, u_grainHighlight, lum) / 100.0;
             color += (noise - 0.5) * intensity;
 
-            fragColor = vec4(color, 1.0);
+            // Split View Logic
+            if (u_splitPos >= 0.0) {
+                // Swap: Left side (x < split) shows Original
+                if (v_texCoord.x < u_splitPos) {
+                   
+                   // Apply content transform to Original UVs
+                   vec2 suv = v_texCoord;
+                   vec2 center = vec2(0.5);
+                   
+                   // 1. Flip
+                   if (u_contentFlipX > 0) suv.x = 1.0 - suv.x;
+                   if (u_contentFlipY > 0) suv.y = 1.0 - suv.y;
+                   
+                   // 2. Rotate
+                   suv -= center;
+                   float c = cos(-u_contentRotation);
+                   float s = sin(-u_contentRotation);
+                   mat2 rot = mat2(c, -s, s, c);
+                   suv = (rot * suv) + center;
+                   
+                   // Sample original
+                   vec3 origColor = texture(u_originalImage, suv).rgb;
+                   color = origColor; // Use original
+                }
+                // Divider Line (Handled by HTML Overlay now)
+                // if (abs(v_texCoord.x - u_splitPos) < 0.003) {
+                //    color = vec3(1.0); 
+                // }
+            }
+
+            fragColor = vec4(color, 1.0) + forceOrig;
         }
     `,
 
