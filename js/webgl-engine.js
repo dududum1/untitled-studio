@@ -56,6 +56,8 @@ class WebGLEngine {
             // Effects
             grain: 0,
             grainSize: 1,
+            grainShadow: 0,
+            grainHighlight: 0,
             vignette: 0,
             fade: 0,
             sharpness: 0,
@@ -678,6 +680,8 @@ class WebGLEngine {
             hslMagenta: [0, 0, 0],
             grain: 0,
             grainSize: 1,
+            grainShadow: 0,
+            grainHighlight: 0,
             vignette: 0,
             fade: 0,
             sharpness: 0,
@@ -688,7 +692,6 @@ class WebGLEngine {
 
             // Bloom / Grain V2
             bloomStrength: 0,
-            bloomThreshold: 70,
             bloomThreshold: 70,
             grainGlobal: 1.0,
 
@@ -858,12 +861,16 @@ class WebGLEngine {
 
         // Pass Grain Uniforms to Composite
         const adj = this.adjustments;
-        // Map legacy 'grain' to both shadow and highlight if specific controls aren't used
-        const gShadow = adj.grainShadow !== undefined ? adj.grainShadow : (adj.grain || 0);
-        const gHighlight = adj.grainHighlight !== undefined ? adj.grainHighlight : (adj.grain || 0);
+        // Calculate Global Multiplier
+        const gGlobal = adj.grainGlobal !== undefined ? adj.grainGlobal : 1.0;
+
+        // Apply Global to Shadow/Highlight
+        const gShadow = (adj.grainShadow !== undefined ? adj.grainShadow : (adj.grain || 0)) * gGlobal;
+        const gHighlight = (adj.grainHighlight !== undefined ? adj.grainHighlight : (adj.grain || 0)) * gGlobal;
 
         gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_grainShadow'), gShadow);
         gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_grainHighlight'), gHighlight);
+        gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_grainSize'), adj.grainSize || 1.0);
         // Secret FX
         gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_pixelateSize'), adj.pixelateSize || 0);
         gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_glitchStrength'), adj.glitchStrength || 0);

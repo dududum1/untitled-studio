@@ -1514,6 +1514,7 @@ const Shaders = {
         uniform vec3 u_tint;
         uniform float u_grainShadow;
         uniform float u_grainHighlight;
+        uniform float u_grainSize;
         uniform vec2 u_resolution;
         uniform float u_time;
         
@@ -1558,18 +1559,48 @@ const Shaders = {
                 uv = (uv - w) / (1.0 - 2.0 * w);
             }
             
-            vec3 base = texture(u_image, uv).rgb;
-            vec3 bloom = texture(u_bloom, uv).rgb;
+            // 1. Pixelate (affect UVs)
+            if (u_pixelateSize > 0.0) {
+                float dx = u_pixelateSize * (1.0 / u_resolution.x);
+                float dy = u_pixelateSize * (1.0 / u_resolution.y);
+                uv = vec2(dx * floor(uv.x / dx), dy * floor(uv.y / dy));
+            }
 
+            vec3 base = texture(u_image, uv).rgb;
+            
+            // 2. Glitch (Chromatic Aberration Shift)
+            if (u_glitchStrength > 0.0) {
+                float shift = (u_glitchStrength / 100.0) * 0.02;     
+                float r = texture(u_image, uv + vec2(shift * random(vec2(u_time)), 0.0)).r;
+                float g = texture(u_image, uv + vec2(-shift * random(vec2(u_time * 0.5)), 0.0)).g;
+                float b = texture(u_image, uv).b;
+                base = vec3(r, g, b);
+            }
+
+            vec3 bloom = texture(u_bloom, uv).rgb;
             vec3 tintedBloom = bloom * u_tint;
             vec3 color = base + (tintedBloom * (u_amount / 100.0));
 
-            // Simple Grain
+            // 3. Scanlines
+            if (u_scanlineIntensity > 0.0) {
+                float scan = 0.5 + 0.5 * sin(uv.y * u_resolution.y * 3.1415); // Simple sine
+                color = mix(color, color * scan, u_scanlineIntensity / 100.0);
+            }
+
+            // 4. Grain (Size & Intensity)
             float lum = dot(color, vec3(0.299, 0.587, 0.114));
-            float noise = random(uv + fract(u_time));
-            // Uniforms are 0-100, normalize to 0-1
+            // Scale UV by resolution and grain size for consistent noise size
+            vec2 noiseUV = uv * (u_resolution / max(1.0, u_grainSize)); 
+            float noise = random(noiseUV + fract(u_time));
+            
             float intensity = mix(u_grainShadow, u_grainHighlight, lum) / 100.0;
             color += (noise - 0.5) * intensity;
+            
+            // 5. Dither (Ordered) - Placeholder or Noise Dither
+            if (u_ditherStrength > 0.0) {
+                 float dither = random(uv) - 0.5;
+                 color += dither * (u_ditherStrength / 255.0); // 8-bit dither sim
+            }
 
             // Split View Logic
             if (u_splitPos >= 0.0) {

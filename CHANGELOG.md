@@ -2,6 +2,32 @@
 
 All notable changes to Untitled Studio will be documented in this file.
 
+## [1.6.0] - 2026-01-30
+
+### 🏛️ The Film Archive Update (Complete)
+A massive expansion converting the app into a "Museum Grade" film emulation library (150+ Total Presets).
+
+### 🎞️ New Film Stocks (Phases 9-12)
+- **The Legends**: Kodak T-Max (100/400/P3200), Tech Pan, HIE Infrared, Vision3 200T/500T.
+- **Fuji Masters**: Reala 100 ("4th Layer"), Eterna 500T, Acros 100, FP-100C.
+- **Cinema Print**: Kodak Vision 2383 (Hollywood Teal/Orange).
+- **Vintage & Obscure**: Konica VX 400, Lucky Super 100, Rollei Retro/Vario, Film Washi S.
+- **Special FX**: Aerochrome III (Pink IR), Lomo Metropolis (Bleach Bypass), Agfa Scala (B&W Slide).
+
+### 🗂️ Library Reorganization
+- **Manufacturer-Based**: Presets now grouped by brand (`Kodak`, `Fuji`, `Ilford`, `Cinestill`, `Agfa`, `Polaroid`).
+- **New Categories**:
+  - `Vintage`: Consumer classics from defunct brands (Ferrania, Boots, Kmart).
+  - `Obscure`: Industrial, Soviet, and Surveillance films (Svema, Tasma, Traffic Surveillance).
+  - `Styles`: Modern, Moody, Dreamy, Cinema, Glitch.
+
+### 🧹 Fixes & Improvements
+- **Database Repair**: Fixed syntax error in `presets.js` causing database load failures.
+- **Refactor**: Complete code cleanup of the preset loading engine.
+- **Quality**: Verified unique chemical signatures for all new additions (Halation, Grain structures, Bloom).
+
+---
+
 ## [1.5.0] - 2026-01-29
 
 ### 🎨 New Presets (20+)
