@@ -77,7 +77,9 @@ class WebGLEngine {
             // Secret FX
             pixelateSize: 0,
             glitchStrength: 0,
-            ditherStrength: 0,
+            ditherType: 0,      // 0=off, 1=Floyd-Steinberg, 2=Atkinson, 3=Bayer, 4=Random
+            ditherDepth: 8,     // 2-8 bits per channel
+            ditherStrength: 0,  // 0-100 blend
             scanlineIntensity: 0,
 
             // LUT
@@ -250,7 +252,9 @@ class WebGLEngine {
         gl.linkProgram(program);
 
         if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            console.error('Link Error:', gl.getProgramInfoLog(program));
+            const log = gl.getProgramInfoLog(program);
+            console.error('Link Error:', log);
+            alert('Program Link Error:\n' + log);
             return null;
         }
         return program;
@@ -262,7 +266,9 @@ class WebGLEngine {
         this.gl.compileShader(shader);
 
         if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-            console.error('Shader compile error:', this.gl.getShaderInfoLog(shader));
+            const log = this.gl.getShaderInfoLog(shader);
+            console.error('Shader compile error:', log);
+            alert('Shader Compile Error:\n' + log);
             this.gl.deleteShader(shader);
             return null;
         }
@@ -320,10 +326,11 @@ class WebGLEngine {
             'u_dehaze', 'u_clarity', 'u_chromaticAberration',
             'u_overlayTexture', 'u_useOverlay', 'u_overlayOpacity', 'u_overlayBlendMode',
             'u_lightLeak', 'u_scratches', 'u_filmSeed',
-            'u_overlayTexture', 'u_useOverlay', 'u_overlayOpacity', 'u_overlayBlendMode',
-            'u_lightLeak', 'u_scratches', 'u_filmSeed',
+            'u_galleryFrame', 'u_filmGateWeave',
+            'u_asciiSize', 'u_posterize', 'u_diffusion', 'u_barrelDistortion',
+            'u_splitToneBalance', 'u_noiseColorHue', 'u_showClipping', 'u_denoise',
             // Secret FX
-            'u_pixelateSize', 'u_glitchStrength', 'u_ditherStrength', 'u_scanlineIntensity',
+            'u_pixelateSize', 'u_glitchStrength', 'u_ditherType', 'u_ditherDepth', 'u_ditherStrength', 'u_scanlineIntensity',
             // LUT
             'u_lut3d', 'u_useLUT', 'u_lutOpacity'
         ];
@@ -838,6 +845,8 @@ class WebGLEngine {
     }
 
     renderPass(adj, fbo) {
+        if (!this.programs.main) return;
+
         const gl = this.gl;
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
@@ -857,17 +866,17 @@ class WebGLEngine {
         }
 
         // ASCII
-        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_asciiSize'), adj.asciiSize || 0);
+        gl.uniform1f(this.uniforms.u_asciiSize, adj.asciiSize || 0);
 
         // New FX (Phase 7)
-        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_posterize'), adj.posterize || 0);
-        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_diffusion'), adj.diffusion || 0);
-        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_barrelDistortion'), adj.barrelDistortion || 0);
-        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_filmGateWeave'), adj.filmGateWeave || 0);
-        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_splitToneBalance'), adj.splitToneBalance || 0);
-        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_noiseColorHue'), adj.noiseColorHue || 0);
-        gl.uniform1i(gl.getUniformLocation(this.programs.main, 'u_showClipping'), adj.showClipping ? 1 : 0);
-        gl.uniform1f(gl.getUniformLocation(this.programs.main, 'u_denoise'), adj.denoise || 0);
+        gl.uniform1f(this.uniforms.u_posterize, adj.posterize || 0);
+        gl.uniform1f(this.uniforms.u_diffusion, adj.diffusion || 0);
+        gl.uniform1f(this.uniforms.u_barrelDistortion, adj.barrelDistortion || 0);
+        gl.uniform1f(this.uniforms.u_filmGateWeave, adj.filmGateWeave || 0);
+        gl.uniform1f(this.uniforms.u_splitToneBalance, adj.splitToneBalance || 0);
+        gl.uniform1f(this.uniforms.u_noiseColorHue, adj.noiseColorHue || 0);
+        gl.uniform1i(this.uniforms.u_showClipping, adj.showClipping ? 1 : 0);
+        gl.uniform1f(this.uniforms.u_denoise, adj.denoise || 0);
 
         if (this.overlayTexture) {
             gl.activeTexture(gl.TEXTURE2);
@@ -1004,9 +1013,16 @@ class WebGLEngine {
         gl.uniform1f(this.uniforms.u_lightLeak, v(adj.lightLeak));
         gl.uniform1f(this.uniforms.u_scratches, v(adj.scratches));
         gl.uniform1f(this.uniforms.u_filmSeed, v(adj.filmSeed));
+        gl.uniform1i(this.uniforms.u_galleryFrame, adj.galleryFrame ? 1 : 0);
+        gl.uniform1f(this.uniforms.u_filmGateWeave, v(adj.filmGateWeave));
 
         // LUT
         gl.uniform1f(this.uniforms.u_lutOpacity, v(adj.lutOpacity) / 100.0);
+
+        // Dithering
+        gl.uniform1i(this.uniforms.u_ditherType, v(adj.ditherType));
+        gl.uniform1f(this.uniforms.u_ditherDepth, v(adj.ditherDepth, 8));
+        gl.uniform1f(this.uniforms.u_ditherStrength, v(adj.ditherStrength));
     }
 
     /**

@@ -72,6 +72,21 @@ All notable changes to Untitled Studio will be documented in this file.
 - Fixed histogram Auto/Clip buttons not clickable (z-index issue)
 - Improved preset category list with editorial and nature categories
 
+### 🎞️ LUT Export & Dithering
+- **LUT Export**: Generate standard .cube files for video editing integration.
+- **Dithering Engine**: 4 algorithms (Floyd-Steinberg, Atkinson, Bayer, Random) for retro aesthetics.
+
+### 🧱 Texture Overlays
+- **Asset Pack**: 15+ built-in textures (Dust, Light Leaks, Crumpled Paper).
+- **Blend Modes**: Multiply, Screen, Overlay, Soft Light support.
+- **Opacity Control**: Fine-tune texture intensity.
+
+### 🛠️ Critical Fixes (Latest)
+- **Stability**: Fixed WebGL crash caused by shader compilation failures ("parameter 1 is not of type 'WebGLProgram'").
+- **Render Pipeline**: Restored missing Composite shader to fix black screen issues.
+- **Quality**: Fixed grain intensity scaling (was 100x too strong) responsible for preset noise.
+- **Safeguards**: Added debug alerts for shader errors to aid future troubleshooting.
+
 ---
 
 ## [1.4.0] - Previous Release

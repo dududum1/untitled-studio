@@ -3475,6 +3475,380 @@ const FilmPresets = {
             hslYellow: [-10, 25, 0],
             hslGreen: [-20, 0, 0]
         }
+    ],
+
+    // ============ LOST FILMS (OBSCURE) ============
+    lost_film: [
+        {
+            name: "Agfa Ultra 50",
+            category: "lost_film",
+            exposure: 0.1,
+            contrast: 35,
+            highlights: 10,
+            shadows: 5,
+            whites: 15,
+            blacks: 10,
+            temperature: 0,
+            tint: 0,
+            vibrance: 60,
+            saturation: 40,
+            hslRed: [0, 50, 0],
+            hslBlue: [0, 50, 0],
+            grain: 15,
+            grainSize: 1.4,
+            fade: 0
+        },
+        {
+            name: "Konica Centuria",
+            category: "lost_film",
+            exposure: 0.05,
+            contrast: 10,
+            highlights: -15,
+            shadows: 10,
+            whites: -5,
+            blacks: 5,
+            temperature: -5,
+            tint: 25, // Strong magenta shift
+            vibrance: 10,
+            saturation: 5,
+            grain: 8,
+            fade: 10
+        },
+        {
+            name: "Ferrania Solaris",
+            category: "lost_film",
+            exposure: 0.15,
+            contrast: 20,
+            highlights: 20,
+            shadows: 5,
+            whites: 10,
+            blacks: 0,
+            temperature: 30, // Warm yellow
+            tint: 5,
+            vibrance: 25,
+            saturation: 15,
+            bloomStrength: 15,
+            fade: 5
+        },
+        {
+            name: "Perutz Primera",
+            category: "lost_film",
+            exposure: -0.05,
+            contrast: 25,
+            highlights: -20,
+            shadows: -10,
+            whites: -15,
+            blacks: -5,
+            temperature: 10,
+            tint: -5,
+            vibrance: -30,
+            saturation: -40, // Muted
+            hslGreen: [-10, -30, -10], // Earthy greens
+            hslOrange: [-5, -20, 0],
+            grain: 25,
+            grainSize: 1.5,
+            fade: 15
+        },
+        {
+            name: "Scotch Chrome",
+            category: "lost_film",
+            exposure: 0,
+            contrast: 15,
+            highlights: 0,
+            shadows: 15,
+            whites: 5,
+            blacks: 5,
+            temperature: 0,
+            tint: 15,
+            vibrance: 10,
+            saturation: 5,
+            hslBlue: [10, 0, 0], // Purple shift in blues
+            hslShadows: [280, 20, 0], // Purple tint in shadows (custom prop simulation)
+            grain: 30,
+            grainSize: 1.8,
+            fade: 10
+        }
+    ],
+
+    // ============ ART HUES (PAINTERLY) ============
+    art_hues: [
+        {
+            name: "Pastel Goth",
+            category: "art_hues",
+            exposure: 0.1,
+            contrast: -10,
+            highlights: 10,
+            shadows: 20,
+            whites: 0,
+            blacks: 15,
+            temperature: -10,
+            tint: 20,
+            vibrance: -10,
+            saturation: -20,
+            splitToneBalance: -20, // Green shadows, Pink highlights handled by tint/temp mix usually, but let's fake it
+            hslGreen: [40, -10, 20], // Minty greens
+            hslRed: [-20, 10, 10], // Pinkish reds
+            fade: 20
+        },
+        {
+            name: "Electric Indigo",
+            category: "art_hues",
+            exposure: -0.2,
+            contrast: 40,
+            highlights: 30,
+            shadows: -30,
+            whites: 20,
+            blacks: -20,
+            temperature: -60, // Very blue
+            tint: 40, // Purple
+            vibrance: 50,
+            saturation: 30,
+            bloomStrength: 50,
+            bloomThreshold: 20,
+            fade: 0
+        },
+        {
+            name: "Solarized",
+            category: "art_hues",
+            exposure: 0,
+            contrast: 100, // Max contrast to simulate curve inversion edge cases
+            highlights: -100,
+            shadows: -100,
+            whites: 100,
+            blacks: 0,
+            temperature: 0,
+            tint: 0,
+            vibrance: -20,
+            saturation: -50,
+            posterize: 10, // Added FX
+            fade: 0
+        },
+        {
+            name: "Crimson Tide",
+            category: "art_hues",
+            exposure: -0.1,
+            contrast: 50,
+            highlights: 10,
+            shadows: -20,
+            whites: 10,
+            blacks: -10,
+            temperature: 40,
+            tint: 60,
+            vibrance: -50, // Mono-ish
+            saturation: -60,
+            hslRed: [0, 50, 20], // Except red
+            fade: 0
+        },
+        {
+            name: "Golden Age",
+            category: "art_hues",
+            exposure: -0.2,
+            contrast: 40,
+            highlights: 30, // Spotlight
+            shadows: -50, // Deep darks
+            whites: 10,
+            blacks: -30,
+            temperature: 25,
+            tint: 5,
+            vibrance: 20,
+            saturation: 10,
+            grain: 5,
+            vignette: 60,
+            fade: 5
+        }
+    ],
+
+    // ============ CINEMA ERAS (STYLISTIC) ============
+    cinema_eras: [
+        {
+            name: "Technicolor 2-Strip",
+            category: "cinema_eras",
+            exposure: 0.1,
+            contrast: 30,
+            highlights: 10,
+            shadows: -10,
+            whites: 10,
+            blacks: -5,
+            temperature: 0,
+            tint: 0,
+            vibrance: 20,
+            saturation: 10,
+            hslBlue: [0, -100, -50], // Kill blue channel
+            hslGreen: [-10, 20, 0], // Teal/Green emphasis
+            hslRed: [10, 30, 0], // Orange/Red emphasis
+            fade: 0
+        },
+        {
+            name: "Bleach Bypass",
+            category: "cinema_eras",
+            exposure: 0,
+            contrast: 60,
+            highlights: 20,
+            shadows: -20,
+            whites: 15,
+            blacks: -25,
+            temperature: -5,
+            tint: 0,
+            vibrance: -40,
+            saturation: -60,
+            grain: 20,
+            grainSize: 1.2,
+            fade: 0
+        },
+        {
+            name: "Day for Night",
+            category: "cinema_eras",
+            exposure: -1.5, // Underexpose heavily
+            contrast: 10,
+            highlights: -50,
+            shadows: 10,
+            whites: -40,
+            blacks: 0,
+            temperature: -50, // Blue cast
+            tint: 10,
+            vibrance: -20,
+            saturation: -30,
+            fade: 20, // Lifted blacks
+            vignette: 40
+        },
+        {
+            name: "Silent Sepia",
+            category: "cinema_eras",
+            exposure: 0.1,
+            contrast: 20,
+            highlights: -10,
+            shadows: 10,
+            whites: 20, // Glowing whites
+            blacks: 5,
+            temperature: 30,
+            tint: 10,
+            vibrance: -80,
+            saturation: -100, // Black and white base
+            // Sepia toning is usually done via split tone or tint, 
+            // here we simulate by temperature/tint on B&W
+            grain: 40,
+            grainSize: 1.5,
+            filmGateWeave: 50, // Added FX
+            fade: 15
+        },
+        {
+            name: "Grindhouse",
+            category: "cinema_eras",
+            exposure: 0,
+            contrast: 50,
+            highlights: -20, // Dirty whites
+            shadows: 20, // Lifted blacks
+            whites: -30,
+            blacks: 20,
+            temperature: 20, // Yellowed
+            tint: 15,
+            vibrance: 0,
+            saturation: -20,
+            grain: 60, // Heavy grain
+            grainSize: 2.0,
+            filmGateWeave: 80, // Heavy wobble
+            vignette: 70,
+            fade: 30
+        }
+    ],
+
+    // ============ DIGITAL GLITCH (EXPERIMENTAL) ============
+    digital_glitch: [
+        {
+            name: "Matrix Green",
+            category: "digital_glitch",
+            exposure: -0.2,
+            contrast: 50,
+            highlights: 40,
+            shadows: -50,
+            whites: 20,
+            blacks: -10,
+            temperature: -20,
+            tint: 100, // Max tint (green)
+            // Wait, tint +100 is magenta. Tint -100 is Green.
+            tint: -100,
+            vibrance: 50,
+            saturation: 0,
+            posterize: 30,
+            grain: 50, // Digital noise
+            grainSize: 0.5, // Small noise
+            fade: 0
+        },
+        {
+            name: "Heatmap",
+            category: "digital_glitch",
+            exposure: 0,
+            contrast: 100,
+            highlights: 0,
+            shadows: 0,
+            whites: 0,
+            blacks: 0,
+            temperature: -100, // Blue base
+            tint: 0,
+            vibrance: 50,
+            saturation: 50,
+            hslRed: [0, 50, 20],
+            hslBlue: [0, 50, 0],
+            bloomStrength: 30,
+            posterize: 10,
+            fade: 0
+        },
+        {
+            name: "CGA Palette",
+            category: "digital_glitch",
+            exposure: 0.2,
+            contrast: 80,
+            highlights: 20,
+            shadows: -20,
+            whites: 10,
+            blacks: -10,
+            temperature: 0,
+            tint: 100, // Magenta bias
+            vibrance: 100,
+            saturation: 100,
+            hslGreen: [180, 0, 0], // Shift greens to cyan
+            hslRed: [0, 0, 0],
+            posterize: 4, // Extreme banding
+            fade: 0
+        },
+        {
+            name: "Night Vision",
+            category: "digital_glitch",
+            exposure: 0.5,
+            contrast: 30,
+            highlights: 50,
+            shadows: 20,
+            whites: 30,
+            blacks: 0,
+            temperature: -20,
+            tint: -80, // Green
+            vibrance: -100, // Monochrome base
+            saturation: -100,
+            bloomStrength: 60, // Light amp glow
+            bloomThreshold: 20,
+            grain: 80, // Sensor noise
+            grainSize: 1.0,
+            vignette: 80,
+            fade: 10
+        },
+        {
+            name: "Vaporwave",
+            category: "digital_glitch",
+            exposure: 0.1,
+            contrast: 10,
+            highlights: 0,
+            shadows: 20,
+            whites: 0,
+            blacks: 10,
+            temperature: -30, // Cool
+            tint: 50, // Pink
+            vibrance: 40,
+            saturation: 20,
+            fade: 30, // Low contrast
+            hue: 0, // Maybe shift global hue?
+            bloomStrength: 30,
+            bloomThreshold: 60
+        }
     ]
 };
 

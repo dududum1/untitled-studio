@@ -411,7 +411,6 @@
                         </div>
                         <svg id="tone-curve-svg"
                             class="w-48 h-48 bg-midnight/50 rounded-lg border border-glass-border cursor-crosshair"></svg>
-                        <p class="text-xs text-gray-500 mt-2">Double-click to add/remove points</p>
                     </div>
                     <div class="flex-1 text-sm text-gray-400">
                         <p class="mb-2">Drag points to adjust tones:</p>
@@ -723,14 +722,60 @@
                         </div>
                         <input type="range" id="denoise" class="studio-slider" min="0" max="100" step="1" value="0">
                     </div>
+
+                    <!-- Dithering Engine -->
+                    <div class="mt-4 pt-4 border-t border-glass-border">
+                        <label class="text-xs text-gray-500 mb-2 block">Dithering (Lo-Fi)</label>
+                        <div class="slider-group mb-2">
+                            <div class="slider-header">
+                                <label>Algorithm</label>
+                            </div>
+                            <select id="ditherType"
+                                class="w-full bg-glass border border-glass-border rounded text-xs text-gray-300 p-2">
+                                <option value="0">Off</option>
+                                <option value="1">Floyd-Steinberg</option>
+                                <option value="2">Atkinson (Mac)</option>
+                                <option value="3">Bayer 4x4 (Retro)</option>
+                                <option value="4">Random Noise</option>
+                            </select>
+                        </div>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Color Depth</label>
+                                <span class="slider-value" data-for="ditherDepth">8</span>
+                            </div>
+                            <input type="range" id="ditherDepth" class="studio-slider" min="2" max="8" step="1"
+                                value="8">
+                        </div>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Strength</label>
+                                <span class="slider-value" data-for="ditherStrength">0</span>
+                            </div>
+                            <input type="range" id="ditherStrength" class="studio-slider" min="0" max="100" step="1"
+                                value="0">
+                        </div>
+
+                        <!-- LUT Export -->
+                        <div class="mt-4 pt-4 border-t border-glass-border">
+                            <button id="export-lut-btn"
+                                class="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-moonstone/30 to-hot-pink/30 
+                                       text-white text-sm font-semibold hover:from-moonstone/50 hover:to-hot-pink/50 
+                                       border border-moonstone/30 transition-all flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                                Export as .cube LUT
+                            </button>
+                            <p class="text-xs text-gray-500 mt-2 text-center">Save your color grade for video editors
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 3. VIBE SUB-PANEL -->
                 <div id="fx-vibe" class="fx-subpanel hidden">
-                    <!-- Log Area for aesthetics -->
-                    <div id="log-area"
-                        class="relative z-10 bg-black border-2 border-neon-green-dim p-4 h-24 overflow-y-auto font-mono text-xs shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] mb-4">
-                    </div>
 
                     <div class="slider-group mb-4">
                         <label class="text-xs text-gray-500 mb-2 block">Border</label>
@@ -740,6 +785,71 @@
                             <option value="assets/border.svg">Torn Paper</option>
                             <option value="assets/film.svg">Film Frame</option>
                         </select>
+                    </div>
+
+                    <!-- Texture Overlay Pack -->
+                    <div class="mb-4 border-t border-glass-border pt-4">
+                        <label class="text-xs text-gray-400 font-bold mb-2 block uppercase tracking-wider">Texture
+                            Overlays</label>
+
+                        <!-- Built-in Textures -->
+                        <div class="grid grid-cols-4 gap-2 mb-3">
+                            <button
+                                class="texture-btn h-14 bg-gray-800 rounded-lg border border-glass-border hover:border-hot-pink bg-cover bg-center transition-all focus:ring-2 focus:ring-hot-pink"
+                                style="background-image: url('assets/textures/dust_scratches.png')" data-texture="dust"
+                                data-mode="2" title="Dust & Scratches"></button>
+                            <button
+                                class="texture-btn h-14 bg-gray-800 rounded-lg border border-glass-border hover:border-hot-pink bg-cover bg-center transition-all focus:ring-2 focus:ring-hot-pink"
+                                style="background-image: url('assets/textures/leak_warm.png')" data-texture="leakWarm"
+                                data-mode="2" title="Warm Leak"></button>
+                            <button
+                                class="texture-btn h-14 bg-gray-800 rounded-lg border border-glass-border hover:border-hot-pink bg-cover bg-center transition-all focus:ring-2 focus:ring-hot-pink"
+                                style="background-image: url('assets/textures/leak_cool.png')" data-texture="leakCool"
+                                data-mode="2" title="Cool Leak"></button>
+                            <button
+                                class="texture-btn h-14 bg-gray-800 rounded-lg border border-glass-border hover:border-hot-pink bg-cover bg-center transition-all focus:ring-2 focus:ring-hot-pink"
+                                style="background-image: url('assets/textures/paper.png')" data-texture="paper"
+                                data-mode="1" title="Paper"></button>
+                        </div>
+
+                        <!-- Custom Import -->
+                        <div class="flex gap-2 mb-3">
+                            <button id="import-texture-btn"
+                                class="flex-1 bg-glass border border-glass-border rounded p-2 text-xs text-gray-300 hover:bg-white/5 flex items-center justify-center gap-2">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                                Custom...
+                            </button>
+                            <button id="remove-texture-btn"
+                                class="px-3 bg-glass border border-glass-border rounded text-gray-400 hover:text-red-400 font-bold">
+                                ×
+                            </button>
+                            <input type="file" id="texture-input" accept="image/*" class="hidden">
+                        </div>
+
+                        <!-- Controls -->
+                        <div class="slider-group mb-2">
+                            <div class="slider-header">
+                                <label>Opacity</label>
+                                <span class="slider-value" data-for="overlayOpacity">0</span>
+                            </div>
+                            <input type="range" id="overlayOpacity" class="studio-slider" min="0" max="100" value="0">
+                        </div>
+
+                        <!-- Blend Modes -->
+                        <div class="flex gap-1" id="blend-mode-btns">
+                            <button
+                                class="blend-mode-btn flex-1 py-1 text-[10px] rounded border border-glass-border text-gray-400 hover:bg-white/10"
+                                data-mode="2">Screen</button>
+                            <button
+                                class="blend-mode-btn flex-1 py-1 text-[10px] rounded border border-glass-border text-gray-400 hover:bg-white/10"
+                                data-mode="3">Overlay</button>
+                            <button
+                                class="blend-mode-btn flex-1 py-1 text-[10px] rounded border border-glass-border text-gray-400 hover:bg-white/10"
+                                data-mode="1">Multiply</button>
+                        </div>
                     </div>
 
                     <!-- Date Stamp & Watermark -->
@@ -763,22 +873,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label>Dust & Scratches</label>
-                                <span class="slider-value" data-for="vibe-dust">0</span>
-                            </div>
-                            <input type="range" id="vibe-dust" class="studio-slider" min="0" max="100" step="1"
-                                value="0">
-                        </div>
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label>Light Leaks</label>
-                                <span class="slider-value" data-for="lightLeak">0</span>
-                            </div>
-                            <input type="range" id="lightLeak" class="studio-slider" min="0" max="100" step="1"
-                                value="0">
-                        </div>
+
                         <div class="slider-group">
                             <div class="slider-header">
                                 <label>Film Scratches</label>
@@ -1013,6 +1108,10 @@
                     <button class="preset-category" data-category="dreamy">Dreamy</button>
                     <button class="preset-category" data-category="editorial">Editorial</button>
                     <button class="preset-category" data-category="nature">Nature</button>
+                    <button class="preset-category" data-category="lost_film">Obscure</button>
+                    <button class="preset-category" data-category="art_hues">Art</button>
+                    <button class="preset-category" data-category="cinema_eras">Eras</button>
+                    <button class="preset-category" data-category="digital_glitch">Glitch</button>
                     <button id="save-preset-btn"
                         class="ml-auto px-3 py-1 rounded-lg bg-hot-pink/20 text-hot-pink text-sm font-semibold hover:bg-hot-pink/30 flex-shrink-0">
                         + Save
@@ -1464,7 +1563,9 @@
     <script src="js/gesture-handler.js?v=14"></script>
     <script src="js/export-manager.js?v=14"></script>
     <script src="js/raw-decoder.js?v=14"></script>
+    <script src="js/lut-exporter.js?v=14"></script>
     <script src="js/webgl-engine.js?v=14"></script>
+    <script src="js/textures.js?v=14"></script>
     <script src="js/app.js?v=14"></script>
 
     <!-- Service Worker Registration -->

@@ -92,6 +92,8 @@ const Shaders = {
         // Vibe Procedural (Phase 6)
         uniform float u_lightLeak;
         uniform float u_scratches;
+        uniform float u_filmGateWeave;
+        uniform bool u_galleryFrame;
 
         uniform float u_filmSeed;
 
@@ -107,11 +109,16 @@ const Shaders = {
         uniform float u_posterize;        // 0-100: Color reduction (2-256 levels)
         uniform float u_diffusion;        // 0-100: Pro-Mist / Soft glow on highlights
         uniform float u_barrelDistortion; // -100 to 100: Lens distortion (neg=pincushion, pos=barrel)
-        uniform float u_filmGateWeave;    // 0-100: Frame wobble/jitter
+
         uniform float u_splitToneBalance; // -100 to 100: Shadows vs Highlights bias
         uniform float u_noiseColorHue;    // 0-360: Tint hue for grain
         uniform bool u_showClipping;      // Show clipping warnings (red=blown, blue=crushed)
         uniform float u_denoise;          // 0-100: AI Denoise (bilateral filter)
+        
+        // Dithering Engine
+        uniform int u_ditherType;          // 0=off, 1=Floyd-Steinberg, 2=Atkinson, 3=Bayer, 4=Random
+        uniform float u_ditherDepth;       // 2-8: Target bits per channel
+        uniform float u_ditherStrength;    // 0-100: Blend with original
         
         in vec2 v_texCoord;
         out vec4 fragColor;
@@ -120,71 +127,68 @@ const Shaders = {
         
         // Procedural 3x5 font (numbers + punct)
         // Returns 1.0 if pixel is part of char, 0.0 otherwise
+        // Mobile-optimized: uses step functions instead of if-branches
         float getCharacter(int n, vec2 p) {
             // p is 0..1 inside the char cell
             // map to 3x5 grid
-            int x = int(p.x * 3.0);
-            int y = int((1.0 - p.y) * 5.0); // flip y for bit reading
+            float fx = p.x * 3.0;
+            float fy = (1.0 - p.y) * 5.0;
+            int x = int(floor(fx));
+            int y = int(floor(fy));
             
+            // Bounds check
             if (x < 0 || x > 2 || y < 0 || y > 4) return 0.0;
             
-            // Bitmask for chars (very simplified set: . : ; + * % @ #)
-            // 15 bits per char (3 cols * 5 rows)
+            // n=0 (darkest) -> no pixels
+            // n=7 (brightest) -> all pixels
             
-            int bits = 0;
+            float result = 0.0;
             
-            if (n == 0) bits = 0;     // space
-            if (n == 1) bits = 4096;  // . (bottom left-ish) -> actually let's use int array logic 
-            // Reuse logic: rows top to bottom
+            // Use float comparisons for mobile compatibility
+            float fn = float(n);
+            float fxx = float(x);
+            float fyy = float(y);
             
-            // 8 levels of brightness
-            // 0: space
-            if (n == 1) bits = 2; // . (very bottom)
-            if (n == 2) bits = 10; // :
-            if (n == 3) bits = 21546; // - 
-            if (n == 4) bits = 4658; // +
-            if (n == 5) bits = 11111; // * (placeholder) -> let's try 15 bits integer
+            // Level 0: empty (space)
+            // (result stays 0.0)
             
-            // Let's use a simpler "density" check for 3x5
-            // 15 pixels. 
-            // n=0 (dark) -> 0 pixels
-            // n=1 .. n=7 (bright)
+            // Level 1: single dot (.)
+            float level1 = step(0.5, fn) * step(fn, 1.5);
+            result += level1 * step(0.5, fxx) * step(fxx, 1.5) * step(3.5, fyy) * step(fyy, 4.5);
             
-            // Simpler: Just hardcode a few shapes manually
-            // n is brightness level 0..7
+            // Level 2: colon (:)
+            float level2 = step(1.5, fn) * step(fn, 2.5);
+            float y_colon = step(0.5, fyy) * step(fyy, 1.5) + step(3.5, fyy) * step(fyy, 4.5);
+            result += level2 * step(0.5, fxx) * step(fxx, 1.5) * y_colon;
             
-            if (n == 0) return 0.0;
+            // Level 3: semicolon pattern
+            float level3 = step(2.5, fn) * step(fn, 3.5);
+            float y_semi = step(0.5, fyy) * step(fyy, 1.5) + step(2.5, fyy) * step(fyy, 4.5);
+            result += level3 * step(0.5, fxx) * step(fxx, 1.5) * y_semi;
             
-            // .
-            if (n == 1) {
-                if (x==1 && y==4) return 1.0;
-            }
-            // :
-            if (n == 2) {
-                if (x==1 && (y==1 || y==4)) return 1.0;
-            }
-            // ;
-            if (n == 3) {
-                if (x==1 && (y==1 || y==4 || y==3)) return 1.0;
-            }
-            // +
-            if (n == 4) {
-                 if ((x==1 && y>0 && y<4) || (y==2)) return 1.0;
-            }
-            // o
-            if (n == 5) {
-                if (y==0 || y==4 || x==0 || x==2) return 1.0;
-            }
-            // #
-            if (n == 6) {
-                if (x==1 || y==1 || y==3) return 1.0;
-            }
-            // @ (fill)
-            if (n == 7) {
-                return 1.0;
-            }
+            // Level 4: plus (+)
+            float level4 = step(3.5, fn) * step(fn, 4.5);
+            float horiz = step(1.5, fyy) * step(fyy, 2.5);
+            float vert = step(0.5, fxx) * step(fxx, 1.5) * step(0.5, fyy) * step(fyy, 3.5);
+            result += level4 * max(horiz, vert);
             
-            return 0.0;
+            // Level 5: circle outline (o)
+            float level5 = step(4.5, fn) * step(fn, 5.5);
+            float edge_x = (1.0 - step(0.5, fxx)) + step(1.5, fxx);
+            float edge_y = (1.0 - step(0.5, fyy)) + step(3.5, fyy);
+            result += level5 * max(edge_x, edge_y);
+            
+            // Level 6: hash (#)
+            float level6 = step(5.5, fn) * step(fn, 6.5);
+            float hash_x = step(0.5, fxx) * step(fxx, 1.5);
+            float hash_y = step(0.5, fyy) * step(fyy, 1.5) + step(2.5, fyy) * step(fyy, 3.5);
+            result += level6 * max(hash_x, hash_y);
+            
+            // Level 7: solid block (@)
+            float level7 = step(6.5, fn);
+            result += level7;
+            
+            return clamp(result, 0.0, 1.0);
         }
 
         vec3 rgb2cmy(vec3 rgb) {
@@ -760,6 +764,102 @@ const Shaders = {
             return sum / max(weightSum, 0.001);
         }
         
+        // ============ DITHERING ENGINE ============
+        
+        // Bayer 4x4 matrix for ordered dithering
+        float bayerMatrix(vec2 pos) {
+            int x = int(mod(pos.x, 4.0));
+            int y = int(mod(pos.y, 4.0));
+            
+            // 4x4 Bayer threshold matrix
+            int matrix[16] = int[16](
+                 0,  8,  2, 10,
+                12,  4, 14,  6,
+                 3, 11,  1,  9,
+                15,  7, 13,  5
+            );
+            
+            return float(matrix[y * 4 + x]) / 16.0;
+        }
+        
+        // Quantize to N levels
+        vec3 quantize(vec3 color, float levels) {
+            float step = 1.0 / (levels - 1.0);
+            return floor(color / step + 0.5) * step;
+        }
+        
+        // Ordered Bayer dithering
+        vec3 ditherBayer(vec3 color, vec2 fragCoord, float levels) {
+            float threshold = bayerMatrix(fragCoord) - 0.5;
+            float step = 1.0 / (levels - 1.0);
+            vec3 dithered = color + threshold * step;
+            return quantize(dithered, levels);
+        }
+        
+        // Floyd-Steinberg approximation (single-pass fragment shader simulation)
+        vec3 ditherFloydSteinberg(vec3 color, vec2 uv, float levels) {
+            vec2 texel = 1.0 / u_resolution;
+            
+            // Get error from neighboring pixels (approximation)
+            vec3 right = texture(u_image, uv + vec2(texel.x, 0.0)).rgb;
+            vec3 below = texture(u_image, uv + vec2(0.0, texel.y)).rgb;
+            vec3 belowRight = texture(u_image, uv + vec2(texel.x, texel.y)).rgb;
+            
+            // Compute quantization
+            vec3 quantized = quantize(color, levels);
+            
+            // Estimate error from neighbors
+            vec3 errorRight = (right - quantize(right, levels)) * 7.0/16.0;
+            vec3 errorBelow = (below - quantize(below, levels)) * 5.0/16.0;
+            vec3 errorBelowRight = (belowRight - quantize(belowRight, levels)) * 1.0/16.0;
+            
+            // Blend in estimated error
+            vec3 result = color + (errorRight + errorBelow + errorBelowRight) * 0.3;
+            return quantize(result, levels);
+        }
+        
+        // Atkinson dithering (higher contrast, used in early Macs)
+        vec3 ditherAtkinson(vec3 color, vec2 fragCoord, float levels) {
+            // Atkinson uses 6/8ths of error, giving higher contrast
+            float threshold = bayerMatrix(fragCoord) - 0.375; // More aggressive threshold
+            float step = 1.0 / (levels - 1.0);
+            vec3 dithered = color + threshold * step * 1.5;
+            return quantize(dithered, levels);
+        }
+        
+        // Random noise dithering
+        vec3 ditherRandom(vec3 color, vec2 fragCoord, float levels) {
+            // Use noise function for random threshold
+            float noise = fract(sin(dot(fragCoord, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
+            float step = 1.0 / (levels - 1.0);
+            vec3 dithered = color + noise * step;
+            return quantize(dithered, levels);
+        }
+        
+        // Main dithering dispatcher
+        vec3 applyDithering(vec3 color, vec2 uv, vec2 fragCoord, int type, float depth, float strength) {
+            if (type == 0 || strength <= 0.0) return color;
+            
+            float levels = pow(2.0, depth); // 2^depth levels per channel
+            vec3 dithered;
+            
+            if (type == 1) {
+                dithered = ditherFloydSteinberg(color, uv, levels);
+            } else if (type == 2) {
+                dithered = ditherAtkinson(color, fragCoord, levels);
+            } else if (type == 3) {
+                dithered = ditherBayer(color, fragCoord, levels);
+            } else if (type == 4) {
+                dithered = ditherRandom(color, fragCoord, levels);
+            } else {
+                dithered = color;
+            }
+            
+            // Blend based on strength
+            float blend = strength / 100.0;
+            return mix(color, dithered, blend);
+        }
+        
         vec3 applySharpen(sampler2D tex, vec2 uv, float amount) {
             if (amount <= 0.0) return texture(tex, uv).rgb;
             
@@ -988,6 +1088,11 @@ const Shaders = {
             // Final safety clamp
             color = clamp(color, 0.0, 1.0);
             
+            // === DITHERING ===
+            // Apply after all other processing, before clipping warnings
+            vec2 fragCoord = uv * u_resolution;
+            color = applyDithering(color, uv, fragCoord, u_ditherType, u_ditherDepth, u_ditherStrength);
+            
             // === CLIPPING WARNINGS ===
             // Show red for blown highlights (>0.99), blue for crushed blacks (<0.01)
             if (u_showClipping) {
@@ -1143,6 +1248,17 @@ const Shaders = {
         void main() {
             vec2 uv = v_texCoord;
             
+            // 0. Film Gate Weave (UV Offset)
+            if (u_filmGateWeave > 0.0) {
+                 float weaveStrength = u_filmGateWeave; // 0-100
+                 float time = u_time * 2.0;
+                 // Jitter x position
+                 float weave = sin(time + u_filmSeed * 10.0) * 0.001 * weaveStrength;
+                 // Minimal y jitter
+                 float bounce = cos(time * 0.5 + u_filmSeed * 20.0) * 0.0005 * weaveStrength;
+                 uv += vec2(weave, bounce);
+            }
+
             // 1. Pixelate (Modifies UV)
             if (u_pixelateSize > 0.0) {
                 float dx = u_pixelateSize * (1.0 / u_resolution.x);
@@ -1222,6 +1338,42 @@ const Shaders = {
                 // Let's just do black/white dither mixed with color
                 
                 color = mix(color, binary, strength);
+            }
+
+            // 7. Dynamic Film Scratches
+            if (u_scratches > 0.0) {
+                float seed = u_filmSeed;
+                float scratchIntensity = u_scratches / 100.0;
+                
+                // Random vertical lines
+                // Use x coord + time to animate or just noise?
+                // Scratches usually move or jump.
+                // Let's make them static to the frame (filmSeed) but position varies by seed
+                
+                float x = uv.x + seed * 13.59;
+                
+                // Thresholded noise for lines
+                float n = random(vec2(x * 100.0, seed)); // 1D noise effectively
+                
+                // Sparse lines
+                if (n > 0.995) {
+                    // Line intensity varies
+                    float line = (n - 0.995) / 0.005; 
+                    // Make it dark or bright? Scratches usually remove emulsion (bright) or add dirt (dark)
+                    // Let's do bright scratches
+                    color += vec3(line * scratchIntensity);
+                }
+            }
+
+            // 8. Gallery Frame
+            if (u_galleryFrame) {
+                // White border
+                float borderW = 0.05; // 5% width
+                float borderH = borderW * u_resolution.x / u_resolution.y; // Maintain aspect ratio thickness
+                
+                if (uv.x < borderW || uv.x > 1.0 - borderW || uv.y < borderH || uv.y > 1.0 - borderH) {
+                    color = vec3(0.98); // Off-white
+                }
             }
 
             fragColor = vec4(color, 1.0);
@@ -1331,6 +1483,51 @@ const Shaders = {
             // Output premultiplied alpha or handled by blending?
             // Usually blending is GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
             fragColor = overlayColor * mask; 
+        }
+    `,
+
+    // Composite Shader (Restored)
+    compositeFragment: `#version 300 es
+        precision highp float;
+
+        uniform sampler2D u_image;
+        uniform sampler2D u_bloom;
+        uniform float u_amount;
+        uniform vec3 u_tint;
+        uniform float u_grainShadow;
+        uniform float u_grainHighlight;
+        uniform vec2 u_resolution;
+        uniform float u_time;
+
+        // Secret FX placeholders to prevent warnings if valid
+        uniform float u_pixelateSize;
+        uniform float u_glitchStrength;
+        uniform float u_ditherStrength;
+        uniform float u_scanlineIntensity;
+
+        in vec2 v_texCoord;
+        out vec4 fragColor;
+
+        float random(vec2 st) {
+            return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+        }
+
+        void main() {
+            vec2 uv = v_texCoord;
+            vec3 base = texture(u_image, uv).rgb;
+            vec3 bloom = texture(u_bloom, uv).rgb;
+
+            vec3 tintedBloom = bloom * u_tint;
+            vec3 color = base + (tintedBloom * (u_amount / 100.0));
+
+            // Simple Grain
+            float lum = dot(color, vec3(0.299, 0.587, 0.114));
+            float noise = random(uv + fract(u_time));
+            // Uniforms are 0-100, normalize to 0-1
+            float intensity = mix(u_grainShadow, u_grainHighlight, lum) / 100.0;
+            color += (noise - 0.5) * intensity;
+
+            fragColor = vec4(color, 1.0);
         }
     `,
 

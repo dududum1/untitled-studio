@@ -748,6 +748,7 @@ class UntitledStudio {
             on(btn, 'touchend', () => this.showOriginal(false));
         }
 
+
         // Undo/Redo
         on(this.elements.undoBtn, 'click', () => this.undo());
         on(this.elements.redoBtn, 'click', () => this.redo());
@@ -926,6 +927,72 @@ class UntitledStudio {
         on(this.elements.removeTextureBtn, 'click', () => this.handleRemoveTexture());
         on(this.elements.textureInput, 'change', (e) => this.handleTextureImport(e));
 
+        // Gallery Frame Toggle
+        const galleryToggle = document.getElementById('gallery-frame-toggle');
+        if (galleryToggle) {
+            on(galleryToggle, 'change', (e) => {
+                if (this.engine) this.engine.setAdjustment('galleryFrame', e.target.checked);
+                const options = document.getElementById('gallery-options');
+                if (options) options.classList.toggle('hidden', !e.target.checked);
+            });
+        }
+
+        // Shuffle Defects
+        const shuffleBtn = document.getElementById('randomize-seed-btn');
+        if (shuffleBtn) {
+            on(shuffleBtn, 'click', () => {
+                const seed = Math.random() * 1000;
+                if (this.engine) this.engine.setAdjustment('filmSeed', seed);
+                // Also update any texture defect offsets if needed
+            });
+        }
+
+        // Built-in Textures
+        document.querySelectorAll('.texture-btn').forEach(btn => {
+            on(btn, 'click', async () => {
+                // UI Feedback
+                document.querySelectorAll('.texture-btn').forEach(b => b.classList.remove('ring-2', 'ring-hot-pink', 'border-hot-pink'));
+                btn.classList.add('ring-2', 'ring-hot-pink', 'border-hot-pink');
+
+                let url = btn.dataset.texture;
+                // Lookup Base64 data if available (fixes CORS on file://)
+                if (window.TextureAssets && window.TextureAssets[url]) {
+                    url = window.TextureAssets[url];
+                }
+                const mode = parseInt(btn.dataset.mode);
+
+                try {
+                    await this.engine.loadOverlay(url);
+
+                    // Set sensible defaults if not set
+                    this.engine.setAdjustment('overlayOpacity', 80);
+                    const opSlider = document.getElementById('overlayOpacity');
+                    if (opSlider) opSlider.value = 80;
+                    const opDisplay = document.querySelector('.slider-value[data-for="overlayOpacity"]');
+                    if (opDisplay) opDisplay.textContent = '80';
+
+                    // Set blend mode
+                    this.engine.setAdjustment('overlayBlendMode', mode);
+
+                    // Update blend mode UI
+                    document.querySelectorAll('.blend-mode-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-moonstone/20', 'text-moonstone');
+                        b.classList.add('hover:bg-white/10');
+                        if (parseInt(b.dataset.mode) === mode) {
+                            b.classList.add('active', 'bg-moonstone/20', 'text-moonstone');
+                            b.classList.remove('hover:bg-white/10');
+                        }
+                    });
+
+                    this.updateHistogram();
+
+                } catch (err) {
+                    console.error('Texture load failed', err);
+                    alert('Failed to load texture');
+                }
+            });
+        });
+
         // --- BATCH UI ---
         const batchBtn = document.getElementById('batch-export-btn');
         if (batchBtn) {
@@ -953,6 +1020,43 @@ class UntitledStudio {
                 });
             }
         });
+
+        // --- DITHERING ---
+        const ditherTypeSelect = document.getElementById('ditherType');
+        if (ditherTypeSelect) {
+            on(ditherTypeSelect, 'change', (e) => {
+                const val = parseInt(e.target.value);
+                this.engine.setAdjustment('ditherType', val);
+                // If turning on, auto-set strength to 100
+                if (val > 0 && this.engine.adjustments.ditherStrength === 0) {
+                    this.engine.setAdjustment('ditherStrength', 100);
+                    const strengthSlider = document.getElementById('ditherStrength');
+                    if (strengthSlider) strengthSlider.value = 100;
+                    const strengthDisplay = document.querySelector('.slider-value[data-for="ditherStrength"]');
+                    if (strengthDisplay) strengthDisplay.textContent = '100';
+                }
+                this.updateHistogram();
+            });
+        }
+
+        ['ditherDepth', 'ditherStrength'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                on(el, 'input', (e) => {
+                    const val = parseFloat(e.target.value);
+                    this.engine.setAdjustment(id, val);
+                    const display = document.querySelector(`.slider-value[data-for="${id}"]`);
+                    if (display) display.textContent = val;
+                    this.updateHistogram();
+                });
+            }
+        });
+
+        // --- LUT EXPORT ---
+        const exportLutBtn = document.getElementById('export-lut-btn');
+        if (exportLutBtn) {
+            on(exportLutBtn, 'click', () => this.exportLUT());
+        }
 
         // Randomize
         const rndBtn = document.getElementById('randomize-seed-btn');
@@ -1568,24 +1672,19 @@ class UntitledStudio {
         if (!file) return;
 
         try {
-            // save to DB
-            // await this.storage.saveTexture(file); // Optional persistence
+            // Deselect built-in buttons
+            document.querySelectorAll('.texture-btn').forEach(b => b.classList.remove('ring-2', 'ring-hot-pink', 'border-hot-pink'));
 
             // Load into engine
             await this.engine.loadOverlay(file);
 
-            // Update UI state
-            const textureControls = document.getElementById('texture-controls');
-            const removeBtn = document.getElementById('remove-texture-btn');
-
-            textureControls.classList.remove('opacity-50', 'pointer-events-none');
-            removeBtn.classList.remove('hidden');
-
             // Set default opacity slider if needed
             const opacitySlider = document.getElementById('overlayOpacity');
-            if (opacitySlider.value == 0) {
+            if (opacitySlider && opacitySlider.value == 0) {
+                this.engine.setAdjustment('overlayOpacity', 50);
                 opacitySlider.value = 50;
-                document.querySelector('.slider-value[data-for="overlayOpacity"]').textContent = '50';
+                const disp = document.querySelector('.slider-value[data-for="overlayOpacity"]');
+                if (disp) disp.textContent = '50';
             }
 
             this.updateHistogram();
@@ -1603,18 +1702,17 @@ class UntitledStudio {
         this.engine.removeOverlay();
 
         // Reset inputs
-        document.getElementById('texture-input').value = '';
+        if (document.getElementById('texture-input')) document.getElementById('texture-input').value = '';
 
-        // Update UI
-        const textureControls = document.getElementById('texture-controls');
-        const removeBtn = document.getElementById('remove-texture-btn');
+        // Deselect buttons
+        document.querySelectorAll('.texture-btn').forEach(b => b.classList.remove('ring-2', 'ring-hot-pink', 'border-hot-pink'));
 
-        textureControls.classList.add('opacity-50', 'pointer-events-none');
-        removeBtn.classList.add('hidden');
-
+        // Reset Opacity
         this.engine.setAdjustment('overlayOpacity', 0);
-        document.getElementById('overlayOpacity').value = 0;
-        document.querySelector('.slider-value[data-for="overlayOpacity"]').textContent = '0';
+        const sl = document.getElementById('overlayOpacity');
+        const disp = document.querySelector('.slider-value[data-for="overlayOpacity"]');
+        if (sl) sl.value = 0;
+        if (disp) disp.textContent = '0';
 
         this.updateHistogram();
     }
@@ -2256,6 +2354,55 @@ class UntitledStudio {
 
         this.elements.progressRingFill.style.strokeDashoffset = offset;
         this.elements.progressText.textContent = `${Math.round(percent)}%`;
+    }
+
+    /**
+     * Export current color grade as .cube LUT file
+     */
+    async exportLUT() {
+        if (!this.engine) {
+            alert('No adjustments to export');
+            return;
+        }
+
+        const btn = document.getElementById('export-lut-btn');
+        const originalText = btn?.innerHTML;
+
+        try {
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="animate-pulse">Generating...</span>';
+            }
+
+            // Get current adjustments
+            const adjustments = this.engine.getAdjustments();
+
+            // Create LUT exporter
+            const exporter = new LUTExporter(this.engine);
+
+            // Generate filename from current time
+            const date = new Date();
+            const filename = `untitled_grade_${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}`;
+
+            // Download LUT
+            await exporter.downloadLUT(adjustments, filename);
+
+            // Show success toast
+            const toast = document.createElement('div');
+            toast.textContent = '✓ LUT exported successfully';
+            toast.className = 'fixed top-24 left-1/2 transform -translate-x-1/2 bg-moonstone/20 backdrop-blur-md border border-moonstone/40 text-moonstone px-6 py-3 rounded-full shadow-2xl z-50 animate-fade-in-down font-medium tracking-wide';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+
+        } catch (error) {
+            console.error('LUT export failed:', error);
+            alert('Failed to export LUT: ' + error.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
     }
 
     updateBatchCount() {
