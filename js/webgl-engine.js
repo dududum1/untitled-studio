@@ -99,7 +99,12 @@ class WebGLEngine {
             splitPos: -1,
             rotation: 0,
             flipX: false,
-            flipY: false
+            splitPos: -1,
+            rotation: 0,
+            flipX: false,
+            flipY: false,
+            outputTransform: 0, // 0=None, 1=Kodak 2383, 2=Fuji 3513, 3=Cineon
+            grainType: 0 // 0=Digital, 1=Negative, 2=Slide
         };
 
         // Tone curve state
@@ -337,6 +342,10 @@ class WebGLEngine {
             'u_splitToneBalance', 'u_noiseColorHue', 'u_showClipping', 'u_denoise',
             // Secret FX
             'u_pixelateSize', 'u_glitchStrength', 'u_ditherType', 'u_ditherDepth', 'u_ditherStrength', 'u_scanlineIntensity',
+            // Output Transform
+            'u_outputTransform',
+            // Grain Type
+            'u_grainType',
             // LUT
             'u_lut3d', 'u_useLUT', 'u_lutOpacity',
             'u_rotation',
@@ -734,7 +743,10 @@ class WebGLEngine {
             // Borders
             borderEnabled: false,
             borderWidth: 0,
-            borderColor: [1, 1, 1]
+            borderColor: [1, 1, 1],
+
+            // Output Transform
+            outputTransform: 0
         };
         this.useToneCurve = false;
         this.overlayTexture = null; // Prevent sticky overlays
@@ -871,6 +883,7 @@ class WebGLEngine {
         gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_grainShadow'), gShadow);
         gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_grainHighlight'), gHighlight);
         gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_grainSize'), adj.grainSize || 1.0);
+        gl.uniform1i(gl.getUniformLocation(this.programs.composite, 'u_grainType'), adj.grainType || 0);
         // Secret FX
         gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_pixelateSize'), adj.pixelateSize || 0);
         gl.uniform1f(gl.getUniformLocation(this.programs.composite, 'u_glitchStrength'), adj.glitchStrength || 0);

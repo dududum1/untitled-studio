@@ -14,6 +14,13 @@ A massive expansion converting the app into a "Museum Grade" film emulation libr
 - **Vintage & Obscure**: Konica VX 400, Lucky Super 100, Rollei Retro/Vario, Film Washi S.
 - **Special FX**: Aerochrome III (Pink IR), Lomo Metropolis (Bleach Bypass), Agfa Scala (B&W Slide).
 
+### 🎞️ Output Transform Engine (New)
+- **Print Profiles**: Added simulation for **Kodak 2383** (Hollywood Look), **Fuji 3513**, and **Cineon Log**.
+- **Physics-Based Grain**: Implemented luminosity-aware grain engines:
+  - **Negative Type**: Shadow/Midtone biased (Portra, Gold, etc).
+  - **Slide Type**: Midtone biased (Velvia, Provia).
+  - Auto-detection system for all 150+ presets.
+
 ### 🗂️ Library Reorganization
 - **Manufacturer-Based**: Presets now grouped by brand (`Kodak`, `Fuji`, `Ilford`, `Cinestill`, `Agfa`, `Polaroid`).
 - **New Categories**:

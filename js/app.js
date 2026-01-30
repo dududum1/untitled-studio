@@ -535,6 +535,7 @@ class UntitledStudio {
             importTextureBtn: document.getElementById('import-texture-btn'),
             removeTextureBtn: document.getElementById('remove-texture-btn'),
             blendModeBtns: document.querySelectorAll('.blend-mode-btn'),
+            printStockBtns: document.querySelectorAll('.print-stock-btn'),
 
             // Export
             resetBtn: document.getElementById('reset-btn'),
@@ -1241,6 +1242,64 @@ class UntitledStudio {
                     const mode = parseInt(target.dataset.mode);
                     this.engine.setAdjustment('overlayBlendMode', mode);
                     this.updateHistogram();
+                });
+            });
+        }
+
+        // Output Transform (Print Stock)
+        if (this.elements.printStockBtns) {
+            this.elements.printStockBtns.forEach(btn => {
+                on(btn, 'click', (e) => {
+                    // Update UI
+                    this.elements.printStockBtns.forEach(b => {
+                        b.classList.remove('active', 'bg-hot-pink/20', 'text-hot-pink', 'font-semibold', 'shadow-[0_0_10px_rgba(237,39,136,0.2)]');
+                        b.classList.add('text-gray-400', 'hover:bg-white/10');
+                    });
+                    const target = e.target.closest('.print-stock-btn');
+                    target.classList.add('active', 'bg-hot-pink/20', 'text-hot-pink', 'font-semibold', 'shadow-[0_0_10px_rgba(237,39,136,0.2)]');
+                    target.classList.remove('text-gray-400', 'hover:bg-white/10');
+
+                    // Update Engine
+                    const stockIndex = parseInt(target.dataset.stock);
+
+                    if (this.engine) {
+                        // 1. Set Uniform for Shader Logic (if any)
+                        // Note: Shader only supports 0, 1, 2 currently. 
+                        // If Cineon (3) is selected, we might want to set it to 0 (Linear) and let adjustments do the work,
+                        // or add a shader mode for it later. For now, passing the index.
+                        this.engine.setAdjustment('outputTransform', stockIndex);
+
+                        // 2. Apply Profile Adjustments (Contrast, Saturation, etc.)
+                        const profiles = window.print_profiles;
+                        if (profiles && profiles[stockIndex]) {
+                            const profile = profiles[stockIndex];
+
+                            // Apply specific adjustments from profile
+                            // We need to be careful not to overwrite USER adjustments entirely, 
+                            // but Print Profiles act as a "Base State". 
+                            // Strategy: specific adjustments defined in profile override current settings?
+                            // Or should they add to them? 
+                            // Standard behavior for "Looks" is to set the values.
+
+                            ['contrast', 'saturation', 'temperature', 'tint', 'highlights', 'shadows', 'gamma'].forEach(key => {
+                                if (profile[key] !== undefined) {
+                                    this.engine.setAdjustment(key, profile[key]);
+                                }
+                            });
+
+                            // Split Tone handling
+                            if (profile.splitShadowHue !== undefined) this.engine.setAdjustment('splitShadowHue', profile.splitShadowHue);
+                            if (profile.splitShadowSat !== undefined) this.engine.setAdjustment('splitShadowSat', profile.splitShadowSat);
+                            if (profile.splitHighlightHue !== undefined) this.engine.setAdjustment('splitHighlightHue', profile.splitHighlightHue);
+                            if (profile.splitHighlightSat !== undefined) this.engine.setAdjustment('splitHighlightSat', profile.splitHighlightSat);
+
+                            // Update UI Sliders to reflect these changes
+                            const currentAdjustments = this.engine.getAdjustments();
+                            this.updateSlidersFromAdjustments(currentAdjustments);
+                        }
+
+                        this.updateHistogram();
+                    }
                 });
             });
         }
@@ -2054,7 +2113,7 @@ class UntitledStudio {
             presetsToRender = this.customPresets;
         } else if (category === 'favorites') {
             // Get all presets that are in favorites
-            const allCats = ['kodak', 'fuji', 'ilford', 'cinestill', 'disposable', 'bw', 'slide', 'instant', 'cinema', 'experimental', 'cinematic', 'vintage', 'modern', 'moody', 'dreamy', 'editorial', 'nature'];
+            const allCats = ['kodak', 'fuji', 'ilford', 'cinestill', 'agfa', 'polaroid', 'rollei', 'lomography', 'konica', 'vintage', 'obscure', 'modern', 'moody', 'dreamy', 'cinema', 'monochrome', 'experimental'];
             if (this.museMode) allCats.push('muse');
 
             allCats.forEach(cat => {
@@ -2067,7 +2126,7 @@ class UntitledStudio {
             presetsToRender = presetsToRender.concat(this.customPresets.filter(p => this.favoritePresets.includes(p.name)));
         } else if (category === 'all') {
             // Flatten all categories for the wheel
-            const allCats = ['kodak', 'fuji', 'ilford', 'cinestill', 'disposable', 'bw', 'slide', 'instant', 'cinema', 'experimental', 'cinematic', 'vintage', 'modern', 'moody', 'dreamy', 'editorial', 'nature'];
+            const allCats = ['kodak', 'fuji', 'ilford', 'cinestill', 'agfa', 'polaroid', 'rollei', 'lomography', 'konica', 'vintage', 'obscure', 'modern', 'moody', 'dreamy', 'cinema', 'monochrome', 'experimental'];
             if (this.museMode) allCats.push('muse');
 
             allCats.forEach(cat => {
@@ -2211,6 +2270,32 @@ class UntitledStudio {
         localStorage.setItem('favoritePresets', JSON.stringify(this.favoritePresets));
     }
 
+    /**
+     * Auto-detect grain physics based on film name
+     * 1 = Negative (Shadows/Mids), 2 = Slide (Mids), 0 = Digital
+     */
+    detectGrainType(name) {
+        const lower = name.toLowerCase();
+
+        // Exceptions: LomoChrome is C-41 (Negative) despite name
+        if (lower.includes('lomochrome')) return 1;
+
+        // Known Slide Films
+        if (lower.includes('velvia') ||
+            lower.includes('provia') ||
+            lower.includes('astia') ||
+            lower.includes('ektachrome') ||
+            lower.includes('fortia') ||
+            lower.includes('sensia') ||
+            lower.includes('ct prec') ||
+            lower.includes('slide') ||
+            lower.includes('chrome')) { // Aerochrome, Ektachrome, Chrome
+            return 2;
+        }
+        // Default to Negative (Portra, Gold, B&W, etc.)
+        return 1;
+    }
+
     applyPreset(name) {
         this.currentPresetName = name;
         // Check custom presets first
@@ -2224,7 +2309,14 @@ class UntitledStudio {
         this.beforePresetAdjustments = JSON.parse(JSON.stringify(this.engine.getAdjustments()));
 
         this.currentPreset = name;
-        this.engine.applyPreset(preset);
+
+        // Clone and inject Grain Type if missing
+        const presetToApply = { ...preset };
+        if (presetToApply.grainType === undefined) {
+            presetToApply.grainType = this.detectGrainType(preset.name);
+        }
+
+        this.engine.applyPreset(presetToApply);
 
         // Store the full preset adjustments
         this.currentPresetAdjustments = JSON.parse(JSON.stringify(this.engine.getAdjustments()));
@@ -2452,6 +2544,20 @@ class UntitledStudio {
         }
 
         document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+
+        // Reset Output Transform UI
+        if (this.elements.printStockBtns) {
+            this.elements.printStockBtns.forEach(b => {
+                b.classList.remove('active', 'bg-hot-pink/20', 'text-hot-pink', 'font-semibold', 'shadow-[0_0_10px_rgba(237,39,136,0.2)]');
+                b.classList.add('text-gray-400', 'hover:bg-white/10');
+            });
+            // Select first one (Standard/None)
+            const first = this.elements.printStockBtns[0];
+            if (first) {
+                first.classList.add('active', 'bg-hot-pink/20', 'text-hot-pink', 'font-semibold', 'shadow-[0_0_10px_rgba(237,39,136,0.2)]');
+                first.classList.remove('text-gray-400', 'hover:bg-white/10');
+            }
+        }
 
         this.history.pushImmediate(adjustments, 'Reset All');
     }

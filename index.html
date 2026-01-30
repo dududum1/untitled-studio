@@ -604,6 +604,28 @@
 
             <!-- EFFECTS Tab -->
             <div id="effects-panel" class="panel hidden">
+                <!-- OUTPUT TRANSFORM (PRINT STOCK) -->
+                <div class="mb-6 pb-4 border-b border-glass-border">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs text-hot-pink font-bold tracking-wider uppercase">Output Transform</label>
+                        <span class="text-[10px] text-gray-500">Cinema Print Emulation</span>
+                    </div>
+                    <div class="flex bg-glass rounded-lg p-1 border border-glass-border">
+                        <button
+                            class="flex-1 py-1.5 text-xs rounded hover:bg-white/10 transition-all print-stock-btn active bg-hot-pink/20 text-hot-pink font-semibold shadow-[0_0_10px_rgba(237,39,136,0.2)]"
+                            data-stock="0">Standard</button>
+                        <button
+                            class="flex-1 py-1.5 text-xs rounded hover:bg-white/10 transition-all print-stock-btn text-gray-400"
+                            data-stock="1">Kodak 2383</button>
+                        <button
+                            class="flex-1 py-1.5 text-xs rounded hover:bg-white/10 transition-all print-stock-btn text-gray-400"
+                            data-stock="2">Fuji 3513</button>
+                        <button
+                            class="flex-1 py-1.5 text-xs rounded hover:bg-white/10 transition-all print-stock-btn text-gray-400"
+                            data-stock="3">Cineon Log</button>
+                    </div>
+                </div>
+
                 <!-- Sub-tab Navigation (Pill Style) -->
                 <div class="flex gap-2 mb-6 overflow-x-auto scrollbar-hide pb-1 border-b border-glass-border">
                     <button
@@ -1245,23 +1267,31 @@
                         Favorites
                     </button>
                     <button class="preset-category" data-category="custom">My Presets</button>
+
+                    <!-- Major Brands -->
                     <button class="preset-category" data-category="kodak">Kodak</button>
                     <button class="preset-category" data-category="fuji">Fuji</button>
                     <button class="preset-category" data-category="ilford">Ilford</button>
                     <button class="preset-category" data-category="cinestill">Cinestill</button>
-                    <button class="preset-category" data-category="cinematic">Cinematic</button>
+                    <button class="preset-category" data-category="agfa">Agfa</button>
+                    <button class="preset-category" data-category="polaroid">Polaroid</button>
+                    <button class="preset-category" data-category="rollei">Rollei</button>
+                    <button class="preset-category" data-category="lomography">Lomo</button>
+                    <button class="preset-category" data-category="konica">Konica</button>
+
+                    <!-- Archives -->
                     <button class="preset-category" data-category="vintage">Vintage</button>
-                    <button class="preset-category" data-category="disposable">Disposable</button>
+                    <button class="preset-category" data-category="obscure">Obscure</button>
+
+                    <!-- Styles -->
                     <button class="preset-category" data-category="modern">Modern</button>
-                    <button class="preset-category" data-category="experimental">Experimental</button>
                     <button class="preset-category" data-category="moody">Moody</button>
                     <button class="preset-category" data-category="dreamy">Dreamy</button>
-                    <button class="preset-category" data-category="editorial">Editorial</button>
-                    <button class="preset-category" data-category="nature">Nature</button>
-                    <button class="preset-category" data-category="lost_film">Obscure</button>
-                    <button class="preset-category" data-category="art_hues">Art</button>
-                    <button class="preset-category" data-category="cinema_eras">Eras</button>
-                    <button class="preset-category" data-category="digital_glitch">Glitch</button>
+                    <button class="preset-category" data-category="cinema">Cinema</button>
+                    <button class="preset-category" data-category="monochrome">B&W</button>
+                    <button class="preset-category" data-category="experimental">Experimental</button>
+                    <button class="preset-category" data-category="muse">Muse</button>
+
                     <button id="save-preset-btn"
                         class="ml-auto px-3 py-1 rounded-lg bg-hot-pink/20 text-hot-pink text-sm font-semibold hover:bg-hot-pink/30 flex-shrink-0">
                         + Save

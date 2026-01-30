@@ -10,6 +10,7 @@ const FilmPresets = {
         {
             name: "Portra 400",
             category: "kodak",
+            grainType: 1,
             exposure: 0.05,
             contrast: -5,
             highlights: -10,
@@ -30,6 +31,7 @@ const FilmPresets = {
         {
             name: "Vision3 250D",
             category: "kodak",
+            grainType: 1,
             exposure: 0.05,
             contrast: -5,
             highlights: -20,
@@ -51,6 +53,7 @@ const FilmPresets = {
         {
             name: "Portra 160",
             category: "kodak",
+            grainType: 1,
             exposure: 0.03,
             contrast: -8,
             highlights: -15,
@@ -71,6 +74,7 @@ const FilmPresets = {
         {
             name: "Portra 800",
             category: "kodak",
+            grainType: 1,
             exposure: 0.08,
             contrast: -3,
             highlights: -5,
@@ -91,6 +95,7 @@ const FilmPresets = {
         {
             name: "Ektar 100",
             category: "kodak",
+            grainType: 1,
             exposure: 0,
             contrast: 15,
             highlights: -5,
@@ -111,6 +116,7 @@ const FilmPresets = {
         {
             name: "Gold 200",
             category: "kodak",
+            grainType: 1,
             exposure: 0.1,
             contrast: 5,
             highlights: 5,
@@ -131,6 +137,7 @@ const FilmPresets = {
         {
             name: "ColorPlus 200",
             category: "kodak",
+            grainType: 1,
             exposure: 0.05,
             contrast: 10,
             highlights: 0,
@@ -151,6 +158,7 @@ const FilmPresets = {
         {
             name: "Ultramax 400",
             category: "kodak",
+            grainType: 1,
             exposure: 0.08,
             contrast: 8,
             highlights: 5,
@@ -171,6 +179,7 @@ const FilmPresets = {
         {
             name: "Pro Image 100",
             category: "kodak",
+            grainType: 1,
             exposure: 0,
             contrast: 5,
             highlights: -5,
@@ -191,6 +200,7 @@ const FilmPresets = {
         {
             name: "Vision3 500T",
             category: "kodak",
+            grainType: 1,
             exposure: 0.05,
             contrast: 10,
             highlights: -8,
@@ -211,6 +221,7 @@ const FilmPresets = {
         {
             name: "Vericolor III",
             category: "kodak",
+            grainType: 1,
             exposure: 0.05,
             contrast: 5,
             highlights: 5,
@@ -227,11 +238,12 @@ const FilmPresets = {
             bloomThreshold: 60,
             grainSize: 1.2,
             fade: 8,
-            hslSkin: [5,10,5]
+            hslSkin: [5, 10, 5]
         },
         {
             name: "Tri-X 400",
             category: "kodak",
+            grainType: 1,
             exposure: 0.05,
             contrast: 30,
             highlights: 5,
@@ -253,6 +265,7 @@ const FilmPresets = {
         {
             name: "T-Max 100",
             category: "kodak",
+            grainType: 1,
             description: "Surgical sharpness, tabular grain.",
             exposure: 0,
             contrast: 15,
@@ -271,6 +284,7 @@ const FilmPresets = {
         {
             name: "T-Max 400",
             category: "kodak",
+            grainType: 1,
             description: "Punchy modern B&W. T-Grain.",
             exposure: 0,
             contrast: 20,
@@ -288,6 +302,7 @@ const FilmPresets = {
         {
             name: "T-Max P3200",
             category: "kodak",
+            grainType: 1,
             description: "High speed, beautiful tight grain.",
             exposure: 0,
             contrast: 25,
@@ -306,6 +321,7 @@ const FilmPresets = {
         {
             name: "Kodak Double-X (5222)",
             category: "kodak",
+            grainType: 1,
             description: "Cinematic B&W. Halation & grit.",
             exposure: 0,
             contrast: 30,
@@ -323,6 +339,7 @@ const FilmPresets = {
         {
             name: "Vision3 200T",
             category: "kodak",
+            grainType: 1,
             description: "Modern cinema workhorse.",
             exposure: 0,
             contrast: 10,
@@ -340,6 +357,7 @@ const FilmPresets = {
         {
             name: "Kodak Technical Pan",
             category: "kodak",
+            grainType: 1,
             description: "Resolution King. Digital-like detail.",
             exposure: 0,
             contrast: 20,
@@ -357,6 +375,7 @@ const FilmPresets = {
         {
             name: "Kodak HIE (High Speed Infrared)",
             category: "kodak",
+            grainType: 1,
             description: "Ghostly bloom. Exploding highlights.",
             exposure: 0,
             contrast: 30,
@@ -375,6 +394,7 @@ const FilmPresets = {
         {
             name: "Kodak Vision 2383 (Print)",
             category: "kodak",
+            grainType: 1,
             description: "Hollywood Print. Teal & Orange.",
             exposure: 0,
             contrast: 20,
@@ -392,6 +412,7 @@ const FilmPresets = {
         {
             name: "Kodak Royal Gold 400",
             category: "kodak",
+            grainType: 1,
             description: "Premium Consumer. Golden vacation glow.",
             exposure: 0,
             contrast: 10,
@@ -403,11 +424,12 @@ const FilmPresets = {
             tint: 5,
             vibrance: 20,
             saturation: 0,
-            hslYellow: [0,20,0]
+            hslYellow: [0, 20, 0]
         },
         {
             name: "Kodak Aerochrome III (1443)",
             category: "kodak",
+            grainType: 2,
             description: "Bubblegum Pink IR. Distinct from generic Red.",
             exposure: 0,
             contrast: 0,
@@ -420,11 +442,12 @@ const FilmPresets = {
             vibrance: 0,
             saturation: 30,
             bloomStrength: 40,
-            hslGreen: [-80,50,20]
+            hslGreen: [-80, 50, 20]
         },
         {
             name: "Silbersalz 200T",
             category: "kodak",
+            grainType: 1,
             description: "Cinematic tungsten, soft contrast.",
             exposure: 0.05,
             contrast: 5,
@@ -440,11 +463,12 @@ const FilmPresets = {
             grainGlobal: 1,
             bloomStrength: 25,
             bloomThreshold: 60,
-            hslBlue: [0,10,0]
+            hslBlue: [0, 10, 0]
         },
         {
             name: "Silbersalz 50D",
             category: "kodak",
+            grainType: 1,
             description: "Pristine daylight motion picture film.",
             exposure: 0.05,
             contrast: 5,
@@ -464,6 +488,7 @@ const FilmPresets = {
         {
             name: "Kodak Aerochrome",
             category: "kodak",
+            grainType: 2,
             description: "Infrared simulation. Vegetation turns red/pink.",
             exposure: 0.05,
             contrast: 30,
@@ -479,12 +504,13 @@ const FilmPresets = {
             grainGlobal: 1.4,
             bloomStrength: 40,
             bloomThreshold: 50,
-            hslGreen: [-120,50,10],
-            hslYellow: [-40,30,0]
+            hslGreen: [-120, 50, 10],
+            hslYellow: [-40, 30, 0]
         },
         {
             name: "Aerochrome",
             category: "kodak",
+            grainType: 2,
             description: "Infrared Simulation. Green becomes Red.",
             exposure: 0.1,
             contrast: 25,
@@ -502,13 +528,14 @@ const FilmPresets = {
             bloomThreshold: 40,
             grainSize: 1.5,
             fade: 0,
-            hslGreen: [-100,50,0],
+            hslGreen: [-100, 50, 0],
             splitHighlightHue: 350,
             splitHighlightSat: 40
         },
         {
             name: "Kodak FunSaver",
             category: "kodak",
+            grainType: 1,
             description: "The classic party camera. Warm, plastic lens softness.",
             exposure: 0.1,
             contrast: 15,
@@ -527,12 +554,13 @@ const FilmPresets = {
             grainSize: 1.3,
             fade: 2,
             vignette: 0.3,
-            hslYellow: [0,10,5],
-            hslRed: [0,5,0]
+            hslYellow: [0, 10, 5],
+            hslRed: [0, 5, 0]
         },
         {
             name: "Kodak Daylight",
             category: "kodak",
+            grainType: 1,
             description: "Balanced for outdoors. Slightly flat but natural.",
             exposure: 0.05,
             contrast: 5,
@@ -558,6 +586,7 @@ const FilmPresets = {
         {
             name: "Pro 400H",
             category: "fuji",
+            grainType: 1,
             exposure: 0.05,
             contrast: -10,
             highlights: -15,
@@ -578,6 +607,7 @@ const FilmPresets = {
         {
             name: "Superia 400",
             category: "fuji",
+            grainType: 1,
             exposure: 0.08,
             contrast: 5,
             highlights: 5,
@@ -598,6 +628,7 @@ const FilmPresets = {
         {
             name: "Superia 800",
             category: "fuji",
+            grainType: 1,
             exposure: 0.1,
             contrast: 3,
             highlights: 8,
@@ -618,6 +649,7 @@ const FilmPresets = {
         {
             name: "C200",
             category: "fuji",
+            grainType: 1,
             exposure: 0.05,
             contrast: 8,
             highlights: 0,
@@ -638,6 +670,7 @@ const FilmPresets = {
         {
             name: "Velvia 50",
             category: "fuji",
+            grainType: 2,
             exposure: -0.05,
             contrast: 25,
             highlights: -10,
@@ -658,6 +691,7 @@ const FilmPresets = {
         {
             name: "Velvia 100",
             category: "fuji",
+            grainType: 2,
             exposure: 0,
             contrast: 20,
             highlights: -8,
@@ -678,6 +712,7 @@ const FilmPresets = {
         {
             name: "Provia 100F",
             category: "fuji",
+            grainType: 2,
             exposure: 0,
             contrast: 15,
             highlights: -5,
@@ -698,6 +733,7 @@ const FilmPresets = {
         {
             name: "Astia 100F",
             category: "fuji",
+            grainType: 2,
             exposure: 0.03,
             contrast: 8,
             highlights: -8,
@@ -718,6 +754,7 @@ const FilmPresets = {
         {
             name: "Classic Chrome",
             category: "fuji",
+            grainType: 2,
             exposure: 0,
             contrast: 12,
             highlights: -15,
@@ -738,6 +775,7 @@ const FilmPresets = {
         {
             name: "Eterna Cinema",
             category: "fuji",
+            grainType: 1,
             exposure: 0,
             contrast: -5,
             highlights: -20,
@@ -758,6 +796,7 @@ const FilmPresets = {
         {
             name: "Natura 1600",
             category: "fuji",
+            grainType: 1,
             description: "The 'Dream Film'. High key, pastel pinks, soft contrast.",
             exposure: 0.15,
             contrast: -15,
@@ -775,12 +814,13 @@ const FilmPresets = {
             bloomThreshold: 45,
             grainSize: 1.5,
             fade: 10,
-            hslMagenta: [0,20,10],
-            hslGreen: [10,-10,5]
+            hslMagenta: [0, 20, 10],
+            hslGreen: [10, -10, 5]
         },
         {
             name: "Fortia SP",
             category: "fuji",
+            grainType: 2,
             description: "Ultra-high saturation, famous for cherry blossoms.",
             exposure: 0,
             contrast: 20,
@@ -798,12 +838,13 @@ const FilmPresets = {
             bloomThreshold: 70,
             grainSize: 1.2,
             fade: 0,
-            hslRed: [0,20,0],
-            hslMagenta: [5,30,0]
+            hslRed: [0, 20, 0],
+            hslMagenta: [5, 30, 0]
         },
         {
             name: "Neopan 1600",
             category: "fuji",
+            grainType: 1,
             exposure: 0.1,
             contrast: 40,
             highlights: 10,
@@ -824,6 +865,7 @@ const FilmPresets = {
         {
             name: "Neopan Acros 100",
             category: "fuji",
+            grainType: 1,
             description: "Orthopanchromatic. Crushed blacks.",
             exposure: 0,
             contrast: 25,
@@ -840,6 +882,7 @@ const FilmPresets = {
         {
             name: "Fujifilm FP-100C",
             category: "fuji",
+            grainType: 1,
             description: "Peel-apart icon. Rich sat, cool blues.",
             exposure: 0,
             contrast: 15,
@@ -851,11 +894,12 @@ const FilmPresets = {
             tint: -5,
             vibrance: 20,
             saturation: 30,
-            hslBlue: [0,10,-5]
+            hslBlue: [0, 10, -5]
         },
         {
             name: "Fuji QuickSnap",
             category: "fuji",
+            grainType: 1,
             description: "Vivid greens and blues. Sharp center, soft edges.",
             exposure: 0.05,
             contrast: 10,
@@ -874,8 +918,8 @@ const FilmPresets = {
             grainSize: 1.2,
             fade: 0,
             vignette: 0.25,
-            hslGreen: [5,15,0],
-            hslBlue: [0,10,0]
+            hslGreen: [5, 15, 0],
+            hslBlue: [0, 10, 0]
         }
     ],
 
@@ -884,6 +928,7 @@ const FilmPresets = {
         {
             name: "HP5 Plus 400",
             category: "ilford",
+            grainType: 1,
             exposure: 0.05,
             contrast: 15,
             highlights: -5,
@@ -904,6 +949,7 @@ const FilmPresets = {
         {
             name: "Delta 100",
             category: "ilford",
+            grainType: 1,
             exposure: 0,
             contrast: 20,
             highlights: -10,
@@ -924,6 +970,7 @@ const FilmPresets = {
         {
             name: "Delta 400",
             category: "ilford",
+            grainType: 1,
             exposure: 0.03,
             contrast: 18,
             highlights: -8,
@@ -944,6 +991,7 @@ const FilmPresets = {
         {
             name: "Delta 3200",
             category: "ilford",
+            grainType: 1,
             exposure: 0.1,
             contrast: 12,
             highlights: 0,
@@ -964,6 +1012,7 @@ const FilmPresets = {
         {
             name: "FP4 Plus 125",
             category: "ilford",
+            grainType: 1,
             exposure: 0,
             contrast: 22,
             highlights: -12,
@@ -984,6 +1033,7 @@ const FilmPresets = {
         {
             name: "Pan F Plus 50",
             category: "ilford",
+            grainType: 1,
             exposure: -0.03,
             contrast: 25,
             highlights: -15,
@@ -1004,6 +1054,7 @@ const FilmPresets = {
         {
             name: "XP2 Super",
             category: "ilford",
+            grainType: 1,
             exposure: 0.05,
             contrast: 10,
             highlights: -5,
@@ -1024,6 +1075,7 @@ const FilmPresets = {
         {
             name: "SFX 200",
             category: "ilford",
+            grainType: 1,
             exposure: 0.08,
             contrast: 30,
             highlights: 10,
@@ -1044,6 +1096,7 @@ const FilmPresets = {
         {
             name: "HP5 Plus 800",
             category: "ilford",
+            grainType: 1,
             exposure: 0.1,
             contrast: 15,
             highlights: -5,
@@ -1064,6 +1117,7 @@ const FilmPresets = {
         {
             name: "Ortho 80",
             category: "ilford",
+            grainType: 1,
             exposure: -0.05,
             contrast: 35,
             highlights: 15,
@@ -1084,6 +1138,7 @@ const FilmPresets = {
         {
             name: "Ilford HP5 Single",
             category: "ilford",
+            grainType: 1,
             description: "Gritty B&W disposable. High contrast.",
             exposure: 0.05,
             contrast: 25,
@@ -1106,6 +1161,7 @@ const FilmPresets = {
         {
             name: "Ilford XP2 Single",
             category: "ilford",
+            grainType: 1,
             description: "Smooth C41 B&W. Creamy tones.",
             exposure: 0.05,
             contrast: 10,
@@ -1132,6 +1188,7 @@ const FilmPresets = {
         {
             name: "Cinestill 800T",
             category: "cinestill",
+            grainType: 1,
             description: "Tungsten balanced with iconic red halation.",
             exposure: 0.05,
             contrast: 10,
@@ -1154,6 +1211,7 @@ const FilmPresets = {
         {
             name: "Cinestill 800T",
             category: "cinestill",
+            grainType: 1,
             description: "Tungsten balanced, famous red halation around lights.",
             exposure: 0.1,
             contrast: 10,
@@ -1171,14 +1229,15 @@ const FilmPresets = {
             bloomThreshold: 35,
             grainSize: 1.2,
             fade: 5,
-            hslRed: [0,10,0],
-            hslOrange: [0,20,0],
-            hslBlue: [-10,10,-5],
+            hslRed: [0, 10, 0],
+            hslOrange: [0, 20, 0],
+            hslBlue: [-10, 10, -5],
             halation: 0.8
         },
         {
             name: "Cinestill 50D",
             category: "cinestill",
+            grainType: 1,
             description: "Fine grain daylight film. Sharp and vibrant.",
             exposure: 0.05,
             contrast: 15,
@@ -1200,6 +1259,7 @@ const FilmPresets = {
         {
             name: "Cinestill 400D",
             category: "cinestill",
+            grainType: 1,
             description: "Versatile, natural skin tones, soft halation.",
             exposure: 0.05,
             contrast: 10,
@@ -1225,6 +1285,7 @@ const FilmPresets = {
         {
             name: "Agfa Vista 200",
             category: "agfa",
+            grainType: 1,
             description: "Punchy reds and blues, cheap drugstore look.",
             exposure: 0.05,
             contrast: 20,
@@ -1242,12 +1303,13 @@ const FilmPresets = {
             bloomThreshold: 70,
             grainSize: 1.3,
             fade: 5,
-            hslRed: [5,20,5],
-            hslBlue: [0,20,0]
+            hslRed: [5, 20, 5],
+            hslBlue: [0, 20, 0]
         },
         {
             name: "Agfa Ultra 50",
             category: "agfa",
+            grainType: 1,
             exposure: 0.1,
             contrast: 35,
             highlights: 10,
@@ -1258,8 +1320,8 @@ const FilmPresets = {
             tint: 0,
             vibrance: 60,
             saturation: 40,
-            hslRed: [0,50,0],
-            hslBlue: [0,50,0],
+            hslRed: [0, 50, 0],
+            hslBlue: [0, 50, 0],
             grain: 15,
             grainSize: 1.4,
             fade: 0
@@ -1267,6 +1329,7 @@ const FilmPresets = {
         {
             name: "Agfa LeBox",
             category: "agfa",
+            grainType: 1,
             description: "Flash-ready look. Punchy contrast, red/blue shift.",
             exposure: 0.15,
             contrast: 25,
@@ -1284,7 +1347,7 @@ const FilmPresets = {
             bloomThreshold: 60,
             grainSize: 1.3,
             fade: 0,
-            hslRed: [0,20,5]
+            hslRed: [0, 20, 5]
         }
     ],
 
@@ -1293,6 +1356,7 @@ const FilmPresets = {
         {
             name: "Polaroid 600",
             category: "polaroid",
+            grainType: 1,
             description: "Soft focus, faded blacks, greenish cast.",
             exposure: 0.1,
             contrast: -10,
@@ -1318,6 +1382,7 @@ const FilmPresets = {
         {
             name: "LomoPurple",
             category: "lomography",
+            grainType: 1,
             description: "Psychedelic purple shift. Greens become purple.",
             exposure: 0,
             contrast: 15,
@@ -1333,13 +1398,14 @@ const FilmPresets = {
             grainGlobal: 1.2,
             bloomStrength: 20,
             bloomThreshold: 60,
-            hslGreen: [100,-50,-20],
-            hslBlue: [-40,20,0],
-            hslMagenta: [0,40,10]
+            hslGreen: [100, -50, -20],
+            hslBlue: [-40, 20, 0],
+            hslMagenta: [0, 40, 10]
         },
         {
             name: "LomoChrome Purple",
             category: "lomography",
+            grainType: 1,
             description: "Surreal spectrum shift. Green becomes purple.",
             exposure: 0,
             contrast: 15,
@@ -1357,7 +1423,7 @@ const FilmPresets = {
             bloomThreshold: 60,
             grainSize: 1.4,
             fade: 0,
-            hslGreen: [120,0,0],
+            hslGreen: [120, 0, 0],
             splitHighlightHue: 300,
             splitHighlightSat: 30,
             splitShadowHue: 240,
@@ -1366,6 +1432,7 @@ const FilmPresets = {
         {
             name: "Lomo Turquoise",
             category: "lomography",
+            grainType: 1,
             description: "Shifts warm colors to blue/emerald.",
             exposure: 0,
             contrast: 20,
@@ -1378,13 +1445,14 @@ const FilmPresets = {
             vibrance: 20,
             saturation: 10,
             grain: 15,
-            hslRed: [-150,0,0],
-            hslOrange: [-150,0,0],
-            hslYellow: [-150,0,0]
+            hslRed: [-150, 0, 0],
+            hslOrange: [-150, 0, 0],
+            hslYellow: [-150, 0, 0]
         },
         {
             name: "Lomo Redscale XR",
             category: "lomography",
+            grainType: 1,
             description: "Spooled backwards. Intense red/orange.",
             exposure: 0.1,
             contrast: 20,
@@ -1397,12 +1465,13 @@ const FilmPresets = {
             vibrance: 30,
             saturation: 20,
             grain: 15,
-            hslRed: [0,20,10],
-            hslYellow: [-10,30,0]
+            hslRed: [0, 20, 10],
+            hslYellow: [-10, 30, 0]
         },
         {
             name: "LomoChrome Purple",
             category: "lomography",
+            grainType: 1,
             description: "Green turns Purple. Infrared sim.",
             exposure: 0,
             contrast: 15,
@@ -1414,13 +1483,14 @@ const FilmPresets = {
             tint: 40,
             vibrance: 20,
             saturation: 10,
-            hslGreen: [140,0,0],
+            hslGreen: [140, 0, 0],
             grain: 10,
             grainGlobal: 1
         },
         {
             name: "LomoSimple",
             category: "lomography",
+            grainType: 1,
             description: "Toy camera. Heavy vignette, random color shifts.",
             exposure: 0,
             contrast: 20,
@@ -1447,6 +1517,7 @@ const FilmPresets = {
         {
             name: "Konica Centuria 400",
             category: "konica",
+            grainType: 1,
             exposure: 0.05,
             contrast: 5,
             highlights: 0,
@@ -1467,6 +1538,7 @@ const FilmPresets = {
         {
             name: "Konica Centuria",
             category: "konica",
+            grainType: 1,
             exposure: 0.05,
             contrast: 10,
             highlights: -15,
@@ -1482,11 +1554,332 @@ const FilmPresets = {
         }
     ],
 
+    // ============ AGFA ============
+    agfa: [
+        {
+            name: "Agfa Scala 200x",
+            category: "agfa",
+            grainType: 2,
+            description: "Black and white slide film. Inky blacks.",
+            exposure: 0,
+            contrast: 15,
+            highlights: 10,
+            shadows: -15,
+            whites: 5,
+            blacks: -10,
+            temperature: 0,
+            tint: 0,
+            vibrance: -100,
+            saturation: -100,
+            grain: 15,
+            grainSize: 1,
+            clarity: 10,
+            fade: 0
+        },
+        {
+            name: "Agfa Vista 200",
+            category: "agfa",
+            grainType: 1,
+            description: "Budget consumer film. Warm and saturated.",
+            exposure: 0.05,
+            contrast: 10,
+            highlights: -5,
+            shadows: 5,
+            whites: 0,
+            blacks: 5,
+            temperature: 5,
+            tint: 0,
+            vibrance: 20,
+            saturation: 20,
+            grain: 10,
+            grainSize: 1.2
+        },
+        {
+            name: "Agfa Optima 100",
+            category: "agfa",
+            grainType: 1,
+            description: "Natural saturation, fine grain.",
+            exposure: 0,
+            contrast: 5,
+            highlights: 0,
+            shadows: 0,
+            whites: 0,
+            blacks: 0,
+            temperature: 0,
+            tint: 0,
+            vibrance: 10,
+            saturation: 5,
+            grain: 5,
+            grainSize: 0.8
+        }
+    ],
+
+    // ============ POLAROID ============
+    polaroid: [
+        {
+            name: "Polaroid 669",
+            category: "polaroid",
+            grainType: 1,
+            description: "Cold cyan shadows, creamy highlights.",
+            exposure: 0.1,
+            contrast: 10,
+            highlights: -10,
+            shadows: 15,
+            whites: -5,
+            blacks: 10,
+            temperature: -5,
+            tint: -5,
+            vibrance: -10,
+            saturation: -15,
+            hslShadows: [180, 20, 0],
+            grain: 15,
+            fade: 10,
+            vignette: 20
+        },
+        {
+            name: "Polaroid SX-70",
+            category: "polaroid",
+            grainType: 1,
+            description: "Warm, dreamy vintage instant.",
+            exposure: 0.1,
+            contrast: 5,
+            highlights: -15,
+            shadows: 20,
+            whites: -10,
+            blacks: 15,
+            temperature: 15,
+            tint: 10,
+            vibrance: 10,
+            saturation: -5,
+            grain: 10,
+            bloomStrength: 15,
+            fade: 15
+        },
+        {
+            name: "Polaroid 600",
+            category: "polaroid",
+            grainType: 1,
+            description: "High contrast flash look.",
+            exposure: 0.15,
+            contrast: 20,
+            highlights: 15,
+            shadows: 10,
+            whites: 10,
+            blacks: 5,
+            temperature: 0,
+            tint: -5,
+            vibrance: 15,
+            saturation: 10,
+            grain: 15
+        }
+    ],
+
+    // ============ ROLLEI ============
+    rollei: [
+        {
+            name: "Rollei Retro 80S",
+            category: "rollei",
+            grainType: 1,
+            description: "Sharp, high contrast B&W. Derived from aviphot.",
+            exposure: -0.05,
+            contrast: 25,
+            highlights: 10,
+            shadows: -15,
+            whites: 5,
+            blacks: -10,
+            temperature: 0,
+            tint: 0,
+            vibrance: -100,
+            saturation: -100,
+            grain: 5,
+            grainSize: 0.8,
+            clarity: 15
+        },
+        {
+            name: "Rollei Retro 400S",
+            category: "rollei",
+            grainType: 1,
+            description: "Moody B&W with infrared sensitivity.",
+            exposure: 0,
+            contrast: 20,
+            highlights: 5,
+            shadows: -10,
+            whites: 0,
+            blacks: -5,
+            temperature: 0,
+            tint: 0,
+            vibrance: -100,
+            saturation: -100,
+            grain: 15,
+            grainSize: 1.2,
+            clarity: 10,
+            vignette: 15
+        },
+        {
+            name: "Rollei Vario Chrome",
+            category: "rollei",
+            grainType: 2,
+            description: "Warm brown slide film emulation.",
+            exposure: 0,
+            contrast: 15,
+            highlights: -5,
+            shadows: 10,
+            whites: 0,
+            blacks: 5,
+            temperature: 10,
+            tint: 5,
+            vibrance: 25,
+            saturation: -10,
+            hslOrange: [0, 10, 0],
+            grain: 15,
+            grainSize: 1.1
+        },
+        {
+            name: "Rollei Ortho 25",
+            category: "rollei",
+            grainType: 1,
+            description: "Orthochromatic B&W. Blind to red. Very high contrast.",
+            exposure: -0.1,
+            contrast: 40,
+            highlights: 20,
+            shadows: -20,
+            whites: 10,
+            blacks: -20,
+            temperature: 0,
+            tint: 0,
+            vibrance: -100,
+            saturation: -100,
+            grain: 5,
+            grainSize: 0.5,
+            clarity: 20,
+            hslRed: [0, -100, -50]
+        },
+        {
+            name: "Rollei Infrared 400",
+            category: "rollei",
+            grainType: 1,
+            description: "B&W IR film with glowing highlights.",
+            exposure: 0.1,
+            contrast: 20,
+            highlights: 30,
+            shadows: -10,
+            whites: 20,
+            blacks: -5,
+            temperature: 0,
+            tint: 0,
+            vibrance: -100,
+            saturation: -100,
+            grain: 15,
+            bloomStrength: 40,
+            bloomThreshold: 40,
+            hslGreen: [0, 50, 20]
+        }
+    ],
+
+    // ============ LOMOGRAPHY ============
+    lomography: [
+        {
+            name: "Lomo Metropolis",
+            category: "lomography",
+            grainType: 1,
+            description: "Desaturated, high contrast, green/blue cast. Bleach bypass.",
+            exposure: 0,
+            contrast: 30,
+            highlights: 10,
+            shadows: -20,
+            whites: 5,
+            blacks: -10,
+            temperature: -5,
+            tint: 10,
+            vibrance: -30,
+            saturation: -30,
+            grain: 20,
+            grainSize: 1.5,
+            vignette: 30
+        },
+        {
+            name: "Lomo Purple",
+            category: "lomography",
+            grainType: 1,
+            description: "Psychedelic chrome. Greens become purple.",
+            exposure: 0,
+            contrast: 15,
+            highlights: 0,
+            shadows: 0,
+            whites: 0,
+            blacks: 0,
+            temperature: 0,
+            tint: 50,
+            vibrance: 30,
+            saturation: 20,
+            hslGreen: [120, 0, 0],
+            grain: 15
+        },
+        {
+            name: "Lomo Turquoise",
+            category: "lomography",
+            grainType: 1,
+            description: "Oranges become blue. Skin turned into smurfs.",
+            exposure: 0,
+            contrast: 15,
+            highlights: 0,
+            shadows: 0,
+            whites: 0,
+            blacks: 0,
+            temperature: -50,
+            tint: -20,
+            vibrance: 20,
+            saturation: 20,
+            hslOrange: [180, 0, 0],
+            grain: 15
+        }
+    ],
+
+    // ============ KONICA ============
+    konica: [
+        {
+            name: "Konica VX 400",
+            category: "konica",
+            grainType: 1,
+            description: "Cool, magenta tint. Distinctive 2000s look.",
+            exposure: 0.05,
+            contrast: 10,
+            highlights: -5,
+            shadows: 10,
+            whites: 0,
+            blacks: 5,
+            temperature: -5,
+            tint: 15,
+            vibrance: 10,
+            saturation: 5,
+            grain: 12,
+            grainSize: 1.2
+        },
+        {
+            name: "Konica Centuria 100",
+            category: "konica",
+            grainType: 1,
+            description: "Vibrant and sharp.",
+            exposure: 0,
+            contrast: 10,
+            highlights: 0,
+            shadows: 5,
+            whites: 5,
+            blacks: 0,
+            temperature: 0,
+            tint: 5,
+            vibrance: 15,
+            saturation: 15,
+            grain: 8
+        }
+    ],
+
     // ============ VINTAGE ============
     vintage: [
         {
             name: "Ferrania Solaris",
             category: "vintage",
+            grainType: 1,
             exposure: 0.15,
             contrast: 20,
             highlights: 20,
@@ -1503,6 +1896,7 @@ const FilmPresets = {
         {
             name: "Drugstore 400",
             category: "vintage",
+            grainType: 1,
             description: "Cheap mall scan. Green shadows, magenta highlights.",
             exposure: 0,
             contrast: 10,
@@ -1520,13 +1914,14 @@ const FilmPresets = {
             bloomThreshold: 65,
             grainSize: 1.4,
             fade: 10,
-            hslGreen: [0,0,0],
+            hslGreen: [0, 0, 0],
             splitShadowHue: 0.33,
             splitShadowSat: 0.2
         },
         {
             name: "Expired Disposable",
             category: "vintage",
+            grainType: 1,
             description: "Found in a drawer after 10 years. Fogged.",
             exposure: 0.1,
             contrast: -25,
@@ -1544,11 +1939,12 @@ const FilmPresets = {
             bloomThreshold: 20,
             grainSize: 1.8,
             fade: 25,
-            hslBlue: [-20,-30,10]
+            hslBlue: [-20, -30, 10]
         },
         {
             name: "Retro PC",
             category: "vintage",
+            grainType: 1,
             description: "CGA Graphics era. 4-bit dither.",
             exposure: 0,
             contrast: 50,
@@ -1561,6 +1957,7 @@ const FilmPresets = {
         {
             name: "Technicolor 2-Strip",
             category: "vintage",
+            grainType: 1,
             exposure: 0.1,
             contrast: 30,
             highlights: 10,
@@ -1571,14 +1968,15 @@ const FilmPresets = {
             tint: 0,
             vibrance: 20,
             saturation: 10,
-            hslBlue: [0,-100,-50],
-            hslGreen: [-10,20,0],
-            hslRed: [10,30,0],
+            hslBlue: [0, -100, -50],
+            hslGreen: [-10, 20, 0],
+            hslRed: [10, 30, 0],
             fade: 0
         },
         {
             name: "Silent Sepia",
             category: "vintage",
+            grainType: 1,
             exposure: 0.1,
             contrast: 20,
             highlights: -10,
@@ -1601,6 +1999,7 @@ const FilmPresets = {
         {
             name: "Orwo Wolfen NC500",
             category: "obscure",
+            grainType: 1,
             description: "German cinema look. Desaturated & gritty.",
             exposure: 0,
             contrast: 10,
@@ -1619,6 +2018,7 @@ const FilmPresets = {
         {
             name: "Revolog Kolor",
             category: "obscure",
+            grainType: 1,
             description: "Artificial rainbow gradients.",
             exposure: 0.1,
             contrast: 10,
@@ -1636,6 +2036,7 @@ const FilmPresets = {
         {
             name: "Perutz Primera",
             category: "obscure",
+            grainType: 1,
             exposure: -0.05,
             contrast: 25,
             highlights: -20,
@@ -1646,8 +2047,8 @@ const FilmPresets = {
             tint: -5,
             vibrance: -30,
             saturation: -40,
-            hslGreen: [-10,-30,-10],
-            hslOrange: [-5,-20,0],
+            hslGreen: [-10, -30, -10],
+            hslOrange: [-5, -20, 0],
             grain: 25,
             grainSize: 1.5,
             fade: 15
@@ -1659,6 +2060,7 @@ const FilmPresets = {
         {
             name: "Ektachrome E100",
             category: "modern",
+            grainType: 2,
             exposure: 0.1,
             contrast: 12,
             highlights: -8,
@@ -1679,6 +2081,7 @@ const FilmPresets = {
         {
             name: "Kodachrome 25",
             category: "modern",
+            grainType: 2,
             exposure: 0,
             contrast: 20,
             highlights: 10,
@@ -1699,6 +2102,7 @@ const FilmPresets = {
         {
             name: "Ektachrome 64T",
             category: "modern",
+            grainType: 2,
             exposure: 0,
             contrast: 10,
             highlights: -10,
@@ -1719,6 +2123,7 @@ const FilmPresets = {
         {
             name: "Ektachrome E100 Warm",
             category: "modern",
+            grainType: 2,
             exposure: 0,
             contrast: 20,
             highlights: -10,
@@ -1739,6 +2144,7 @@ const FilmPresets = {
         {
             name: "Kodachrome 64",
             category: "modern",
+            grainType: 2,
             exposure: 0,
             contrast: 25,
             highlights: 10,
@@ -1755,13 +2161,14 @@ const FilmPresets = {
             bloomThreshold: 75,
             grainSize: 0.8,
             fade: 0,
-            hslRed: [0,10,-5],
-            hslYellow: [0,15,0],
-            hslBlue: [0,20,-10]
+            hslRed: [0, 10, -5],
+            hslYellow: [0, 15, 0],
+            hslBlue: [0, 20, -10]
         },
         {
             name: "Ektachrome E100VS",
             category: "modern",
+            grainType: 2,
             exposure: 0.05,
             contrast: 20,
             highlights: 5,
@@ -1778,11 +2185,12 @@ const FilmPresets = {
             bloomThreshold: 60,
             grainSize: 1,
             fade: 0,
-            hslBlue: [0,30,0]
+            hslBlue: [0, 30, 0]
         },
         {
             name: "Infrared B&W",
             category: "modern",
+            grainType: 1,
             exposure: 0.1,
             contrast: 40,
             highlights: 15,
@@ -1799,12 +2207,13 @@ const FilmPresets = {
             bloomThreshold: 45,
             grainSize: 1.2,
             fade: 0,
-            hslGreen: [0,50,50],
-            hslBlue: [0,-50,-50]
+            hslGreen: [0, 50, 50],
+            hslBlue: [0, -50, -50]
         },
         {
             name: "Bleach Bypass",
             category: "modern",
+            grainType: 1,
             exposure: -0.1,
             contrast: 40,
             highlights: 15,
@@ -1826,6 +2235,7 @@ const FilmPresets = {
         {
             name: "Moonlight",
             category: "modern",
+            grainType: 1,
             exposure: 0,
             contrast: 5,
             highlights: -25,
@@ -1846,6 +2256,7 @@ const FilmPresets = {
         {
             name: "Euphoria",
             category: "modern",
+            grainType: 1,
             exposure: 0.05,
             contrast: 15,
             highlights: -10,
@@ -1862,12 +2273,13 @@ const FilmPresets = {
             bloomThreshold: 35,
             grainSize: 0.7,
             fade: 10,
-            hslMagenta: [0,30,5],
-            hslBlue: [10,25,0]
+            hslMagenta: [0, 30, 5],
+            hslBlue: [10, 25, 0]
         },
         {
             name: "Sci-Fi Blue",
             category: "modern",
+            grainType: 1,
             exposure: 0,
             contrast: 20,
             highlights: -10,
@@ -1883,11 +2295,12 @@ const FilmPresets = {
             bloomStrength: 15,
             bloomThreshold: 60,
             fade: 5,
-            hslBlue: [0,20,10]
+            hslBlue: [0, 20, 10]
         },
         {
             name: "Western",
             category: "modern",
+            grainType: 1,
             exposure: 0.1,
             contrast: 15,
             highlights: 5,
@@ -1908,6 +2321,7 @@ const FilmPresets = {
         {
             name: "Thriller",
             category: "modern",
+            grainType: 1,
             exposure: -0.15,
             contrast: 30,
             highlights: -20,
@@ -1922,11 +2336,12 @@ const FilmPresets = {
             grainGlobal: 1.3,
             bloomStrength: 5,
             fade: 0,
-            hslGreen: [0,-20,-10]
+            hslGreen: [0, -20, -10]
         },
         {
             name: "French New Wave",
             category: "modern",
+            grainType: 1,
             exposure: 0.15,
             contrast: -10,
             highlights: 10,
@@ -1946,6 +2361,7 @@ const FilmPresets = {
         {
             name: "Clean & Crisp",
             category: "modern",
+            grainType: 1,
             exposure: 0.05,
             contrast: 10,
             highlights: -20,
@@ -1966,6 +2382,7 @@ const FilmPresets = {
         {
             name: "Moody",
             category: "modern",
+            grainType: 1,
             exposure: -0.1,
             contrast: 20,
             highlights: -25,
@@ -1987,6 +2404,7 @@ const FilmPresets = {
         {
             name: "Light & Airy",
             category: "modern",
+            grainType: 1,
             exposure: 0.3,
             contrast: -15,
             highlights: 20,
@@ -2007,6 +2425,7 @@ const FilmPresets = {
         {
             name: "Rich & Bold",
             category: "modern",
+            grainType: 1,
             exposure: 0,
             contrast: 25,
             highlights: -15,
@@ -2027,6 +2446,7 @@ const FilmPresets = {
         {
             name: "Matte Film",
             category: "modern",
+            grainType: 1,
             exposure: 0.05,
             contrast: -5,
             highlights: -15,
@@ -2047,6 +2467,7 @@ const FilmPresets = {
         {
             name: "Golden Hour",
             category: "modern",
+            grainType: 1,
             exposure: 0.15,
             contrast: 5,
             highlights: 10,
@@ -2067,6 +2488,7 @@ const FilmPresets = {
         {
             name: "Blue Hour",
             category: "modern",
+            grainType: 1,
             exposure: -0.05,
             contrast: 10,
             highlights: -20,
@@ -2087,6 +2509,7 @@ const FilmPresets = {
         {
             name: "Pastel Dream",
             category: "modern",
+            grainType: 1,
             exposure: 0.2,
             contrast: -20,
             highlights: 15,
@@ -2107,6 +2530,7 @@ const FilmPresets = {
         {
             name: "Scotch Chrome",
             category: "modern",
+            grainType: 2,
             exposure: 0,
             contrast: 15,
             highlights: 0,
@@ -2117,8 +2541,8 @@ const FilmPresets = {
             tint: 15,
             vibrance: 10,
             saturation: 5,
-            hslBlue: [10,0,0],
-            hslShadows: [280,20,0],
+            hslBlue: [10, 0, 0],
+            hslShadows: [280, 20, 0],
             grain: 30,
             grainSize: 1.8,
             fade: 10
@@ -2126,6 +2550,7 @@ const FilmPresets = {
         {
             name: "Redrum",
             category: "modern",
+            grainType: 1,
             description: "Limited edition red-scale film. Intense monochromatic red.",
             exposure: -0.1,
             contrast: 40,
@@ -2141,13 +2566,14 @@ const FilmPresets = {
             grainGlobal: 1.3,
             bloomStrength: 30,
             bloomThreshold: 50,
-            hslRed: [0,50,0],
-            hslOrange: [-10,30,-10],
-            hslYellow: [-20,0,-20]
+            hslRed: [0, 50, 0],
+            hslOrange: [-10, 30, -10],
+            hslYellow: [-20, 0, -20]
         },
         {
             name: "Wedding Cam",
             category: "modern",
+            grainType: 1,
             description: "Table camera aesthetic. Harsh flash simulation.",
             exposure: 0.2,
             contrast: 30,
@@ -2170,6 +2596,7 @@ const FilmPresets = {
         {
             name: "Hackerman",
             category: "modern",
+            grainType: 1,
             description: "System brea__kdown. Glitch + Dither.",
             exposure: 0.1,
             contrast: 20,
@@ -2179,8 +2606,8 @@ const FilmPresets = {
             blacks: 0,
             temperature: -20,
             tint: 50,
-            hslGreen: [0,50,0],
-            hslRed: [0,-100,-50],
+            hslGreen: [0, 50, 0],
+            hslRed: [0, -100, -50],
             glitchStrength: 30,
             pixelateSize: 0,
             ditherStrength: 20,
@@ -2191,6 +2618,7 @@ const FilmPresets = {
         {
             name: "Cyberpunk",
             category: "modern",
+            grainType: 1,
             description: "High tech, low life. Neon aesthetic.",
             exposure: 0.05,
             contrast: 15,
@@ -2211,6 +2639,7 @@ const FilmPresets = {
         {
             name: "VHS",
             category: "modern",
+            grainType: 1,
             description: "Tracking error. Worn tape.",
             exposure: 0.05,
             contrast: 10,
@@ -2228,6 +2657,7 @@ const FilmPresets = {
         {
             name: "Vogue",
             category: "modern",
+            grainType: 1,
             description: "High fashion contrast. Punchy and sharp.",
             exposure: 0.1,
             contrast: 15,
@@ -2247,6 +2677,7 @@ const FilmPresets = {
         {
             name: "Studio Clean",
             category: "modern",
+            grainType: 1,
             description: "Perfect skin tones. Soft and neutral.",
             exposure: 0.05,
             contrast: 5,
@@ -2266,6 +2697,7 @@ const FilmPresets = {
         {
             name: "Runway",
             category: "modern",
+            grainType: 1,
             description: "Cool and edgy. Modern magazine look.",
             exposure: 0.1,
             contrast: 20,
@@ -2284,6 +2716,7 @@ const FilmPresets = {
         {
             name: "High Key",
             category: "modern",
+            grainType: 1,
             exposure: 0.3,
             contrast: -20,
             highlights: 25,
@@ -2302,6 +2735,7 @@ const FilmPresets = {
         {
             name: "Matte Fashion",
             category: "modern",
+            grainType: 1,
             exposure: 0.05,
             contrast: -10,
             highlights: -10,
@@ -2320,6 +2754,7 @@ const FilmPresets = {
         {
             name: "Urban Grit",
             category: "modern",
+            grainType: 1,
             exposure: -0.1,
             contrast: 35,
             highlights: -15,
@@ -2338,6 +2773,7 @@ const FilmPresets = {
         {
             name: "Porcelain",
             category: "modern",
+            grainType: 1,
             exposure: 0.15,
             contrast: 5,
             highlights: -10,
@@ -2356,6 +2792,7 @@ const FilmPresets = {
         {
             name: "Deep Forest",
             category: "modern",
+            grainType: 1,
             exposure: -0.1,
             contrast: 20,
             highlights: -15,
@@ -2368,11 +2805,12 @@ const FilmPresets = {
             saturation: 10,
             grain: 5,
             fade: 5,
-            hslGreen: [0,20,-10]
+            hslGreen: [0, 20, -10]
         },
         {
             name: "Desert Heat",
             category: "modern",
+            grainType: 1,
             exposure: 0.1,
             contrast: 15,
             highlights: 10,
@@ -2386,11 +2824,12 @@ const FilmPresets = {
             grain: 8,
             clarity: 15,
             fade: 5,
-            hslOrange: [0,20,0]
+            hslOrange: [0, 20, 0]
         },
         {
             name: "Ocean Air",
             category: "modern",
+            grainType: 1,
             exposure: 0.15,
             contrast: 5,
             highlights: 15,
@@ -2403,12 +2842,13 @@ const FilmPresets = {
             saturation: 10,
             grain: 3,
             fade: 0,
-            hslBlue: [-5,20,5],
-            hslAqua: [0,25,10]
+            hslBlue: [-5, 20, 5],
+            hslAqua: [0, 25, 10]
         },
         {
             name: "Alpine",
             category: "modern",
+            grainType: 1,
             exposure: 0.1,
             contrast: 25,
             highlights: 10,
@@ -2422,11 +2862,12 @@ const FilmPresets = {
             grain: 2,
             clarity: 20,
             fade: 0,
-            hslBlue: [0,10,5]
+            hslBlue: [0, 10, 5]
         },
         {
             name: "Autumn Gold",
             category: "modern",
+            grainType: 1,
             exposure: 0.05,
             contrast: 10,
             highlights: -5,
@@ -2439,12 +2880,13 @@ const FilmPresets = {
             saturation: 20,
             grain: 5,
             fade: 5,
-            hslYellow: [-10,25,0],
-            hslGreen: [-20,0,0]
+            hslYellow: [-10, 25, 0],
+            hslGreen: [-20, 0, 0]
         },
         {
             name: "Pastel Goth",
             category: "modern",
+            grainType: 1,
             exposure: 0.1,
             contrast: -10,
             highlights: 10,
@@ -2456,13 +2898,14 @@ const FilmPresets = {
             vibrance: -10,
             saturation: -20,
             splitToneBalance: -20,
-            hslGreen: [40,-10,20],
-            hslRed: [-20,10,10],
+            hslGreen: [40, -10, 20],
+            hslRed: [-20, 10, 10],
             fade: 20
         },
         {
             name: "Electric Indigo",
             category: "modern",
+            grainType: 1,
             exposure: -0.2,
             contrast: 40,
             highlights: 30,
@@ -2480,6 +2923,7 @@ const FilmPresets = {
         {
             name: "Solarized",
             category: "modern",
+            grainType: 1,
             exposure: 0,
             contrast: 100,
             highlights: -100,
@@ -2496,6 +2940,7 @@ const FilmPresets = {
         {
             name: "Crimson Tide",
             category: "modern",
+            grainType: 1,
             exposure: -0.1,
             contrast: 50,
             highlights: 10,
@@ -2506,12 +2951,13 @@ const FilmPresets = {
             tint: 60,
             vibrance: -50,
             saturation: -60,
-            hslRed: [0,50,20],
+            hslRed: [0, 50, 20],
             fade: 0
         },
         {
             name: "Golden Age",
             category: "modern",
+            grainType: 1,
             exposure: -0.2,
             contrast: 40,
             highlights: 30,
@@ -2529,6 +2975,7 @@ const FilmPresets = {
         {
             name: "Bleach Bypass",
             category: "modern",
+            grainType: 1,
             exposure: 0,
             contrast: 60,
             highlights: 20,
@@ -2546,6 +2993,7 @@ const FilmPresets = {
         {
             name: "Day for Night",
             category: "modern",
+            grainType: 1,
             exposure: -1.5,
             contrast: 10,
             highlights: -50,
@@ -2562,6 +3010,7 @@ const FilmPresets = {
         {
             name: "Grindhouse",
             category: "modern",
+            grainType: 1,
             exposure: 0,
             contrast: 50,
             highlights: -20,
@@ -2585,6 +3034,7 @@ const FilmPresets = {
         {
             name: "Dark & Stormy",
             category: "moody",
+            grainType: 1,
             exposure: -0.15,
             contrast: 25,
             highlights: -30,
@@ -2606,6 +3056,7 @@ const FilmPresets = {
         {
             name: "Melancholy",
             category: "moody",
+            grainType: 1,
             exposure: -0.05,
             contrast: 10,
             highlights: -25,
@@ -2626,6 +3077,7 @@ const FilmPresets = {
         {
             name: "Midnight Blues",
             category: "moody",
+            grainType: 1,
             exposure: -0.1,
             contrast: 15,
             highlights: -20,
@@ -2646,6 +3098,7 @@ const FilmPresets = {
         {
             name: "Gothic",
             category: "moody",
+            grainType: 1,
             exposure: -0.2,
             contrast: 35,
             highlights: -35,
@@ -2667,6 +3120,7 @@ const FilmPresets = {
         {
             name: "Rainy Day",
             category: "moody",
+            grainType: 1,
             exposure: 0,
             contrast: 5,
             highlights: -20,
@@ -2687,6 +3141,7 @@ const FilmPresets = {
         {
             name: "Brooding",
             category: "moody",
+            grainType: 1,
             exposure: -0.1,
             contrast: 20,
             highlights: -30,
@@ -2708,6 +3163,7 @@ const FilmPresets = {
         {
             name: "Twilight",
             category: "moody",
+            grainType: 1,
             exposure: -0.05,
             contrast: 12,
             highlights: -25,
@@ -2728,6 +3184,7 @@ const FilmPresets = {
         {
             name: "Foggy Morning",
             category: "moody",
+            grainType: 1,
             exposure: 0.1,
             contrast: -15,
             highlights: 10,
@@ -2749,6 +3206,7 @@ const FilmPresets = {
         {
             name: "Deep Forest",
             category: "moody",
+            grainType: 1,
             exposure: -0.15,
             contrast: 20,
             highlights: -20,
@@ -2765,11 +3223,12 @@ const FilmPresets = {
             bloomThreshold: 60,
             grainSize: 1.2,
             fade: 5,
-            hslGreen: [-10,-20,-20]
+            hslGreen: [-10, -20, -20]
         },
         {
             name: "Stormy Seas",
             category: "moody",
+            grainType: 1,
             exposure: -0.1,
             contrast: 25,
             highlights: 5,
@@ -2786,11 +3245,12 @@ const FilmPresets = {
             bloomThreshold: 55,
             grainSize: 1.5,
             fade: 0,
-            hslBlue: [-10,-10,-10]
+            hslBlue: [-10, -10, -10]
         },
         {
             name: "Silent Night",
             category: "moody",
+            grainType: 1,
             exposure: -0.15,
             contrast: 18,
             highlights: -30,
@@ -2812,6 +3272,7 @@ const FilmPresets = {
         {
             name: "Overcast",
             category: "moody",
+            grainType: 1,
             exposure: 0.05,
             contrast: 0,
             highlights: -15,
@@ -2836,6 +3297,7 @@ const FilmPresets = {
         {
             name: "Cotton Candy",
             category: "dreamy",
+            grainType: 1,
             exposure: 0.25,
             contrast: -25,
             highlights: 20,
@@ -2853,6 +3315,7 @@ const FilmPresets = {
         {
             name: "Soft Focus",
             category: "dreamy",
+            grainType: 1,
             exposure: 0.15,
             contrast: -20,
             highlights: 15,
@@ -2870,6 +3333,7 @@ const FilmPresets = {
         {
             name: "Morning Haze",
             category: "dreamy",
+            grainType: 1,
             exposure: 0.2,
             contrast: -15,
             highlights: 25,
@@ -2887,6 +3351,7 @@ const FilmPresets = {
         {
             name: "Ethereal",
             category: "dreamy",
+            grainType: 1,
             exposure: 0.3,
             contrast: -30,
             highlights: 30,
@@ -2904,6 +3369,7 @@ const FilmPresets = {
         {
             name: "Fairy Tale",
             category: "dreamy",
+            grainType: 1,
             exposure: 0.2,
             contrast: -10,
             highlights: 20,
@@ -2921,6 +3387,7 @@ const FilmPresets = {
         {
             name: "Lavender Fields",
             category: "dreamy",
+            grainType: 1,
             exposure: 0.15,
             contrast: -15,
             highlights: 15,
@@ -2938,6 +3405,7 @@ const FilmPresets = {
         {
             name: "Cloud Nine",
             category: "dreamy",
+            grainType: 1,
             exposure: 0.35,
             contrast: -35,
             highlights: 35,
@@ -2955,6 +3423,7 @@ const FilmPresets = {
         {
             name: "Rose Tinted",
             category: "dreamy",
+            grainType: 1,
             exposure: 0.2,
             contrast: -20,
             highlights: 20,
@@ -2972,6 +3441,7 @@ const FilmPresets = {
         {
             name: "Sunbeam",
             category: "dreamy",
+            grainType: 1,
             exposure: 0.25,
             contrast: -10,
             highlights: 30,
@@ -2989,6 +3459,7 @@ const FilmPresets = {
         {
             name: "Watercolor",
             category: "dreamy",
+            grainType: 1,
             exposure: 0.2,
             contrast: -25,
             highlights: 25,
@@ -3010,6 +3481,7 @@ const FilmPresets = {
         {
             name: "Noir Soft",
             category: "monochrome",
+            grainType: 1,
             exposure: -0.05,
             contrast: 15,
             highlights: -10,
@@ -3030,6 +3502,7 @@ const FilmPresets = {
         {
             name: "Newsprint",
             category: "monochrome",
+            grainType: 1,
             exposure: 0.1,
             contrast: 50,
             highlights: 10,
@@ -3050,6 +3523,7 @@ const FilmPresets = {
         {
             name: "Noir City",
             category: "monochrome",
+            grainType: 1,
             exposure: -0.15,
             contrast: 30,
             highlights: 0,
@@ -3071,6 +3545,7 @@ const FilmPresets = {
         {
             name: "Noir",
             category: "monochrome",
+            grainType: 1,
             exposure: -0.1,
             contrast: 35,
             highlights: -20,
@@ -3096,6 +3571,7 @@ const FilmPresets = {
         {
             name: "Wes Anderson II",
             category: "cinema",
+            grainType: 1,
             exposure: 0.2,
             contrast: -10,
             highlights: 10,
@@ -3112,13 +3588,14 @@ const FilmPresets = {
             bloomThreshold: 65,
             grainSize: 0.8,
             fade: 10,
-            hslYellow: [5,20,10],
-            hslRed: [0,15,5],
-            hslBlue: [0,25,10]
+            hslYellow: [5, 20, 10],
+            hslRed: [0, 15, 5],
+            hslBlue: [0, 25, 10]
         },
         {
             name: "Blockbuster",
             category: "cinema",
+            grainType: 1,
             exposure: 0,
             contrast: 20,
             highlights: -15,
@@ -3139,6 +3616,7 @@ const FilmPresets = {
         {
             name: "Blade Runner",
             category: "cinema",
+            grainType: 1,
             exposure: 0,
             contrast: 10,
             highlights: -20,
@@ -3159,6 +3637,7 @@ const FilmPresets = {
         {
             name: "Wes Anderson",
             category: "cinema",
+            grainType: 1,
             exposure: 0.1,
             contrast: -5,
             highlights: -10,
@@ -3183,6 +3662,7 @@ const FilmPresets = {
         {
             name: "Teal & Orange",
             category: "experimental",
+            grainType: 1,
             exposure: 0.05,
             contrast: 15,
             highlights: -10,
@@ -3199,12 +3679,13 @@ const FilmPresets = {
             bloomThreshold: 60,
             grainSize: 1,
             fade: 3,
-            hslAqua: [0,25,0],
-            hslOrange: [0,20,5]
+            hslAqua: [0, 25, 0],
+            hslOrange: [0, 20, 5]
         },
         {
             name: "Teal & Orange II",
             category: "experimental",
+            grainType: 1,
             exposure: 0,
             contrast: 25,
             highlights: -15,
@@ -3221,8 +3702,8 @@ const FilmPresets = {
             bloomThreshold: 65,
             grainSize: 1.2,
             fade: 5,
-            hslBlue: [-20,30,-10],
-            hslOrange: [5,25,5],
+            hslBlue: [-20, 30, -10],
+            hslOrange: [5, 25, 5],
             splitHighlightHue: 0.08,
             splitHighlightSat: 0.2,
             splitShadowHue: 0.55,
@@ -3231,6 +3712,7 @@ const FilmPresets = {
         {
             name: "Matrix Green",
             category: "experimental",
+            grainType: 1,
             exposure: -0.05,
             contrast: 25,
             highlights: -15,
@@ -3247,11 +3729,12 @@ const FilmPresets = {
             bloomThreshold: 50,
             grainSize: 1.1,
             fade: 10,
-            hslGreen: [0,40,10]
+            hslGreen: [0, 40, 10]
         },
         {
             name: "Glitch 99",
             category: "experimental",
+            grainType: 1,
             exposure: 0.1,
             contrast: 25,
             highlights: 10,
@@ -3270,6 +3753,7 @@ const FilmPresets = {
         {
             name: "Disposable Flash",
             category: "experimental",
+            grainType: 1,
             exposure: 0.2,
             contrast: 30,
             highlights: 20,
@@ -3289,6 +3773,7 @@ const FilmPresets = {
         {
             name: "Void",
             category: "experimental",
+            grainType: 1,
             exposure: -0.2,
             contrast: 10,
             highlights: -30,
@@ -3306,6 +3791,7 @@ const FilmPresets = {
         {
             name: "Glitch Pop",
             category: "experimental",
+            grainType: 1,
             exposure: 0.1,
             contrast: 30,
             highlights: 20,
@@ -3326,6 +3812,7 @@ const FilmPresets = {
         {
             name: "Neon Noir",
             category: "experimental",
+            grainType: 1,
             exposure: -0.1,
             contrast: 40,
             highlights: -25,
@@ -3347,6 +3834,7 @@ const FilmPresets = {
         {
             name: "Acid Trip",
             category: "experimental",
+            grainType: 1,
             exposure: 0.2,
             contrast: -10,
             highlights: 25,
@@ -3367,6 +3855,7 @@ const FilmPresets = {
         {
             name: "Thermal Vision",
             category: "experimental",
+            grainType: 1,
             exposure: 0.05,
             contrast: 35,
             highlights: 10,
@@ -3387,6 +3876,7 @@ const FilmPresets = {
         {
             name: "Solar Flare",
             category: "experimental",
+            grainType: 1,
             exposure: 0.1,
             contrast: -10,
             highlights: -10,
@@ -3407,6 +3897,7 @@ const FilmPresets = {
         {
             name: "Azure Dream",
             category: "experimental",
+            grainType: 1,
             exposure: 0.05,
             contrast: -15,
             highlights: -20,
@@ -3426,6 +3917,7 @@ const FilmPresets = {
         {
             name: "Candy Shop",
             category: "experimental",
+            grainType: 1,
             exposure: 0.1,
             contrast: 5,
             highlights: -10,
@@ -3439,12 +3931,13 @@ const FilmPresets = {
             grain: 0,
             bloomStrength: 25,
             bloomThreshold: 60,
-            hslBlue: [-20,20,10],
-            hslMagenta: [10,20,10]
+            hslBlue: [-20, 20, 10],
+            hslMagenta: [10, 20, 10]
         },
         {
             name: "Fade 2 Black",
             category: "experimental",
+            grainType: 1,
             exposure: -0.1,
             contrast: -20,
             highlights: -20,
@@ -3464,6 +3957,7 @@ const FilmPresets = {
         {
             name: "Acid Green",
             category: "experimental",
+            grainType: 1,
             exposure: 0,
             contrast: 30,
             highlights: 10,
@@ -3479,11 +3973,12 @@ const FilmPresets = {
             bloomStrength: 30,
             bloomThreshold: 50,
             grainSize: 1,
-            hslGreen: [0,50,0]
+            hslGreen: [0, 50, 0]
         },
         {
             name: "Bleach Bypass II",
             category: "experimental",
+            grainType: 1,
             exposure: -0.05,
             contrast: 50,
             highlights: 10,
@@ -3504,6 +3999,7 @@ const FilmPresets = {
         {
             name: "CCTV",
             category: "experimental",
+            grainType: 1,
             description: "Surveillance camera. Green tint, low fi.",
             exposure: 0.1,
             contrast: 10,
@@ -3524,6 +4020,7 @@ const FilmPresets = {
         {
             name: "Night Vision",
             category: "experimental",
+            grainType: 1,
             description: "Green phosphor look.",
             exposure: 0.2,
             contrast: 50,
@@ -3538,7 +4035,7 @@ const FilmPresets = {
             grain: 50,
             grainSize: 2,
             bloomStrength: 50,
-            hslGreen: [0,0,0],
+            hslGreen: [0, 0, 0],
             splitHighlightHue: 120,
             splitHighlightSat: 100,
             splitShadowHue: 120,
@@ -3547,6 +4044,7 @@ const FilmPresets = {
         {
             name: "Gameboy",
             category: "experimental",
+            grainType: 1,
             description: "4-shade green monochrome.",
             exposure: 0,
             contrast: 100,
@@ -3569,6 +4067,7 @@ const FilmPresets = {
         {
             name: "VGA",
             category: "experimental",
+            grainType: 1,
             description: "Crunchy 256 color look.",
             exposure: 0,
             contrast: 30,
@@ -3587,6 +4086,7 @@ const FilmPresets = {
         {
             name: "Floppy Disk",
             category: "experimental",
+            grainType: 1,
             description: "Digital corruption.",
             exposure: 0,
             contrast: 20,
@@ -3605,6 +4105,7 @@ const FilmPresets = {
         {
             name: "Predator",
             category: "experimental",
+            grainType: 1,
             description: "Thermal vision heat map feel.",
             exposure: 0,
             contrast: 50,
@@ -3624,6 +4125,7 @@ const FilmPresets = {
         {
             name: "Harman Phoenix 200",
             category: "experimental",
+            grainType: 1,
             description: "High contrast, strong grain, weird glows.",
             exposure: 0.05,
             contrast: 30,
@@ -3643,6 +4145,7 @@ const FilmPresets = {
         {
             name: "Matrix Green",
             category: "experimental",
+            grainType: 1,
             exposure: -0.2,
             contrast: 50,
             highlights: 40,
@@ -3661,6 +4164,7 @@ const FilmPresets = {
         {
             name: "Heatmap",
             category: "experimental",
+            grainType: 1,
             exposure: 0,
             contrast: 100,
             highlights: 0,
@@ -3671,8 +4175,8 @@ const FilmPresets = {
             tint: 0,
             vibrance: 50,
             saturation: 50,
-            hslRed: [0,50,20],
-            hslBlue: [0,50,0],
+            hslRed: [0, 50, 20],
+            hslBlue: [0, 50, 0],
             bloomStrength: 30,
             posterize: 10,
             fade: 0
@@ -3680,6 +4184,7 @@ const FilmPresets = {
         {
             name: "CGA Palette",
             category: "experimental",
+            grainType: 1,
             exposure: 0.2,
             contrast: 80,
             highlights: 20,
@@ -3690,14 +4195,15 @@ const FilmPresets = {
             tint: 100,
             vibrance: 100,
             saturation: 100,
-            hslGreen: [180,0,0],
-            hslRed: [0,0,0],
+            hslGreen: [180, 0, 0],
+            hslRed: [0, 0, 0],
             posterize: 4,
             fade: 0
         },
         {
             name: "Night Vision",
             category: "experimental",
+            grainType: 1,
             exposure: 0.5,
             contrast: 30,
             highlights: 50,
@@ -3718,6 +4224,7 @@ const FilmPresets = {
         {
             name: "Vaporwave",
             category: "experimental",
+            grainType: 1,
             exposure: 0.1,
             contrast: 10,
             highlights: 0,
@@ -3740,6 +4247,7 @@ const FilmPresets = {
         {
             name: "Soft & Warm",
             category: "muse",
+            grainType: 1,
             contrast: 5,
             temperature: 8,
             clarity: -10,

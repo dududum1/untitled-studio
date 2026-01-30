@@ -137,6 +137,9 @@ const Shaders = {
         uniform int u_ditherType;          // 0=off, 1=Floyd-Steinberg, 2=Atkinson, 3=Bayer, 4=Random
         uniform float u_ditherDepth;       // 2-8: Target bits per channel
         uniform float u_ditherStrength;    // 0-100: Blend with original
+
+        // Output Transform (Print Stock)
+        uniform int u_outputTransform;     // 0=None, 1=Kodak 2383, 2=Fuji 3513
         
         in vec2 v_texCoord;
         out vec4 fragColor;
@@ -1105,7 +1108,61 @@ const Shaders = {
             
             // Final safety clamp
             color = clamp(color, 0.0, 1.0);
+
+            // === OUTPUT TRANSFORM (PRINT STOCK) ===
+            if (u_outputTransform == 1) {
+                // Kodak Vision 2383 Emulation
+                // 1. Contrast: Strong S-Curve with crushed blacks
+                // 2. Color: Teal Shadows, Golden Highlights
+                
+                // Contrast
+                color = (color - 0.5) * 1.15 + 0.5;
+                
+                // Subtractive CMY Color Grading
+                float lum = dot(color, vec3(0.2126, 0.7152, 0.0722));
+                
+                // Shadows: Add Cyan/Blue (Teal)
+                // Highlights: Add Red/Yellow (Gold)
+                vec3 shadowTint = vec3(-0.05, 0.02, 0.05);  // Cool
+                vec3 highlightTint = vec3(0.05, 0.02, -0.05); // Warm
+                
+                vec3 tint = mix(shadowTint, highlightTint, lum);
+                color += tint * 0.5; // Strength
+                
+                // Gamut compression (Slight desaturation of blues)
+                float sat = 0.9;
+                float gray = dot(color, vec3(0.2126, 0.7152, 0.0722));
+                color = mix(vec3(gray), color, sat);
+                
+            } else if (u_outputTransform == 2) {
+                // Fujifilm 3513 Emulation
+                // 1. Contrast: Softer, more open shadows
+                // 2. Color: Magenta/Green bias (Fuji Green)
+                
+                // Contrast
+                color = (color - 0.5) * 1.08 + 0.5;
+                
+                // Fuji Greens in shadows, Magenta in Mids
+                float lum = dot(color, vec3(0.2126, 0.7152, 0.0722));
+                
+                // Shadows: Greenish
+                // Mids: Pink/Magenta
+                // Highlights: Neutral/Cyan
+                
+                vec3 shadowTint = vec3(-0.02, 0.04, -0.02);
+                vec3 midTint = vec3(0.03, -0.02, 0.03);
+                
+                // Parabolic midtone mask
+                float midMask = 1.0 - abs(lum - 0.5) * 2.0;
+                float shadowMask = 1.0 - smoothstep(0.0, 0.6, lum);
+                
+                color += shadowTint * shadowMask * 0.4;
+                color += midTint * midMask * 0.3;
+            }
             
+            // Re-clamp after transforms
+            color = clamp(color, 0.0, 1.0);
+
             // === DITHERING ===
             // Apply after all other processing, before clipping warnings
             vec2 fragCoord = uv * u_resolution;
@@ -1201,6 +1258,7 @@ const Shaders = {
         uniform float u_grainHighlight;
         uniform float u_grainSize;
         uniform float u_grainGlobal; // Main Multiplier
+        uniform int u_grainType;     // 0=Digital(Uniform/Mix), 1=Negative, 2=Slide
         // Secret FX Uniforms
         uniform float u_pixelateSize; // 0 = off, > 0 = pixel size
         uniform float u_glitchStrength;
@@ -1237,16 +1295,31 @@ const Shaders = {
             return brightness < bayer[index] ? 0.0 : 1.0;
         }
         
-        vec3 applyGrain(vec3 c, vec2 uv, float shadowAmt, float highlightAmt, float size, float globalMult) {
+        vec3 applyGrain(vec3 c, vec2 uv, float shadowAmt, float highlightAmt, float size, float globalMult, int type) {
             if (globalMult <= 0.0) return c;
             
             float lum = luminance(c);
-            
-            // Mix between shadow and highlight amounts
-            float intensity = mix(shadowAmt, highlightAmt, lum);
-            
-            // Apply Global Multiplier
-            intensity *= globalMult;
+            float intensity = 0.0;
+
+            if (type == 1) {
+                // Negative Film: Visible in Shadows/Mids, cleaner in Highlights
+                // Curve: High -> High -> Drop off
+                intensity = (1.0 - pow(lum, 2.5)) * globalMult;
+                // Allow shadow slider to boost/cut the base intensity
+                intensity *= (shadowAmt / 50.0); 
+            } else if (type == 2) {
+                // Slide Film: Visible in Mids, cleaner in Shadows/Highlights
+                // Curve: Low -> High -> Low (Parabola)
+                // 1.0 - |x - 0.5|*2 is linear triangle. Let's use smooth sin or parabola.
+                // 4.0 * x * (1.0 - x) is a standard parabola 0->1->0
+                intensity = (4.0 * lum * (1.0 - lum)) * globalMult;
+                // Allow global to control peak
+            } else {
+                // Digital / Uniform (Type 0) - Original Logic
+                // Mix between shadow and highlight amounts
+                intensity = mix(shadowAmt, highlightAmt, lum);
+                intensity *= globalMult;
+            }
             
             // Scale down to usable range (0 - 100 -> 0.0 - 0.2)
             intensity *= 0.002;
@@ -1321,7 +1394,7 @@ const Shaders = {
             vec3 color = baseColor + (tintedBloom * (u_amount / 100.0));
             
             // 4. Grain
-            color = applyGrain(color, uv, u_grainShadow, u_grainHighlight, u_grainSize, u_grainGlobal);
+            color = applyGrain(color, uv, u_grainShadow, u_grainHighlight, u_grainSize, u_grainGlobal, u_grainType);
             
             // 5. Scanlines
             if (u_scanlineIntensity > 0.0) {
