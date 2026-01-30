@@ -348,6 +348,47 @@ body {
     background: rgba(237, 39, 136, 0.1);
 }
 
+/* Preset Browser Accordion */
+#preset-browser {
+    mask-image: linear-gradient(to bottom, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 95%, transparent 100%);
+}
+
+.preset-group .group-header {
+    transition: background 0.2s ease;
+}
+
+.preset-group .group-header:hover {
+    background: rgba(45, 45, 45, 0.8);
+}
+
+.preset-group .group-content {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.preset-group.expanded .group-header {
+    background: rgba(45, 45, 45, 0.9);
+    border-bottom-color: var(--hot-pink);
+}
+
+.preset-group .group-header svg {
+    transition: transform 0.3s ease;
+}
+
+.preset-group.expanded .group-header svg {
+    transform: rotate(180deg);
+}
+
+/* Scrollbar styling for browser */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
 /* Preset Card */
 .preset-card {
     aspect-ratio: 1;

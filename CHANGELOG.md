@@ -43,6 +43,11 @@ A massive expansion converting the app into a "Museum Grade" film emulation libr
 - **Persistence**: Saved looks are stored in IndexedDB for long-term persistence.
 - **Integration**: Custom presets appear in the new "Custom" category with full support for strength and favorites.
 
+### 🧭 UI Optimization
+- **Collapsible Browser**: Replaced horizontal category bar with a vertical accordion for the 150+ preset catalog.
+- **Sticky Navigation**: Group headers (Manufacturers, Archives, Creative) stay pinned during scroll.
+- **Smooth Interaction**: Added chevron animations and height transitions for a premium Feel.
+
 ### 🧹 Fixes & Improvements
 - **Database Repair**: Fixed syntax error in `presets.js` causing database load failures.
 - **Refactor**: Complete code cleanup of the preset loading engine.

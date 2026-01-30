@@ -268,6 +268,7 @@ class UntitledStudio {
             this.initScrubbing(); // Mobile Extra 1
             this.initOLED();      // Mobile Extra 2
             this.initVibePack();  // Retro Vibe Pack
+            this.initPresetAccordion(); // New: Collapsible Menu
 
             await this.loadSavedImages().catch(err => console.warn('Failed to load saved images:', err));
             await this.loadCustomPresets().catch(err => console.warn('Failed to load presets:', err));
@@ -505,9 +506,9 @@ class UntitledStudio {
             cropApplyBtn: document.getElementById('crop-apply-btn'),
 
             // Presets
-            presetCategories: document.querySelectorAll('.preset-category'),
-            presetsGrid: document.getElementById('presets-grid'),
-            savePresetBtn: document.getElementById('save-preset-btn'),
+            presetsPanel: document.getElementById('presets-panel'),
+            presetBrowser: document.getElementById('preset-browser'),
+            presetGroups: document.querySelectorAll('.preset-group'),
 
             // Histogram
             histogramContainer: document.getElementById('histogram-container'),
@@ -986,13 +987,18 @@ class UntitledStudio {
             }
         });
 
-        // Preset categories
-        this.elements.presetCategories.forEach(btn => {
-            on(btn, 'click', () => {
-                this.elements.presetCategories.forEach(b => b.classList.remove('active'));
+        // Preset categories (Delegated or updated)
+        this.initPresetAccordion();
+        this.elements.presetBrowser.addEventListener('click', (e) => {
+            const btn = e.target.closest('.preset-category');
+            if (btn) {
+                document.querySelectorAll('.preset-category').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 this.populatePresets(btn.dataset.category);
-            });
+
+                // On mobile, maybe auto-collapse current group to show wheel?
+                // For now, just apply.
+            }
         });
 
         // Save preset
@@ -3531,11 +3537,36 @@ class UntitledStudio {
         e.target.value = '';
     }
 
-    removeLUT() {
-        if (this.engine) this.engine.removeLUT();
-        this.elements.lutControls.classList.add('hidden');
-        this.elements.removeLutBtn.classList.add('hidden');
-        if (this.elements.lutName) this.elements.lutName.textContent = '';
+    initPresetAccordion() {
+        if (!this.elements.presetGroups) return;
+
+        this.elements.presetGroups.forEach(group => {
+            const header = group.querySelector('.group-header');
+            const content = group.querySelector('.group-content');
+            const chevron = header.querySelector('svg');
+
+            header.addEventListener('click', () => {
+                const isExpanded = group.classList.toggle('expanded');
+                content.classList.toggle('hidden', !isExpanded);
+                if (chevron) chevron.classList.toggle('rotate-180', isExpanded);
+
+                // Optional: Accordion behavior (one at a time)
+                if (isExpanded) {
+                    this.elements.presetGroups.forEach(g => {
+                        if (g !== group) {
+                            g.classList.remove('expanded');
+                            g.querySelector('.group-content')?.classList.add('hidden');
+                            g.querySelector('.group-header svg')?.classList.remove('rotate-180');
+                        }
+                    });
+                }
+
+                this.hapticFeedback('light');
+            });
+        });
+
+        // Ensure save preset btn element ref is updated for the listener
+        this.elements.savePresetBtn = document.getElementById('save-preset-btn');
     }
 }
 // Handle B key release for Before/After
