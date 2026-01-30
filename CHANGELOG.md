@@ -21,6 +21,11 @@ A massive expansion converting the app into a "Museum Grade" film emulation libr
   - **Slide Type**: Midtone biased (Velvia, Provia).
   - Auto-detection system for all 150+ presets.
 
+### 👾 Advanced ASCII Engine
+- **Bitwise Font**: Replaced legacy logic with a high-performance 16-level bitmask font system.
+- **Enhanced Resolution**: Increased maximum character density by 4x for finer detail.
+- **Extended Ramp**: ` ` `.` `,` `-` `~` `:` `;` `=` `!` `*` `%` `$` `&` `8` `W` `@`
+
 ### 🗂️ Library Reorganization
 - **Manufacturer-Based**: Presets now grouped by brand (`Kodak`, `Fuji`, `Ilford`, `Cinestill`, `Agfa`, `Polaroid`).
 - **New Categories**:

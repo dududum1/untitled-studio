@@ -149,67 +149,73 @@ const Shaders = {
         // Procedural 3x5 font (numbers + punct)
         // Returns 1.0 if pixel is part of char, 0.0 otherwise
         // Mobile-optimized: uses step functions instead of if-branches
+        // Procedural 3x5 font using Bitmask (Integer)
+        // Returns 1.0 if pixel is part of char, 0.0 otherwise
         float getCharacter(int n, vec2 p) {
             // p is 0..1 inside the char cell
             // map to 3x5 grid
-            float fx = p.x * 3.0;
-            float fy = (1.0 - p.y) * 5.0;
-            int x = int(floor(fx));
-            int y = int(floor(fy));
+            vec2 uv = p;
+            // Configurable 3x5 grid
+            int x = int(floor(uv.x * 3.0));
+            int y = int(floor((1.0 - uv.y) * 5.0));
             
-            // Bounds check
             if (x < 0 || x > 2 || y < 0 || y > 4) return 0.0;
             
-            // n=0 (darkest) -> no pixels
-            // n=7 (brightest) -> all pixels
+            // Bit index (0-14)
+            // Layout: 
+            // 0 1 2
+            // 3 4 5
+            // ...
+            int i = x + y * 3;
             
-            float result = 0.0;
+            // Character Map (16 levels of brightness)
+            // 0: space
+            // 1: .
+            // 2: ,
+            // 3: -
+            // 4: ~
+            // 5: :
+            // 6: ;
+            // 7: =
+            // 8: !
+            // 9: *
+            // 10: %
+            // 11: $
+            // 12: &
+            // 13: 8
+            // 14: W
+            // 15: @
             
-            // Use float comparisons for mobile compatibility
-            float fn = float(n);
-            float fxx = float(x);
-            float fyy = float(y);
+            int bits = 0;
             
-            // Level 0: empty (space)
-            // (result stays 0.0)
+            // Hardcoded bitmap font (GLSL ES 3.0 allows arrays but switch is safer for some mobile drivers)
+            // Bits are reversed? 0=top-left. 14=bottom-right.
+            // Let's use standard integer values.
             
-            // Level 1: single dot (.)
-            float level1 = step(0.5, fn) * step(fn, 1.5);
-            result += level1 * step(0.5, fxx) * step(fxx, 1.5) * step(3.5, fyy) * step(fyy, 4.5);
+            switch(n) {
+                case 0: bits = 0; break;      // space
+                case 1: bits = 4096; break;   // . (bottom left-ish)
+                case 2: bits = 8192; break;   // ,
+                case 3: bits = 3584; break;   // -
+                case 4: bits = 2730; break;   // ~ (checker) or similar
+                case 5: bits = 1040; break;   // :
+                case 6: bits = 9232; break;   // ;
+                case 7: bits = 3640; break;   // =
+                case 8: bits = 18450; break;  // !
+                case 9: bits = 21157; break;  // *
+                case 10: bits = 22101; break; // % 
+                case 11: bits = 15307; break; // $
+                case 12: bits = 12762; break; // &
+                case 13: bits = 14269; break; // 8
+                case 14: bits = 23989; break; // W
+                case 15: bits = 32319; break; // @
+                default: bits = 0; break;
+            }
             
-            // Level 2: colon (:)
-            float level2 = step(1.5, fn) * step(fn, 2.5);
-            float y_colon = step(0.5, fyy) * step(fyy, 1.5) + step(3.5, fyy) * step(fyy, 4.5);
-            result += level2 * step(0.5, fxx) * step(fxx, 1.5) * y_colon;
-            
-            // Level 3: semicolon pattern
-            float level3 = step(2.5, fn) * step(fn, 3.5);
-            float y_semi = step(0.5, fyy) * step(fyy, 1.5) + step(2.5, fyy) * step(fyy, 4.5);
-            result += level3 * step(0.5, fxx) * step(fxx, 1.5) * y_semi;
-            
-            // Level 4: plus (+)
-            float level4 = step(3.5, fn) * step(fn, 4.5);
-            float horiz = step(1.5, fyy) * step(fyy, 2.5);
-            float vert = step(0.5, fxx) * step(fxx, 1.5) * step(0.5, fyy) * step(fyy, 3.5);
-            result += level4 * max(horiz, vert);
-            
-            // Level 5: circle outline (o)
-            float level5 = step(4.5, fn) * step(fn, 5.5);
-            float edge_x = (1.0 - step(0.5, fxx)) + step(1.5, fxx);
-            float edge_y = (1.0 - step(0.5, fyy)) + step(3.5, fyy);
-            result += level5 * max(edge_x, edge_y);
-            
-            // Level 6: hash (#)
-            float level6 = step(5.5, fn) * step(fn, 6.5);
-            float hash_x = step(0.5, fxx) * step(fxx, 1.5);
-            float hash_y = step(0.5, fyy) * step(fyy, 1.5) + step(2.5, fyy) * step(fyy, 3.5);
-            result += level6 * max(hash_x, hash_y);
-            
-            // Level 7: solid block (@)
-            float level7 = step(6.5, fn);
-            result += level7;
-            
-            return clamp(result, 0.0, 1.0);
+            // Check bit
+            // GLSL bitwise operators
+            int mask = 1 << (14 - i); 
+            return (bits & mask) != 0 ? 1.0 : 0.0;
         }
 
         vec3 rgb2cmy(vec3 rgb) {
@@ -1021,10 +1027,10 @@ const Shaders = {
             // === ASCII ===
             // This replaces the whole visual, so do it last or near last
             if (u_asciiSize > 0.01) {
-                float density = u_asciiSize * 100.0; // Slider 0-2 -> 0-200 chars width
+                float density = u_asciiSize * 300.0; // Slider 0-2 -> 0-600 chars width
                 if (density < 10.0) density = 10.0;
 
-                vec2 charGrid = vec2(density, density * (u_resolution.y / u_resolution.x) * 1.6); // Aspect correction
+                vec2 charGrid = vec2(density, density * (u_resolution.y / u_resolution.x) * 1.66); // Aspect (5/3 = 1.66)
                 
                 vec2 charPos = floor(uv * charGrid) / charGrid;
                 vec2 charUV = fract(uv * charGrid);
@@ -1048,7 +1054,7 @@ const Shaders = {
                 
                 // Let's go with "Draw simplistic ASCII on top of result":
                 float gray = dot(color, vec3(0.299, 0.587, 0.114));
-                int charIndex = int(gray * 7.99); 
+                int charIndex = int(gray * 15.99);   
                 
                 // We need quantized brightness though to make it look blocky
                 // But since we can't query neighbors, we'll just check if *this* pixel falls into the char shape 
@@ -1065,7 +1071,7 @@ const Shaders = {
                 // Apply basic luminance check on source
                 float qGray = dot(quantizedSource, vec3(0.299, 0.587, 0.114));
                 
-                int idx = int(qGray * 8.0);
+                int idx = int(qGray * 15.99);
                 float isChar = getCharacter(idx, charUV);
                 
                 // Replace color
