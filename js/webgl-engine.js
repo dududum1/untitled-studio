@@ -1339,6 +1339,9 @@ class WebGLEngine {
             throw new Error('No image loaded');
         }
 
+        const originalWidth = this.canvas.width;
+        const originalHeight = this.canvas.height;
+
         let targetWidth = this.currentImage.naturalWidth;
         let targetHeight = this.currentImage.naturalHeight;
 
@@ -1363,20 +1366,39 @@ class WebGLEngine {
             targetHeight = Math.round(this.currentImage.naturalHeight * scale);
         }
 
-        // Ensure latest render
+        // --- HIGH-RES RENDER STEP ---
+        // To get true high-res, we MUST resize the canvas to target dimensions
+        // so that the WebGL viewport and FBOs match the output size.
+        if (onProgress) onProgress(10);
+
+        console.log(`🚀 Exporting High-Res: ${targetWidth}x${targetHeight}`);
+
+        // Resize canvas to high-res
+        this.resize(targetWidth, targetHeight);
+
+        // Ensure latest render at HIGH RES
         this.render();
 
-        // Use tiled export for large images to prevent mobile crashes
+        if (onProgress) onProgress(30);
+
+        // Use tiled export for large images to prevent mobile crashes 
+        // (Even if we rendered high-res, extraction can still fail)
+        let dataUrl;
         if (this._needsTiledExport(targetWidth, targetHeight)) {
-            console.log(`📐 Using tiled export for ${targetWidth}x${targetHeight} image`);
-            return this._tiledExport(targetWidth, targetHeight, format, quality, onProgress);
+            console.log(`📐 Using tiled extraction for ${targetWidth}x${targetHeight} image`);
+            dataUrl = await this._tiledExport(targetWidth, targetHeight, format, quality, onProgress);
+        } else {
+            // Standard export for smaller images
+            if (onProgress) onProgress(50);
+            const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+            // Flush GL to ensure valid data
+            this.gl.finish();
+            dataUrl = this.canvas.toDataURL(mimeType, quality);
         }
 
-        // Standard export for smaller images
-        if (onProgress) onProgress(50);
-
-        const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
-        const dataUrl = this.canvas.toDataURL(mimeType, quality);
+        // RESTORE Preview Resolution
+        this.resize(originalWidth, originalHeight);
+        this.render();
 
         if (onProgress) onProgress(100);
         return dataUrl;
@@ -1391,6 +1413,14 @@ class WebGLEngine {
         link.click();
 
         return link.download;
+    }
+
+    /**
+     * Helper to get blob directly from current render
+     */
+    getCanvasBlob(format, quality, callback) {
+        const mime = format === 'png' ? 'image/png' : 'image/jpeg';
+        this.canvas.toBlob(callback, mime, quality);
     }
 
     destroy() {

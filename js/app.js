@@ -2593,7 +2593,9 @@ class UntitledStudio {
 
             // Fallback to download if not shared
             if (!shared) {
-                await this.exportManager.exportImage(format, quality, null, updateProgress, drawCallback);
+                const res = this.exportSettings.resolution;
+                const customW = res === 'custom' ? this.exportSettings.customWidth : null;
+                await this.exportManager.exportImage(format, quality, res, updateProgress, drawCallback, customW);
             }
 
             this.hapticFeedback('success');

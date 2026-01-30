@@ -33,6 +33,16 @@ A massive expansion converting the app into a "Museum Grade" film emulation libr
   - `Obscure`: Industrial, Soviet, and Surveillance films (Svema, Tasma, Traffic Surveillance).
   - `Styles`: Modern, Moody, Dreamy, Cinema, Glitch.
 
+### 🖼️ High-Resolution Export
+- **Native Rendering**: True native resolution export (up to 4K/Custom) via offscreen WebGL context.
+- **Tiled Extraction**: Safe export for large images to prevent mobile browser crashes.
+- **Overlay Compositing**: Full-resolution composition of borders, grain, and textures.
+
+### 💾 LocalStorage Presets
+- **Custom Saving**: Users can now save their own adjustments as named presets.
+- **Persistence**: Saved looks are stored in IndexedDB for long-term persistence.
+- **Integration**: Custom presets appear in the new "Custom" category with full support for strength and favorites.
+
 ### 🧹 Fixes & Improvements
 - **Database Repair**: Fixed syntax error in `presets.js` causing database load failures.
 - **Refactor**: Complete code cleanup of the preset loading engine.

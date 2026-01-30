@@ -10,60 +10,64 @@ class ExportManager {
     /**
      * Standard Image Export (Refactored for Blob usage)
      */
-    async exportImage(format, quality, resolution, onProgress, drawCallback) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                if (onProgress) onProgress(0);
+    async exportImage(format, quality, resolution = 'original', onProgress, drawCallback, customWidth = null) {
+        try {
+            if (onProgress) onProgress(0);
 
-                // If we have a drawCallback (e.g. for Vibe Overlays), we MUST use the 2D Canvas path
-                // to composite the extra elements.
-                if (drawCallback) {
-                    this.engine.render();
-                    const source = this.engine.gl.canvas;
+            // 1. Get High-Res Base Image from Engine
+            // This handles resizing, tiled rendering, and effect applying
+            const dataUrl = await this.engine.exportImage(format, quality, (p) => {
+                if (onProgress) onProgress(p * 0.8); // 80% weight to render
+            }, resolution, customWidth);
 
-                    const canvas = document.createElement('canvas');
-                    canvas.width = source.width;
-                    canvas.height = source.height;
-                    const ctx = canvas.getContext('2d');
+            if (onProgress) onProgress(85);
 
-                    // Draw main image
-                    ctx.drawImage(source, 0, 0);
+            // 2. Apply Overlays if needed
+            if (drawCallback) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
 
-                    // Apply Overlays
-                    drawCallback(ctx, canvas.width, canvas.height);
+                        // Draw base high-res image
+                        ctx.drawImage(img, 0, 0);
 
-                    if (onProgress) onProgress(50);
+                        // Apply Overlays (Vibes)
+                        drawCallback(ctx, canvas.width, canvas.height);
 
-                    // Export
-                    const mime = format === 'png' ? 'image/png' : 'image/jpeg';
-                    canvas.toBlob((blob) => {
-                        if (!blob) {
-                            reject(new Error('Overlay export failed'));
-                            return;
-                        }
-                        this.triggerDownload(blob, format);
-                        if (onProgress) onProgress(100);
-                        resolve();
-                    }, mime, quality);
+                        if (onProgress) onProgress(95);
 
-                } else {
-                    // Standard optimized path via WebGL directly
-                    this.engine.getCanvasBlob(format, quality, (blob) => {
-                        if (!blob) {
-                            alert('Export failed: memory limit or format error.');
-                            reject(new Error('Failed to create image blob'));
-                            return;
-                        }
-                        this.triggerDownload(blob, format);
-                        if (onProgress) onProgress(100);
-                        resolve();
-                    }, resolution);
-                }
-
-            } catch (error) {
-                reject(error);
+                        // Export final to blob
+                        const mime = format === 'png' ? 'image/png' : 'image/jpeg';
+                        canvas.toBlob((blob) => {
+                            if (!blob) {
+                                reject(new Error('Overlay composition failed'));
+                                return;
+                            }
+                            this.triggerDownload(blob, format);
+                            if (onProgress) onProgress(100);
+                            resolve();
+                        }, mime, quality);
+                    };
+                    img.onerror = () => reject(new Error('Failed to load base image for overlay'));
+                    img.src = dataUrl;
+                });
+            } else {
+                // No overlays, just convert dataUrl to blob and download
+                const response = await fetch(dataUrl);
+                const blob = await response.blob();
+                this.triggerDownload(blob, format);
+                if (onProgress) onProgress(100);
+                return;
             }
-        });
+
+        } catch (error) {
+            console.error('ExportManager error:', error);
+            throw error;
+        }
     }
 
     triggerDownload(blob, format) {
