@@ -60,7 +60,18 @@ A massive expansion converting the app into a "Museum Grade" film emulation libr
 ### 🧹 Fixes & Improvements
 - **Database Repair**: Fixed syntax error in `presets.js` causing database load failures.
 - **Refactor**: Complete code cleanup of the preset loading engine.
-- **Quality**: Verified unique chemical signatures for all new additions (Halation, Grain structures, Bloom).
+- **Quality**: Verified unique chemical signatures for all all new additions (Halation, Grain structures, Bloom).
+
+### 📺 The Immersion Upgrade
+- **Audio Engine**: Procedural sound synthesis using Web Audio API (No functional assets required).
+  - **Startup**: "Power up" drone and CRT spark sequence.
+  - **UI Interaction**: High-tech sinusoidal blips for clicks and sliders.
+  - **Feedback**: Mechanical shutter sounds for warnings, digital static glitches for errors.
+- **CRT Visualization Mode**:
+  - **Global Overlay**: Scanlines, sub-pixel RGB separation, and curved vignette.
+  - **Reactivity**: Screen shake and chromatic aberration triggers on system errors.
+  - **Toggle**: Dedicated CRT button in the header.
+- **Documentation**: Generated full `PRESET_CATALOG.md` artifact listing all 154+ film stocks.
 
 ---
 

@@ -43,7 +43,7 @@ const Shaders = {
         precision highp float;
         
         uniform sampler2D u_image;
-        uniform sampler2D u_toneCurveLUT;  // 256x1 LUT texture for tone curve
+        uniform sampler2D u_toneCurveLUT;  // 256x4 LUT (Row 0=Master, 1=R, 2=G, 3=B)
         uniform float u_time;
         uniform vec2 u_resolution;
         uniform bool u_showOriginal;       // Before/After toggle
@@ -65,13 +65,14 @@ const Shaders = {
         // Split Toning
         uniform float u_splitHighlightHue;
         uniform float u_splitHighlightSat;
+        uniform float u_splitMidtoneHue;
+        uniform float u_splitMidtoneSat;
         uniform float u_splitShadowHue;
         uniform float u_splitShadowSat;
         uniform float u_splitBalance;
         
         // Tone Curve
         uniform bool u_useToneCurve;
-        uniform int u_toneCurveChannel; // 0=RGB, 1=R, 2=G, 3=B
         
         // HSL Mixer (8 color channels: R, O, Y, G, A, B, P, M)
         uniform vec3 u_hslRed;
@@ -125,7 +126,6 @@ const Shaders = {
 
         // New FX (Phase 7)
         uniform float u_posterize;        // 0-100: Color reduction (2-256 levels)
-        uniform float u_diffusion;        // 0-100: Pro-Mist / Soft glow on highlights
         uniform float u_barrelDistortion; // -100 to 100: Lens distortion (neg=pincushion, pos=barrel)
 
         uniform float u_splitToneBalance; // -100 to 100: Shadows vs Highlights bias
@@ -232,7 +232,6 @@ const Shaders = {
             
             // Exposure adds "thickness" to all layers (or removes it)
             // -Exposure = More Density (Darker)
-            // But usually Exposure slider means Brightness. 
             // So +Exposure = Less Density.
             cmy -= exposure * 0.5; 
             
@@ -403,53 +402,78 @@ const Shaders = {
             return mix(vec3(gray), c, s);
         }
         
-        // Split Toning - color grading for highlights and shadows separately
-        vec3 applySplitToning(vec3 c, float highlightHue, float highlightSat, float shadowHue, float shadowSat, float balance) {
-            if (highlightSat <= 0.0 && shadowSat <= 0.0) return c;
-            
+        // Color Grading - 3-Way (Shadows, Midtones, Highlights)
+        vec3 applyColorGrading(vec3 c, float highlightHue, float highlightSat, float midHue, float midSat, float shadowHue, float shadowSat, float balance) {
             float lum = luminance(c);
             
-            // Create highlight and shadow color from hue
-            vec3 highlightColor = hsl2rgb(vec3(highlightHue / 360.0, 1.0, 0.5));
+            // Generate Colors
+            vec3 highColor = hsl2rgb(vec3(highlightHue / 360.0, 1.0, 0.5));
+            vec3 midColor  = hsl2rgb(vec3(midHue / 360.0, 1.0, 0.5));
             vec3 shadowColor = hsl2rgb(vec3(shadowHue / 360.0, 1.0, 0.5));
             
-            // Balance shifts the midpoint (0 = even, negative = more shadows, positive = more highlights)
+            // Balance Shift (-1.0 to 1.0)
+            // Shifts the crossover points
             float balanceShift = balance / 100.0 * 0.25;
-            float midpoint = 0.5 + balanceShift;
             
-            // Calculate masks
-            float highlightMask = smoothstep(midpoint - 0.1, midpoint + 0.3, lum);
-            float shadowMask = 1.0 - smoothstep(midpoint - 0.3, midpoint + 0.1, lum);
+            // Masks
+            // Shadows: 1.0 -> 0.0 (Bottom third)
+            float shadowMask = 1.0 - smoothstep(0.0 + balanceShift, 0.5 + balanceShift, lum);
             
-            // Apply split toning
+            // Highlights: 0.0 -> 1.0 (Top third)
+            float highlightMask = smoothstep(0.5 + balanceShift, 1.0 + balanceShift, lum);
+            
+            // Midtones: Parabola in middle
+            // We want it to peak at 0.5 (or balanced center) and fall off
+            // Gaussian-ish: exp(-((lum - center)^2) / width)
+            float midCenter = 0.5 + balanceShift;
+            float midMask = 1.0 - abs(lum - midCenter) * 2.0;
+            midMask = smoothstep(0.0, 1.0, midMask); // smooth tip
+            midMask = clamp(midMask, 0.0, 1.0);
+            
+            // Intensities
             float hSat = highlightSat / 100.0 * 0.3;
+            float mSat = midSat / 100.0 * 0.3; // Mids typically subtle
             float sSat = shadowSat / 100.0 * 0.3;
             
-            c = mix(c, c * highlightColor, highlightMask * hSat);
-            c = mix(c, c * shadowColor, shadowMask * sSat);
+            // Apply Tints (Soft Light or Overlay logic usually better, but Mix is safe for now)
+            // For true Grading, we often use Gain/Gamma/Lift. 
+            // Using Mix for Tinting:
             
-            return c;
+            vec3 res = c;
+            
+            // Shadows
+            if (shadowSat > 0.0) res = mix(res, res * shadowColor, shadowMask * sSat);
+            
+            // Mids
+            if (midSat > 0.0)    res = mix(res, res * midColor, midMask * mSat);
+            
+            // Highlights
+            if (highlightSat > 0.0) res = mix(res, res * highColor, highlightMask * hSat);
+            
+            return res;
         }
         
         // Tone Curve - apply LUT-based curve adjustment
-        vec3 applyToneCurve(vec3 c, sampler2D lut, bool useCurve, int channel) {
+        // Tone Curve - apply LUT-based curve adjustment (4-Channel)
+        vec3 applyToneCurve(vec3 c, sampler2D lut, bool useCurve) {
             if (!useCurve) return c;
             
-            // Sample the LUT (256x1 texture)
-            if (channel == 0) {
-                // RGB - apply same curve to all channels
-                c.r = texture(lut, vec2(c.r, 0.5)).r;
-                c.g = texture(lut, vec2(c.g, 0.5)).r;
-                c.b = texture(lut, vec2(c.b, 0.5)).r;
-            } else if (channel == 1) {
-                c.r = texture(lut, vec2(c.r, 0.5)).r;
-            } else if (channel == 2) {
-                c.g = texture(lut, vec2(c.g, 0.5)).r;
-            } else if (channel == 3) {
-                c.b = texture(lut, vec2(c.b, 0.5)).r;
-            }
+            // Row 0: Master (RGB) - Applied to all channels
+            vec3 master;
+            master.r = texture(lut, vec2(c.r, 0.125)).r;
+            master.g = texture(lut, vec2(c.g, 0.125)).r;
+            master.b = texture(lut, vec2(c.b, 0.125)).r;
             
-            return c;
+            // Row 1: Red Channel
+            master.r = texture(lut, vec2(master.r, 0.375)).r;
+            
+            // Row 2: Green Channel
+            master.g = texture(lut, vec2(master.g, 0.625)).r;
+            
+            // Row 3: Blue Channel
+            master.b = texture(lut, vec2(master.b, 0.875)).r;
+            
+            return master;
         }
         
         // Dehaze - remove atmospheric haze
@@ -683,32 +707,7 @@ const Shaders = {
             return floor(c * levels) / (levels - 1.0);
         }
         
-        // Diffusion / Pro-Mist: Soft glow on highlights
-        vec3 applyDiffusion(vec3 c, float amount, vec2 uv) {
-            if (amount <= 0.0) return c;
-            
-            float intensity = amount / 100.0;
-            float lum = dot(c, vec3(0.299, 0.587, 0.114));
-            
-            // Highlight mask (only glow bright areas)
-            float highlightMask = smoothstep(0.5, 1.0, lum);
-            
-            // Simple blur approximation (box blur)
-            vec2 texel = 1.0 / u_resolution;
-            vec3 blur = vec3(0.0);
-            float blurRadius = intensity * 8.0;
-            
-            for (float x = -2.0; x <= 2.0; x += 1.0) {
-                for (float y = -2.0; y <= 2.0; y += 1.0) {
-                    blur += texture(u_image, uv + vec2(x, y) * texel * blurRadius).rgb;
-                }
-            }
-            blur /= 25.0;
-            
-            // Blend: Add glow to highlights
-            vec3 glow = blur * highlightMask * intensity;
-            return c + glow * 0.5;
-        }
+
         
         // Barrel Distortion: Lens distortion effect
         vec2 applyBarrelDistortion(vec2 uv, float amount) {
@@ -971,7 +970,7 @@ const Shaders = {
             color = applyDenoise(color, uv, u_denoise);
             
             // === TONE CURVE (before other adjustments) ===
-            color = applyToneCurve(color, u_toneCurveLUT, u_useToneCurve, u_toneCurveChannel);
+            color = applyToneCurve(color, u_toneCurveLUT, u_useToneCurve);
             
             // === FILM DENSITY MODEL (Subtractive) ===
             // Replaces: Exposure, Contrast, Saturation with Density Math
@@ -1004,11 +1003,12 @@ const Shaders = {
             color = applyTemperature(color, u_temperature);
             color = applyTint(color, u_tint);
             color = applyVibrance(color, u_vibrance);
-            // Saturation handled in Density pass
-            
-            // === SPLIT TONING ===
-            color = applySplitToning(color, u_splitHighlightHue, u_splitHighlightSat, 
-                                     u_splitShadowHue, u_splitShadowSat, u_splitBalance);
+            // === COLOR GRADING (3-WAY) ===
+            color = applyColorGrading(color, 
+                u_splitHighlightHue, u_splitHighlightSat,
+                u_splitMidtoneHue,   u_splitMidtoneSat, 
+                u_splitShadowHue,    u_splitShadowSat, 
+                u_splitBalance);
             
             // === HSL MIXER ===
             color = applyHSLMixer(color);
@@ -1021,8 +1021,8 @@ const Shaders = {
             }
 
             // === NEW FX (Phase 7) ===
-            color = applyDiffusion(color, u_diffusion, uv);
             color = applyPosterize(color, u_posterize);
+            // Diffusion now handled in post-pass for higher quality (Bloom 2.0)
 
             // === ASCII ===
             // This replaces the whole visual, so do it last or near last
@@ -1200,24 +1200,40 @@ const Shaders = {
         
         uniform sampler2D u_image;
         uniform float u_threshold;
+        uniform float u_mist; // Mist strength (0-1)
         
         in vec2 v_texCoord;
         out vec4 fragColor;
         
         void main() {
             vec4 color = texture(u_image, v_texCoord);
-            float brightness = max(color.r, max(color.g, color.b));
+            
+            // Halation Physics: Most prominent in the red layer
+            float brightness = color.r * 0.7 + color.g * 0.2 + color.b * 0.1;
+            
+            // Mist logic: If mist is high, we lower the threshold effectively
+            float effectiveThreshold = mix(u_threshold, 0.0, u_mist * 0.5);
             
             // Soft threshold knee
             float knee = 0.1;
-            float soft = brightness - u_threshold + knee;
+            float soft = brightness - effectiveThreshold + knee;
             soft = clamp(soft, 0.0, 2.0 * knee);
             soft = soft * soft / (4.0 * knee);
             
-            float contribution = max(soft, brightness - u_threshold);
-            contribution /= max(brightness, 0.00001);
+            float contribution = max(soft, brightness - effectiveThreshold);
             
-            fragColor = vec4(color.rgb * contribution, 1.0);
+            // Color the contribution: Halation/Bloom/Mist
+            vec3 glowColor = color.rgb * contribution;
+            
+            // If mist is active, we also add a bit of un-thresholded "glow" based on local color
+            glowColor += color.rgb * u_mist * 0.1;
+            
+            // For Halation, we target Red
+            glowColor.r *= 1.1;
+            glowColor.g *= 0.95;
+            glowColor.b *= 0.9;
+            
+            fragColor = vec4(glowColor, 1.0);
         }
     `,
 
@@ -1254,8 +1270,9 @@ const Shaders = {
         
         uniform sampler2D u_image; // Original image
         uniform sampler2D u_bloom; // Blurred highlights
+        uniform sampler2D u_grainTexture; // Scanned grain texture (Grain 2.0)
         
-        // Bloom/Halation
+        // Bloom/Halation/Mist
         uniform float u_amount;      // Bloom/Halation Strength
         uniform vec3 u_tint;         // Bloom Color (White for Glow, Pink for Halation)
         
@@ -1270,6 +1287,15 @@ const Shaders = {
         uniform float u_glitchStrength;
         uniform float u_ditherStrength;
         uniform float u_scanlineIntensity;
+        
+        // Analog Engine (Missing Declarations)
+        uniform float u_filmGateWeave;
+        uniform float u_filmSeed;
+        uniform bool u_galleryFrame;
+        
+        // Dust & Scratches
+        uniform sampler2D u_dustTexture;
+        uniform float u_dustIntensity;
         
         uniform vec2 u_resolution;
         uniform float u_time;
@@ -1396,11 +1422,34 @@ const Shaders = {
             vec3 tintedBloom = bloom * u_tint;
             
             // Additive Blend
-            // Additive Blend
             vec3 color = baseColor + (tintedBloom * (u_amount / 100.0));
             
             // 4. Grain
-            color = applyGrain(color, uv, u_grainShadow, u_grainHighlight, u_grainSize, u_grainGlobal, u_grainType);
+            // If we have a texture and it's Grain 2.0 (type 3), use it
+            if (u_grainType == 3) {
+                // Randomize UV for each frame to animate the grain
+                vec2 grainJitter = vec2(random(vec2(u_time, u_filmSeed)), random(vec2(u_filmSeed, u_time)));
+                vec2 grainUV = uv * (u_resolution / (u_grainSize * 512.0)) + grainJitter;
+                
+                vec3 gTex = texture(u_grainTexture, grainUV).rgb;
+                float g = (gTex.r + gTex.g + gTex.b) / 3.0 - 0.5;
+                
+                float lum = luminance(color);
+                float intensity = (1.0 - pow(lum, 1.5)) * u_grainGlobal * (u_grainShadow / 50.0);
+                
+                color += g * intensity * 0.15; // Increased scale for Analog mode
+            } else {
+                color = applyGrain(color, uv, u_grainShadow, u_grainHighlight, u_grainSize, u_grainGlobal, u_grainType);
+            }
+            
+            // 5. Dust & Scratches 2.0
+            if (u_dustIntensity > 0.0) {
+                // Offset dust UV by filmSeed for variation
+                vec2 dustUV = uv + vec2(random(vec2(u_filmSeed, 0.0)), random(vec2(0.0, u_filmSeed)));
+                vec3 dust = texture(u_dustTexture, dustUV).rgb;
+                // Additive/Screen blend for dust/scratches
+                color = color + (dust * (u_dustIntensity / 100.0));
+            }
             
             // 5. Scanlines
             if (u_scanlineIntensity > 0.0) {
@@ -1435,31 +1484,6 @@ const Shaders = {
                 // Let's just do black/white dither mixed with color
                 
                 color = mix(color, binary, strength);
-            }
-
-            // 7. Dynamic Film Scratches
-            if (u_scratches > 0.0) {
-                float seed = u_filmSeed;
-                float scratchIntensity = u_scratches / 100.0;
-                
-                // Random vertical lines
-                // Use x coord + time to animate or just noise?
-                // Scratches usually move or jump.
-                // Let's make them static to the frame (filmSeed) but position varies by seed
-                
-                float x = uv.x + seed * 13.59;
-                
-                // Thresholded noise for lines
-                float n = random(vec2(x * 100.0, seed)); // 1D noise effectively
-                
-                // Sparse lines
-                if (n > 0.995) {
-                    // Line intensity varies
-                    float line = (n - 0.995) / 0.005; 
-                    // Make it dark or bright? Scratches usually remove emulsion (bright) or add dirt (dark)
-                    // Let's do bright scratches
-                    color += vec3(line * scratchIntensity);
-                }
             }
 
             // 8. Gallery Frame
@@ -1583,138 +1607,6 @@ const Shaders = {
         }
     `,
 
-    // Composite Shader (Restored)
-    compositeFragment: `#version 300 es
-        precision highp float;
-
-        uniform sampler2D u_image;
-        uniform sampler2D u_bloom;
-        uniform float u_amount;
-        uniform vec3 u_tint;
-        uniform float u_grainShadow;
-        uniform float u_grainHighlight;
-        uniform float u_grainSize;
-        uniform vec2 u_resolution;
-        uniform float u_time;
-        
-        // Border Uniforms
-        uniform int u_useBorder;
-        uniform float u_borderWidth;
-        uniform vec3 u_borderColor;
-
-        // Secret FX placeholders to prevent warnings if valid
-        uniform float u_pixelateSize;
-        uniform float u_glitchStrength;
-        uniform float u_ditherStrength;
-        uniform float u_scanlineIntensity;
-
-        uniform float u_splitPos; // 0.0-1.0, -1 = disabled
-        uniform sampler2D u_originalImage;
-
-        in vec2 v_texCoord;
-        out vec4 fragColor;
-
-        float random(vec2 st) {
-            return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
-        }
-
-        uniform float u_contentRotation;
-        uniform int u_contentFlipX;
-        uniform int u_contentFlipY;
-
-        void main() {
-            vec2 uv = v_texCoord;
-            
-            // Force usage of u_originalImage to prevent optimization culling
-            vec4 forceOrig = texture(u_originalImage, uv) * 0.0001;
-            
-            // Border Logic
-            if (u_useBorder > 0) {
-                float w = u_borderWidth;
-                if (uv.x < w || uv.x > 1.0 - w || uv.y < w || uv.y > 1.0 - w) {
-                    fragColor = vec4(u_borderColor, 1.0);
-                    return;
-                }
-                uv = (uv - w) / (1.0 - 2.0 * w);
-            }
-            
-            // 1. Pixelate (affect UVs)
-            if (u_pixelateSize > 0.0) {
-                float dx = u_pixelateSize * (1.0 / u_resolution.x);
-                float dy = u_pixelateSize * (1.0 / u_resolution.y);
-                uv = vec2(dx * floor(uv.x / dx), dy * floor(uv.y / dy));
-            }
-
-            vec3 base = texture(u_image, uv).rgb;
-            
-            // 2. Glitch (Chromatic Aberration Shift)
-            if (u_glitchStrength > 0.0) {
-                float shift = (u_glitchStrength / 100.0) * 0.02;     
-                float r = texture(u_image, uv + vec2(shift * random(vec2(u_time)), 0.0)).r;
-                float g = texture(u_image, uv + vec2(-shift * random(vec2(u_time * 0.5)), 0.0)).g;
-                float b = texture(u_image, uv).b;
-                base = vec3(r, g, b);
-            }
-
-            vec3 bloom = texture(u_bloom, uv).rgb;
-            vec3 tintedBloom = bloom * u_tint;
-            vec3 color = base + (tintedBloom * (u_amount / 100.0));
-
-            // 3. Scanlines
-            if (u_scanlineIntensity > 0.0) {
-                float scan = 0.5 + 0.5 * sin(uv.y * u_resolution.y * 3.1415); // Simple sine
-                color = mix(color, color * scan, u_scanlineIntensity / 100.0);
-            }
-
-            // 4. Grain (Size & Intensity)
-            float lum = dot(color, vec3(0.299, 0.587, 0.114));
-            // Scale UV by resolution and grain size for consistent noise size
-            vec2 noiseUV = uv * (u_resolution / max(1.0, u_grainSize)); 
-            float noise = random(noiseUV + fract(u_time));
-            
-            float intensity = mix(u_grainShadow, u_grainHighlight, lum) / 100.0;
-            color += (noise - 0.5) * intensity;
-            
-            // 5. Dither (Ordered) - Placeholder or Noise Dither
-            if (u_ditherStrength > 0.0) {
-                 float dither = random(uv) - 0.5;
-                 color += dither * (u_ditherStrength / 255.0); // 8-bit dither sim
-            }
-
-            // Split View Logic
-            if (u_splitPos >= 0.0) {
-                // Swap: Left side (x < split) shows Original
-                if (v_texCoord.x < u_splitPos) {
-                   
-                   // Apply content transform to Original UVs
-                   vec2 suv = v_texCoord;
-                   vec2 center = vec2(0.5);
-                   
-                   // 1. Flip
-                   if (u_contentFlipX > 0) suv.x = 1.0 - suv.x;
-                   if (u_contentFlipY > 0) suv.y = 1.0 - suv.y;
-                   
-                   // 2. Rotate
-                   suv -= center;
-                   float c = cos(-u_contentRotation);
-                   float s = sin(-u_contentRotation);
-                   mat2 rot = mat2(c, -s, s, c);
-                   suv = (rot * suv) + center;
-                   
-                   // Sample original
-                   vec3 origColor = texture(u_originalImage, suv).rgb;
-                   color = origColor; // Use original
-                }
-                // Divider Line (Handled by HTML Overlay now)
-                // if (abs(v_texCoord.x - u_splitPos) < 0.003) {
-                //    color = vec3(1.0); 
-                // }
-            }
-
-            fragColor = vec4(color, 1.0) + forceOrig;
-        }
-    `,
-
     // Phase 5: Vibe Module (Borders & Textures)
     vibeFragment: `#version 300 es
         precision highp float;
@@ -1734,19 +1626,12 @@ const Shaders = {
             // 1. Dust/Scratches (Screen Blend)
             if (u_dustIntensity > 0.0) {
                 vec4 dust = texture(u_dustTexture, v_texCoord);
-                // Assume dust is white on black. Screen it.
                 color += dust * u_dustIntensity;
             }
             
             // 2. Border (Multiply/Alpha)
             if (u_hasBorder) {
                 vec4 border = texture(u_borderTexture, v_texCoord);
-                // Assume border texture: Black=Border, White=Transparent (Typical film masks)
-                // Or Alpha: 0=Transparent, 1=Border
-                // Let's assume standard PNG overlay: RGB=Color, A=Opacity
-                // If it's a "film frame", usually it's black blocking the image.
-                
-                // Compositing: simple over
                 color = mix(color, border, border.a);
             }
             

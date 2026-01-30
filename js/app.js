@@ -18,6 +18,9 @@ class UntitledStudio {
         this.history = null;
         this.cropTool = null;
 
+        // Audio Engine (Initialize EARLY so startup toast can use it)
+        this.audio = new AudioEngine();
+
         // State
         this.images = [];
         this.activeIndex = -1;
@@ -84,14 +87,41 @@ class UntitledStudio {
                 // 15% Warning (Yellow Flicker)
                 const msg = warningMessages[Math.floor(Math.random() * warningMessages.length)];
                 contentHTML = `<div class="viewfinder-hud toast-warning">${msg}</div>`;
+                // CRT Glitch Trigger (Warning)
+                const overlay = document.getElementById('crt-overlay');
+                if (overlay) {
+                    overlay.classList.add('crt-glitch');
+                    setTimeout(() => overlay.classList.remove('crt-glitch'), 500);
+                }
             } else {
                 // 10% Critical Error (Red Shake)
                 const msg = errorMessages[Math.floor(Math.random() * errorMessages.length)];
                 contentHTML = `<div class="viewfinder-hud toast-error">${msg}</div>`;
+                // CRT Glitch Trigger (Error)
+                const overlay = document.getElementById('crt-overlay');
+                if (overlay) {
+                    overlay.classList.add('crt-glitch');
+                    setTimeout(() => overlay.classList.remove('crt-glitch'), 1200);
+                }
             }
 
             // 3. Inject and Animate
             toastContainer.innerHTML = contentHTML;
+
+            // Audio Trigger
+            if (rand < 0.15) {
+                // ASCII
+                this.audio.playStartup();
+            } else if (rand > 0.90) {
+                // Error
+                this.audio.playGlitch();
+            } else if (rand > 0.75) {
+                // Warning
+                this.audio.playShutter(); // Heavy clack
+            } else {
+                // Normal
+                this.audio.playStartup();
+            }
 
             // Fade out
             setTimeout(() => {
@@ -178,6 +208,13 @@ class UntitledStudio {
 
         // LUT Parser
         this.lutParser = new LUTParser();
+
+        // Global Audio Listener
+        document.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.classList.contains('studio-slider')) {
+                this.audio.playClick();
+            }
+        });
     }
 
     hapticFeedback(type = 'light') {
@@ -325,6 +362,9 @@ class UntitledStudio {
             this.initWorker();
             this.initHistogram();
             this.initToneCurve();
+            this.initHSL(); // Selective Color
+            this.initColorWheels(); // Color Grading
+            this.initVectorscope(); // Analysis
             this.initHistory();
             this.initCropTool();
             this.initGestures();
@@ -332,6 +372,7 @@ class UntitledStudio {
             this.initOLED();      // Mobile Extra 2
             this.initVibePack();  // Retro Vibe Pack
             this.initPresetAccordion(); // New: Collapsible Menu
+            this.initCRT();         // CRT Visualization Mode
 
             await this.loadSavedImages().catch(err => console.warn('Failed to load saved images:', err));
             await this.loadCustomPresets().catch(err => console.warn('Failed to load presets:', err));
@@ -405,6 +446,40 @@ class UntitledStudio {
             watermarkPreview.classList.add('hidden');
         }
     }
+
+    initCRT() {
+        const toggle = document.getElementById('crt-toggle-btn');
+        const overlay = document.getElementById('crt-overlay');
+
+        // Default to OFF or load from local storage
+        const isCRT = localStorage.getItem('crtMode') === 'true';
+        if (isCRT) {
+            document.body.classList.add('crt-active');
+            overlay?.classList.add('active');
+            toggle?.classList.add('text-hot-pink');
+        }
+
+        if (toggle && overlay) {
+            toggle.addEventListener('click', () => {
+                const isActive = overlay.classList.toggle('active');
+                document.body.classList.toggle('crt-active', isActive);
+
+                // Visual feedback on button
+                if (isActive) {
+                    toggle.classList.add('text-hot-pink');
+                    toggle.classList.remove('text-gray-400');
+                    localStorage.setItem('crtMode', 'true');
+                    this.hapticFeedback('success');
+                } else {
+                    toggle.classList.remove('text-hot-pink');
+                    toggle.classList.add('text-gray-400');
+                    localStorage.setItem('crtMode', 'false');
+                    this.hapticFeedback('light');
+                }
+            });
+        }
+    }
+
 
     /**
      * Draw Vibe Elements onto a 2D context
@@ -532,7 +607,6 @@ class UntitledStudio {
             beforeLabel: document.getElementById('before-label'),
             undoBtn: document.getElementById('undo-btn'),
             redoBtn: document.getElementById('redo-btn'),
-            redoBtn: document.getElementById('redo-btn'),
 
 
             // Tabs
@@ -618,6 +692,7 @@ class UntitledStudio {
             exportSettingsSave: document.getElementById('export-settings-save'),
             progressRingFill: document.querySelector('.progress-ring-fill'),
             progressText: document.querySelector('.progress-text'),
+            savePresetBtn: document.getElementById('save-preset-btn'),
 
             // Save Preset Modal
             savePresetModal: document.getElementById('save-preset-modal'),
@@ -1275,6 +1350,22 @@ class UntitledStudio {
             }
         });
 
+        // --- GRAIN 2.0 ---
+        const grainTypeSelect = document.getElementById('grainType');
+        if (grainTypeSelect) {
+            on(grainTypeSelect, 'change', (e) => {
+                const val = parseInt(e.target.value);
+                this.engine.setAdjustment('grainType', val);
+                // If type 3 (Analog), ensure Global Grain is active
+                if (val === 3 && this.engine.adjustments.grainGlobal === 0) {
+                    this.engine.setAdjustment('grainGlobal', 1.0);
+                    const globalSlider = document.getElementById('grainGlobal');
+                    if (globalSlider) globalSlider.value = 1;
+                }
+                this.updateHistogram();
+            });
+        }
+
         // --- LUT EXPORT ---
         const exportLutBtn = document.getElementById('export-lut-btn');
         if (exportLutBtn) {
@@ -1417,6 +1508,67 @@ class UntitledStudio {
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+
+        // --- TOOLBAR SAVE PRESET ---
+        if (this.elements.savePresetBtn) {
+            this.elements.savePresetBtn.addEventListener('click', () => {
+                this.showSavePresetModal();
+            });
+        }
+
+        // --- PRESET MODAL ---
+        if (this.elements.savePresetCancel) {
+            this.elements.savePresetCancel.addEventListener('click', () => {
+                this.hideSavePresetModal();
+            });
+        }
+
+        if (this.elements.savePresetConfirm) {
+            this.elements.savePresetConfirm.addEventListener('click', () => {
+                this.saveCustomPreset();
+            });
+        }
+
+        if (this.elements.presetNameInput) {
+            this.elements.presetNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.saveCustomPreset();
+            });
+        }
+
+        // --- EXPORT SETTINGS ---
+        if (this.elements.exportSettingsBtn) {
+            this.elements.exportSettingsBtn.addEventListener('click', () => {
+                this.showExportSettings();
+            });
+        }
+
+        if (this.elements.exportSettingsCancel) {
+            this.elements.exportSettingsCancel.addEventListener('click', () => {
+                this.hideExportSettings();
+            });
+        }
+
+        if (this.elements.exportSettingsSave) {
+            this.elements.exportSettingsSave.addEventListener('click', () => {
+                this.saveExportSettings();
+            });
+        }
+
+        if (this.elements.exportResolution) {
+            this.elements.exportResolution.addEventListener('change', (e) => {
+                if (this.elements.customResolutionGroup) {
+                    this.elements.customResolutionGroup.classList.toggle('hidden', e.target.value !== 'custom');
+                }
+            });
+        }
+
+        if (this.elements.exportQuality) {
+            this.elements.exportQuality.addEventListener('input', (e) => {
+                if (this.elements.exportQualityValue) {
+                    this.elements.exportQualityValue.textContent = e.target.value + '%';
+                }
+            });
+        }
     }
 
     openFilePicker() {
@@ -2174,6 +2326,33 @@ class UntitledStudio {
             return;
         }
 
+        // Inject "My Presets" Button if not present
+        const categoryContainer = document.querySelector('.preset-category-list') || document.querySelector('.flex.overflow-x-auto');
+        if (categoryContainer && !categoryContainer.querySelector('[data-category="custom"]')) {
+            const btn = document.createElement('button');
+            btn.className = 'preset-category px-3 py-1 bg-glass border border-glass-border rounded-lg text-xs text-white font-mono';
+            btn.dataset.category = 'custom';
+            btn.innerHTML = `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>My Presets</span>`;
+            // Insert after "Favorites" (usually first)
+            const first = categoryContainer.firstChild;
+            if (first) categoryContainer.insertBefore(btn, first.nextSibling);
+            else categoryContainer.appendChild(btn);
+
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.preset-category').forEach(b => {
+                    b.classList.remove('bg-emerald-500', 'text-black', 'active');
+                    if (b.dataset.category !== 'custom') b.classList.add('bg-glass', 'text-white'); // Reset others
+                });
+                // Highlight logic handled by populatePresets usually, or manually here
+                // We'll let standard click handler do it if delegated, but we need to ensure this works.
+                // Assuming global delegation or we add manual handler:
+                document.querySelectorAll('.preset-category').forEach(b => b.classList.remove('bg-emerald-500', 'text-black'));
+                btn.classList.remove('bg-glass', 'text-white');
+                btn.classList.add('bg-emerald-500', 'text-black');
+                this.populatePresets('custom');
+            });
+        }
+
         // 1. Get List of Presets
         let presetsToRender = [];
 
@@ -2249,9 +2428,24 @@ class UntitledStudio {
                 <div class="wheel-card-preview preset-swatch-grid">
                     ${swatchesHtml}
                 </div>
-                <div class="wheel-card-label">${preset.name}</div>
+                <div class="wheel-card-label flex items-center justify-center gap-1">
+                    ${preset.name}
+                    ${category === 'custom' ? `<button class="delete-preset text-red-500 hover:text-red-400 ml-1" data-preset-name="${preset.name}" title="Delete Preset">×</button>` : ''}
+                </div>
             </div>
         `}).join('');
+
+        // Add "New Preset" Card if Custom
+        if (category === 'custom') {
+            const newCardHtml = `
+            <div class="wheel-card group border-dashed border-2 border-white/20 hover:border-emerald-500/50" id="create-preset-card">
+                <div class="wheel-card-preview flex items-center justify-center bg-black/20">
+                    <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                </div>
+                <div class="wheel-card-label text-emerald-500">New Preset</div>
+            </div>`;
+            wheel.innerHTML = newCardHtml + wheel.innerHTML;
+        }
 
         // 3. Initialize IntersectionObserver for Center Detection
         const options = {
@@ -2307,6 +2501,42 @@ class UntitledStudio {
                 this.toggleFavorite(presetName, star);
             });
         });
+
+        // 6. Handle "New Preset" Click
+        const createCard = wheel.querySelector('#create-preset-card');
+        if (createCard) {
+            createCard.addEventListener('click', () => {
+                this.showSavePresetModal();
+            });
+        }
+
+        // 7. Handle Delete Preset
+        wheel.querySelectorAll('.delete-preset').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const presetName = btn.dataset.presetName;
+                if (confirm(`Delete preset "${presetName}"?`)) {
+                    this.deleteCustomPreset(presetName);
+                }
+            });
+        });
+    }
+
+    async deleteCustomPreset(name) {
+        const preset = this.customPresets.find(p => p.name === name);
+        if (!preset) return;
+
+        try {
+            if (preset.id) {
+                await storage.deletePreset(preset.id);
+            }
+            this.customPresets = this.customPresets.filter(p => p.name !== name);
+            this.populatePresets('custom');
+            this.showToast('Preset deleted');
+        } catch (error) {
+            console.error('Failed to delete preset:', error);
+            this.showToast('Failed to delete preset', 'error');
+        }
     }
 
     toggleFavorite(presetName, starElement = null) {
@@ -2445,23 +2675,40 @@ class UntitledStudio {
 
 
     showSavePresetModal() {
+        console.log('[App] Opening Save Preset Modal');
         if (this.elements.savePresetModal) {
             this.elements.savePresetModal.classList.remove('hidden');
             this.elements.presetNameInput.value = '';
             this.elements.presetNameInput.focus();
+        } else {
+            console.error('[App] Save Preset Modal not found in DOM');
         }
     }
 
     hideSavePresetModal() {
+        console.log('[App] Closing Save Preset Modal');
         if (this.elements.savePresetModal) {
             this.elements.savePresetModal.classList.add('hidden');
         }
     }
 
     async saveCustomPreset() {
+        console.log('[App] saveCustomPreset triggered');
         const name = this.elements.presetNameInput.value.trim();
         if (!name) {
             alert('Please enter a preset name');
+            return;
+        }
+
+        // 1. Check against catalog (FilmPresets)
+        if (window.findPreset && window.findPreset(name)) {
+            alert(`"${name}" is a protected catalog preset name. Please choose a different name.`);
+            return;
+        }
+
+        // 2. Check for duplicates in local array
+        if (this.customPresets.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+            alert('A user preset with this name already exists');
             return;
         }
 
@@ -2471,19 +2718,30 @@ class UntitledStudio {
             ...this.engine.getAdjustments()
         };
 
-        this.customPresets.push(preset);
+        try {
+            // Save to IndexedDB (returns the generated id)
+            const id = await storage.savePreset(preset);
+            preset.id = id;
 
-        // Save to IndexedDB
-        await storage.savePreset(preset);
+            this.customPresets.push(preset);
+            this.hideSavePresetModal();
 
-        this.hideSavePresetModal();
+            // Refresh presets if viewing custom
+            if (document.querySelector('.preset-category.active')?.dataset.category === 'custom') {
+                this.populatePresets('custom');
+            }
 
-        // Refresh presets if viewing custom
-        if (document.querySelector('.preset-category.active')?.dataset.category === 'custom') {
-            this.populatePresets('custom');
+            this.showToast(`✓ Preset "${name}" saved`);
+        } catch (error) {
+            console.error('Failed to save preset:', error);
+
+            // Handle unique constraint error specifically if it somehow bypassed our check
+            if (error.name === 'ConstraintError') {
+                alert(`Error: A preset named "${name}" already exists in the database. Please use a unique name.`);
+            } else {
+                this.showToast('Failed to save preset', 'error');
+            }
         }
-
-        console.log(`✓ Preset "${name}" saved`);
     }
 
     async loadCustomPresets() {
@@ -2494,52 +2752,6 @@ class UntitledStudio {
         }
     }
 
-    showExportSettings() {
-        if (this.elements.exportSettingsModal) {
-            this.elements.exportSettingsModal.classList.remove('hidden');
-            this.elements.exportResolution.value = this.exportSettings.resolution;
-            this.elements.exportCustomWidth.value = this.exportSettings.customWidth;
-            this.elements.exportQuality.value = this.exportSettings.quality;
-            this.elements.exportQualityValue.textContent = this.exportSettings.quality + '%';
-            this.elements.exportExif.checked = this.exportSettings.preserveExif;
-            this.elements.customResolutionGroup.classList.toggle('hidden', this.exportSettings.resolution !== 'custom');
-        }
-    }
-
-    updateBatchExportButton() {
-        // Now handled by CSS (hidden/flex) or manual toggle?
-        // Actually, the footer is always visible on mobile, or should it hide if 0 images?
-        // Requirement: "Impossible to miss". Usually always there eventually.
-        // But original logic hid the button if count < 2 or similar.
-
-        const btn = document.getElementById('batch-export-btn');
-        const syncBtn = document.getElementById('sync-all-btn');
-        const count = this.images.length;
-
-        if (btn) {
-            const countDisplay = btn.querySelector('#batch-count');
-            if (countDisplay) countDisplay.textContent = count;
-
-            // Enable/disable based on count
-            btn.disabled = count === 0;
-            // Original logic hid it. Let's keep it visible but disabled if empty? 
-            // Or toggle hidden class.
-            // If footer wraps it, hiding button might leave empty footer on mobile.
-            // Let's assume footer is permanent UI now.
-            btn.classList.toggle('opacity-50', count === 0);
-        }
-
-        if (syncBtn) {
-            syncBtn.disabled = count < 2;
-        }
-
-        // Update footer visibility itself?
-        // User didn't ask to hide it.
-        // Just update the batch count text.
-        const batchCountSpan = document.getElementById('batch-count'); // The span inside button
-        if (batchCountSpan) batchCountSpan.textContent = count;
-    }
-
     hideExportSettings() {
         if (this.elements.exportSettingsModal) {
             this.elements.exportSettingsModal.classList.add('hidden');
@@ -2547,13 +2759,39 @@ class UntitledStudio {
     }
 
     saveExportSettings() {
+        if (!this.elements.exportSettingsModal) return;
+
         this.exportSettings = {
             resolution: this.elements.exportResolution.value,
             customWidth: parseInt(this.elements.exportCustomWidth.value) || 1920,
-            quality: parseInt(this.elements.exportQuality.value),
+            quality: parseInt(this.elements.exportQuality.value) || 95,
             preserveExif: this.elements.exportExif.checked
         };
+
         this.hideExportSettings();
+        this.showToast('Export settings saved');
+
+        console.log('[App] Export settings updated:', this.exportSettings);
+    }
+
+    updateBatchExportButton() {
+        const btn = document.getElementById('batch-export-btn');
+        const syncBtn = document.getElementById('sync-all-btn');
+        const count = this.images.length;
+
+        if (btn) {
+            const countDisplay = btn.querySelector('#batch-count');
+            if (countDisplay) countDisplay.textContent = count;
+            btn.disabled = count === 0;
+            btn.classList.toggle('opacity-50', count === 0);
+        }
+
+        if (syncBtn) {
+            syncBtn.disabled = count < 2;
+        }
+
+        const batchCountSpan = document.getElementById('batch-count');
+        if (batchCountSpan) batchCountSpan.textContent = count;
     }
 
     updateSlidersFromAdjustments(adjustments) {
@@ -2727,6 +2965,206 @@ class UntitledStudio {
                 btn.disabled = false;
                 btn.innerHTML = originalText;
             }
+        }
+        btn.innerHTML = originalText;
+    }
+
+    initHSL() {
+        const channels = document.querySelectorAll('.hsl-channel');
+        const sliders = document.querySelectorAll('.hsl-slider');
+
+        let activeMode = 'hue'; // hue, sat, lum
+
+        const updateSliders = () => {
+            sliders.forEach(slider => {
+                const color = slider.dataset.color;
+                const key = `hsl${color.charAt(0).toUpperCase() + color.slice(1)}`;
+
+                // Get current value from engine adjustments
+                // adjustments.hslRed is [h, s, l]
+                if (this.engine.adjustments[key]) {
+                    const idx = { hue: 0, sat: 1, lum: 2 }[activeMode];
+                    slider.value = this.engine.adjustments[key][idx];
+                }
+
+                // Update track gradient visual (optional polish)
+                // this.updateSliderVisual(slider); 
+            });
+        };
+
+        // Channel Tabs (Hue / Saturation / Luminance)
+        channels.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update UI
+                channels.forEach(b => b.classList.remove('active', 'text-hot-pink', 'font-bold'));
+                btn.classList.add('active', 'text-hot-pink', 'font-bold');
+
+                activeMode = btn.dataset.channel;
+                updateSliders();
+
+                // Haptic
+                this.hapticFeedback('light');
+            });
+        });
+
+        // Sliders
+        sliders.forEach(slider => {
+            const handleInput = (e) => {
+                const val = parseFloat(e.target.value);
+                const color = e.target.dataset.color;
+
+                this.engine.setHSL(color, activeMode, val);
+            };
+
+            slider.addEventListener('input', handleInput);
+        });
+
+        // Initial update
+        updateSliders();
+    }
+
+    initColorWheels() {
+        // Shadows
+        this.shadowWheel = new ColorWheel(document.getElementById('wheel-shadows'), {
+            onChange: (v) => {
+                this.engine.setAdjustment('splitShadowHue', v.hue);
+                this.engine.setAdjustment('splitShadowSat', v.sat);
+                document.getElementById('splitShadowSat').value = v.sat;
+            }
+        });
+
+        // Midtones
+        this.midtoneWheel = new ColorWheel(document.getElementById('wheel-midtones'), {
+            onChange: (v) => {
+                this.engine.setAdjustment('splitMidtoneHue', v.hue);
+                this.engine.setAdjustment('splitMidtoneSat', v.sat);
+                document.getElementById('splitMidtoneSat').value = v.sat;
+            }
+        });
+
+        // Highlights
+        this.highlightWheel = new ColorWheel(document.getElementById('wheel-highlights'), {
+            onChange: (v) => {
+                this.engine.setAdjustment('splitHighlightHue', v.hue);
+                this.engine.setAdjustment('splitHighlightSat', v.sat);
+                document.getElementById('splitHighlightSat').value = v.sat;
+            }
+        });
+
+        // Link Saturation Sliders back to Wheels
+        // Shadows
+        const sSat = document.getElementById('splitShadowSat');
+        sSat.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            this.shadowWheel.sat = val;
+            this.shadowWheel.draw();
+            this.engine.setAdjustment('splitShadowSat', val);
+        });
+
+        // Mids
+        const mSat = document.getElementById('splitMidtoneSat');
+        mSat.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            this.midtoneWheel.sat = val;
+            this.midtoneWheel.draw();
+            this.engine.setAdjustment('splitMidtoneSat', val);
+        });
+
+        // Highlights
+        const hSat = document.getElementById('splitHighlightSat');
+        hSat.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            this.highlightWheel.sat = val;
+            this.highlightWheel.draw();
+            this.engine.setAdjustment('splitHighlightSat', val);
+        });
+
+        // Balance Slider
+        const balance = document.getElementById('splitBalance');
+        balance.addEventListener('input', (e) => {
+            this.engine.setAdjustment('splitBalance', parseFloat(e.target.value));
+        });
+    }
+
+
+    initHistory() {
+        this.history = new HistoryManager();
+
+        // Listen for history changes
+        this.history.onStateChange = (state) => {
+            // Update Undo/Redo buttons
+            if (this.elements.undoBtn) this.elements.undoBtn.disabled = !state.canUndo;
+            if (this.elements.redoBtn) this.elements.redoBtn.disabled = !state.canRedo;
+
+            // Note: We don't automatically restore config here. 
+            // Undo/Redo actions call restoreState manually.
+        };
+
+        // Setup Button Listeners
+        if (this.elements.undoBtn) {
+            this.elements.undoBtn.addEventListener('click', () => {
+                const state = this.history.undo();
+                if (state) this.restoreState(state);
+            });
+        }
+
+        if (this.elements.redoBtn) {
+            this.elements.redoBtn.addEventListener('click', () => {
+                const state = this.history.redo();
+                if (state) this.restoreState(state);
+            });
+        }
+    }
+
+    initVectorscope() {
+        const canvas = document.getElementById('vectorscope-canvas');
+        if (!canvas) return;
+
+        this.vectorscope = new Vectorscope(canvas);
+        this.isVectorscopeVisible = false;
+
+        const toggle = document.getElementById('toggle-vectorscope');
+        const container = document.getElementById('vectorscope-container');
+
+        toggle.addEventListener('click', () => {
+            this.isVectorscopeVisible = !this.isVectorscopeVisible;
+            if (this.isVectorscopeVisible) {
+                container.classList.remove('hidden');
+                this.updateVectorscope();
+            } else {
+                container.classList.add('hidden');
+            }
+        });
+
+        // Hook into engine render to update scope
+        // Simple override of engine.render to inject callback
+        const originalRender = this.engine.render.bind(this.engine);
+        this.engine.render = () => {
+            originalRender();
+            if (this.isVectorscopeVisible) {
+                // Defer to next frame to allow UI update
+                requestAnimationFrame(() => this.updateVectorscope());
+            }
+        };
+    }
+
+    updateVectorscope() {
+        if (!this.vectorscope || !this.isVectorscopeVisible) return;
+
+        // Throttling to ~30fps to save battery/CPU
+        const now = performance.now();
+        if (this.lastVectorscopeUpdate && (now - this.lastVectorscopeUpdate < 32)) {
+            return;
+        }
+        this.lastVectorscopeUpdate = now;
+
+        // Use efficient GPU downsampling (256x256)
+        // This avoids reading 4K+ pixels from the GPU which causes massive lag
+        const size = 256;
+        const pixels = this.engine.getAnalysisData(size);
+
+        if (pixels) {
+            this.vectorscope.update(pixels, size, size);
         }
     }
 

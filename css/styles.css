@@ -1525,3 +1525,211 @@ select:focus-visible {
 .ui-hidden #main-stage {
     cursor: none;
 }
+
+/* ========== CRT VISUALIZATION MODE ========== */
+#crt-overlay {
+    background:
+        /* Scanlines - subtle alternating dark lines */
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        /* RGB Sub-pixels - extremely subtle horizontal separation */
+        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+
+    background-size: 100% 4px, 3px 100%;
+    /* Vignette - intense corner darkening for curved glass look */
+    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+    pointer-events: none;
+    z-index: 9999;
+}
+
+#crt-overlay.active {
+    opacity: 1 !important;
+    /* Visible */
+    animation: flicker-crt 0.15s infinite;
+}
+
+#crt-overlay::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+    background-size: 100% 2px;
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.1);
+    /* General dimming */
+}
+
+/* Subtle Flicker for realism */
+@keyframes flicker-crt {
+    0% {
+        opacity: 0.95;
+    }
+
+    5% {
+        opacity: 0.9;
+    }
+
+    10% {
+        opacity: 0.95;
+    }
+
+    15% {
+        opacity: 1;
+    }
+
+    20% {
+        opacity: 0.95;
+    }
+
+    50% {
+        opacity: 0.9;
+    }
+
+    55% {
+        opacity: 0.95;
+    }
+
+    90% {
+        opacity: 0.9;
+    }
+
+    100% {
+        opacity: 0.95;
+    }
+}
+
+/* Hard Glitch for Warnings/Errors */
+.crt-glitch {
+    animation: shake-hard 0.2s cubic-bezier(.36, .07, .19, .97) both infinite,
+        chromatic 0.1s infinite !important;
+    opacity: 1 !important;
+    background: rgba(255, 0, 0, 0.1) !important;
+    /* Red tint during glitch */
+}
+
+@keyframes chromatic {
+    0% {
+        transform: translate(0);
+        text-shadow: -2px 0 red, 2px 0 blue;
+    }
+
+    25% {
+        transform: translate(2px, 2px);
+        text-shadow: 2px 0 red, -2px 0 blue;
+    }
+
+    50% {
+        transform: translate(-1px, -2px);
+        text-shadow: -1px 0 red, 1px 0 blue;
+    }
+
+    75% {
+        transform: translate(1px, 2px);
+        text-shadow: 1px 0 red, -1px 0 blue;
+    }
+
+    100% {
+        transform: translate(0);
+        text-shadow: -2px 0 red, 2px 0 blue;
+    }
+}
+
+@keyframes shake-hard {
+    0% {
+        transform: translate(1px, 1px) rotate(0deg);
+    }
+
+    10% {
+        transform: translate(-1px, -2px) rotate(-1deg);
+    }
+
+    20% {
+        transform: translate(-3px, 0px) rotate(1deg);
+    }
+
+    30% {
+        transform: translate(3px, 2px) rotate(0deg);
+    }
+
+    40% {
+        transform: translate(1px, -1px) rotate(1deg);
+    }
+
+    50% {
+        transform: translate(-1px, 2px) rotate(-1deg);
+    }
+
+    60% {
+        transform: translate(-3px, 1px) rotate(0deg);
+    }
+
+    70% {
+        transform: translate(3px, 1px) rotate(-1deg);
+    }
+
+    80% {
+        transform: translate(-1px, -1px) rotate(1deg);
+    }
+
+    90% {
+        transform: translate(1px, 2px) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(1px, -2px) rotate(-1deg);
+    }
+}
+
+/* Text glow for active CRT mode */
+body.crt-active * {
+    text-shadow: 0 0 1px rgba(100, 255, 100, 0.4), 0 0 3px rgba(100, 255, 100, 0.1);
+}
+
+body.crt-active canvas {
+    filter: contrast(1.2) brightness(1.1) saturate(1.1);
+    /* Boost for CRT look */
+}
+
+/* ========== HSL MIXER ========== */
+.hsl-channel {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.hsl-channel:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.hsl-channel.active {
+    background: rgba(237, 39, 136, 0.15);
+    color: var(--hot-pink);
+    border-color: rgba(237, 39, 136, 0.3);
+}
+
+.hsl-color-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.hsl-slider-group {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}

@@ -4242,7 +4242,7 @@ const FilmPresets = {
         }
     ],
 
-    // ============ MUSE ============
+    // ============ MUSE (FULL PACK) ============
     muse: [
         {
             name: "Soft & Warm",
@@ -4257,11 +4257,7 @@ const FilmPresets = {
                 { channel: "yellow", sat: -10 }
             ],
             hidden: true
-        }
-    ],
-
-    // ============ MUSE (STARTER PACK) ============
-    muse: [
+        },
         {
             name: "Velvet Goldmine",
             category: "muse",
@@ -4384,9 +4380,13 @@ const FilmPresets = {
 function getAllPresets() {
     const all = [];
     Object.keys(FilmPresets).forEach(category => {
-        FilmPresets[category].forEach(preset => {
-            all.push({ ...preset, category });
-        });
+        if (Array.isArray(FilmPresets[category])) {
+            FilmPresets[category].forEach(preset => {
+                if (preset && preset.name) {
+                    all.push({ ...preset, category });
+                }
+            });
+        }
     });
     return all;
 }
@@ -4401,12 +4401,10 @@ function getPresetsByCategory(category) {
     return FilmPresets[category] || [];
 }
 
-/**
- * Find preset by name
- */
 function findPreset(name) {
+    if (!name) return null;
     const all = getAllPresets();
-    return all.find(p => p.name.toLowerCase() === name.toLowerCase());
+    return all.find(p => p && p.name && p.name.toLowerCase() === name.toLowerCase());
 }
 
 // Export for module usage

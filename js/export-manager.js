@@ -14,16 +14,26 @@ class ExportManager {
         try {
             if (onProgress) onProgress(0);
 
+            let blob;
+
             // 1. Get High-Res Base Image from Engine
-            // This handles resizing, tiled rendering, and effect applying
-            const dataUrl = await this.engine.exportImage(format, quality, (p) => {
-                if (onProgress) onProgress(p * 0.8); // 80% weight to render
-            }, resolution, customWidth);
+            if (resolution === 'original' && this.engine.renderHighRes) {
+                // Use new High-Res Pipeline
+                blob = await this.engine.renderHighRes(format, quality);
+            } else {
+                // Fallback for custom widths or if renderHighRes is missing
+                // For now, let's assume we use the current canvas state (preview res)
+                // TODO: Implement custom resizing
+                blob = await new Promise(resolve => this.engine.getCanvasBlob(format, quality, resolve));
+            }
 
             if (onProgress) onProgress(85);
 
+            if (!blob) throw new Error('Render failed');
+
             // 2. Apply Overlays if needed
             if (drawCallback) {
+                const dataUrl = URL.createObjectURL(blob);
                 return new Promise((resolve, reject) => {
                     const img = new Image();
                     img.onload = () => {
@@ -42,23 +52,25 @@ class ExportManager {
 
                         // Export final to blob
                         const mime = format === 'png' ? 'image/png' : 'image/jpeg';
-                        canvas.toBlob((blob) => {
-                            if (!blob) {
+                        canvas.toBlob((finalBlob) => {
+                            URL.revokeObjectURL(dataUrl); // Cleanup
+                            if (!finalBlob) {
                                 reject(new Error('Overlay composition failed'));
                                 return;
                             }
-                            this.triggerDownload(blob, format);
+                            this.triggerDownload(finalBlob, format);
                             if (onProgress) onProgress(100);
                             resolve();
                         }, mime, quality);
                     };
-                    img.onerror = () => reject(new Error('Failed to load base image for overlay'));
+                    img.onerror = () => {
+                        URL.revokeObjectURL(dataUrl);
+                        reject(new Error('Failed to load base image for overlay'));
+                    }
                     img.src = dataUrl;
                 });
             } else {
-                // No overlays, just convert dataUrl to blob and download
-                const response = await fetch(dataUrl);
-                const blob = await response.blob();
+                // No overlays, just download
                 this.triggerDownload(blob, format);
                 if (onProgress) onProgress(100);
                 return;

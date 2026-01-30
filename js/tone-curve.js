@@ -58,8 +58,10 @@ class ToneCurve {
         this.dragOffset = { x: 0, y: 0 };
 
         // LUT texture data and memoization
-        this.lutData = new Uint8Array(256);
-        this.lastPointsHash = null;
+        // LUT texture data (256 * 4 rows)
+        // Row 0: Master, Row 1: R, Row 2: G, Row 3: B
+        this.lutData = new Uint8Array(256 * 4);
+        this.lastPointsHash = {}; // Hash per channel
 
         // Bound event handlers
         this._boundMouseDown = this.handleMouseDown.bind(this);
@@ -281,32 +283,38 @@ class ToneCurve {
      * Generate LUT from curve with memoization
      * Only regenerates if points have changed
      */
+    /**
+     * Generate LUT from all curves (or update changed ones)
+     */
     generateLUT() {
-        const currentHash = this.getPointsHash();
+        const channels = ['rgb', 'r', 'g', 'b'];
 
-        // Skip if points haven't changed (memoization)
-        if (currentHash === this.lastPointsHash) {
-            return;
-        }
+        channels.forEach((channel, index) => {
+            const points = this.channels[channel];
 
-        this.lastPointsHash = currentHash;
+            // Hash check per channel
+            const pointHash = points.map(p => `${p.x.toFixed(4)},${p.y.toFixed(4)}`).join('|');
+            if (this.lastPointsHash[channel] === pointHash) return;
 
-        const points = this.channels[this.activeChannel];
+            this.lastPointsHash[channel] = pointHash;
 
-        // Sort points by x
-        const sorted = [...points].sort((a, b) => a.x - b.x);
+            // Sort points
+            const sorted = [...points].sort((a, b) => a.x - b.x);
 
-        // Interpolate for each of 256 values
-        for (let i = 0; i < 256; i++) {
-            const x = i / 255;
-            let y = this.interpolateCurve(sorted, x);
-            y = Math.max(0, Math.min(1, y));
-            this.lutData[i] = Math.round(y * 255);
-        }
+            // Fill 256-byte block for this channel
+            const offset = index * 256;
 
-        // Notify change
+            for (let i = 0; i < 256; i++) {
+                const x = i / 255;
+                let y = this.interpolateCurve(sorted, x);
+                y = Math.max(0, Math.min(1, y));
+                this.lutData[offset + i] = Math.round(y * 255);
+            }
+        });
+
+        // Notify change with full data
         if (this.onChange) {
-            this.onChange(this.lutData, this.activeChannel);
+            this.onChange(this.lutData);
         }
     }
 
@@ -500,7 +508,7 @@ class ToneCurve {
         points.splice(insertIndex, 0, newPoint);
         this.selectedPointIndex = insertIndex;
 
-        this.lastPointsHash = null;
+        this.lastPointsHash = {};
         this.draw();
         this.generateLUT();
     }
@@ -519,7 +527,7 @@ class ToneCurve {
         points.splice(this.selectedPointIndex, 1);
         this.selectedPointIndex = -1;
 
-        this.lastPointsHash = null;
+        this.lastPointsHash = {};
         this.draw();
         this.generateLUT();
     }
@@ -546,7 +554,7 @@ class ToneCurve {
     setChannel(channel) {
         this.activeChannel = channel;
         this.selectedPointIndex = -1;
-        this.lastPointsHash = null; // Channel change invalidates cache
+        this.lastPointsHash = {}; // Channel change invalidates cache
         this.draw();
         this.generateLUT();
     }
@@ -569,7 +577,7 @@ class ToneCurve {
             ];
         }
         this.selectedPointIndex = -1;
-        this.lastPointsHash = null;
+        this.lastPointsHash = {};
         this.draw();
         this.generateLUT();
     }
@@ -583,7 +591,8 @@ class ToneCurve {
             this.reset();
         });
         this.activeChannel = 'rgb';
-        this.lastPointsHash = null;
+        this.activeChannel = 'rgb';
+        this.lastPointsHash = {};
         this.draw();
         this.generateLUT();
     }

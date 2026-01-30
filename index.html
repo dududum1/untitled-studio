@@ -109,6 +109,16 @@
                     </svg>
                 </button>
 
+                <!-- CRT Toggle -->
+                <button id="crt-toggle-btn"
+                    class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
+                    title="CRT Visualization Mode">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </button>
+
                 <!-- Hide UI Toggle -->
                 <button id="toggle-ui-btn"
                     class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
@@ -143,6 +153,28 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+
+                <!-- Save Preset -->
+                <button id="save-preset-btn"
+                    class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
+                    title="Save current adjustments as Preset">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                    </svg>
+                </button>
+
+                <!-- Export Settings -->
+                <button id="export-settings-btn"
+                    class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
+                    title="Export Settings">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                 </button>
 
@@ -527,33 +559,49 @@
                     </div>
                 </div>
 
-                <!-- Split Toning -->
+                <!-- Color Grading Wheels -->
                 <div class="mt-6">
-                    <h3 class="text-sm font-semibold text-gray-400 mb-3">Split Toning</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-xs text-gray-500 mb-1 block">Highlights</label>
-                            <div class="flex gap-2">
-                                <input type="range" id="splitHighlightHue" class="studio-slider flex-1" min="0"
-                                    max="360" step="1" value="0">
-                                <input type="range" id="splitHighlightSat" class="studio-slider w-16" min="0" max="100"
-                                    step="1" value="0">
-                            </div>
+                    <h3 class="text-sm font-semibold text-gray-400 mb-3">Color Grading</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="text-center">
+                            <label class="text-[10px] text-gray-500 mb-1 block">Shadows</label>
+                            <canvas id="wheel-shadows" width="100" height="100"
+                                class="w-full aspect-square cursor-crosshair rounded-full border border-glass-border"></canvas>
                         </div>
-                        <div>
-                            <label class="text-xs text-gray-500 mb-1 block">Shadows</label>
-                            <div class="flex gap-2">
-                                <input type="range" id="splitShadowHue" class="studio-slider flex-1" min="0" max="360"
-                                    step="1" value="0">
-                                <input type="range" id="splitShadowSat" class="studio-slider w-16" min="0" max="100"
-                                    step="1" value="0">
-                            </div>
+                        <div class="text-center">
+                            <label class="text-[10px] text-gray-500 mb-1 block">Midtones</label>
+                            <canvas id="wheel-midtones" width="100" height="100"
+                                class="w-full aspect-square cursor-crosshair rounded-full border border-glass-border"></canvas>
+                        </div>
+                        <div class="text-center">
+                            <label class="text-[10px] text-gray-500 mb-1 block">Highlights</label>
+                            <canvas id="wheel-highlights" width="100" height="100"
+                                class="w-full aspect-square cursor-crosshair rounded-full border border-glass-border"></canvas>
                         </div>
                     </div>
-                    <div class="mt-2">
-                        <label class="text-xs text-gray-500">Balance</label>
-                        <input type="range" id="splitBalance" class="studio-slider" min="-100" max="100" step="1"
-                            value="0">
+                    <div class="grid grid-cols-3 gap-2 mt-2">
+                        <input type="range" id="splitShadowSat" class="studio-slider small" min="0" max="100" value="0"
+                            title="Shadow Saturation">
+                        <input type="range" id="splitMidtoneSat" class="studio-slider small" min="0" max="100" value="0"
+                            title="Midtone Saturation">
+                        <input type="range" id="splitHighlightSat" class="studio-slider small" min="0" max="100"
+                            value="0" title="Highlight Saturation">
+                    </div>
+                    <div class="mt-2 text-center text-[10px] text-gray-600">Balance</div>
+                    <input type="range" id="splitBalance" class="studio-slider" min="-100" max="100" step="1" val="0">
+                </div>
+
+                <!-- Vectorscope -->
+                <div class="mt-6">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-3 flex items-center justify-between">
+                        <span>Vectorscope</span>
+                        <button id="toggle-vectorscope"
+                            class="text-[10px] bg-white/5 px-2 py-1 rounded hover:bg-white/10 transition">Show/Hide</button>
+                    </h3>
+                    <div id="vectorscope-container"
+                        class="hidden relative aspect-square w-full bg-black rounded-lg border border-glass-border overflow-hidden">
+                        <canvas id="vectorscope-canvas" width="256" height="256"
+                            class="w-full h-full object-contain"></canvas>
                     </div>
                 </div>
 
@@ -765,7 +813,7 @@
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <label>Diffusion</label>
+                            <label>Mist Diffusion</label>
                             <span class="slider-value" data-for="diffusion">0</span>
                         </div>
                         <input type="range" id="diffusion" class="studio-slider" min="0" max="100" step="1" value="0">
@@ -782,6 +830,18 @@
 
                 <!-- 2. GRAIN SUB-PANEL -->
                 <div id="fx-grain" class="fx-subpanel hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Grain Mode</label>
+                        </div>
+                        <select id="grainType"
+                            class="w-full bg-glass border border-glass-border rounded text-xs text-gray-300 p-2">
+                            <option value="0">Digital (Gaussian)</option>
+                            <option value="1">Negative (Emulsion)</option>
+                            <option value="2">Slide (Micro-Grain)</option>
+                            <option value="3">Analog (35mm Scan)</option>
+                        </select>
+                    </div>
                     <div class="slider-group">
                         <div class="slider-header">
                             <label>Global Grain</label>
@@ -1766,6 +1826,92 @@
         </div>
     </div>
 
+    <!-- Save Preset Modal -->
+    <div id="save-preset-modal"
+        class="fixed inset-0 z-[110] bg-midnight/90 backdrop-blur-sm flex items-center justify-center hidden">
+        <div class="bg-glass backdrop-blur-glass border border-glass-border rounded-2xl p-6 w-[24rem] max-w-[95vw]">
+            <h3 class="text-lg font-bold text-white mb-4">Save Preset</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-gray-500 mb-2 uppercase tracking-wider">Preset Name</label>
+                    <input type="text" id="preset-name-input"
+                        class="w-full bg-white/5 border border-glass-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-hot-pink transition-all"
+                        placeholder="Enter preset name...">
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-6">
+                    <button id="save-preset-cancel"
+                        class="py-3 px-4 rounded-xl bg-white/5 text-white text-sm font-semibold hover:bg-white/10 transition-all">Cancel</button>
+                    <button id="save-preset-confirm"
+                        class="py-3 px-4 rounded-xl bg-hot-pink text-white text-sm font-semibold hover:bg-hot-pink/90 transition-all">Save
+                        Preset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Settings Modal -->
+    <div id="export-settings-modal"
+        class="fixed inset-0 z-[110] bg-midnight/90 backdrop-blur-sm flex items-center justify-center hidden">
+        <div class="bg-glass backdrop-blur-glass border border-glass-border rounded-2xl p-6 w-[28rem] max-w-[95vw]">
+            <h3 class="text-lg font-bold text-white mb-6 font-mono">EXPORT SETTINGS</h3>
+
+            <div class="space-y-6">
+                <!-- Resolution -->
+                <div class="space-y-3">
+                    <label class="block text-[10px] text-gray-500 uppercase tracking-[0.2em]">Resolution</label>
+                    <select id="export-resolution"
+                        class="w-full bg-white/5 border border-glass-border rounded-xl px-4 py-3 text-white appearance-none focus:outline-none focus:border-hot-pink">
+                        <option value="original">Original (Full Quality)</option>
+                        <option value="2048">2K (2048px)</option>
+                        <option value="1080">HD (1080px)</option>
+                        <option value="custom">Custom Width</option>
+                    </select>
+                </div>
+
+                <!-- Custom Width (Hidden by default) -->
+                <div id="custom-resolution-group" class="space-y-3 hidden">
+                    <label class="block text-[10px] text-gray-500 uppercase tracking-[0.2em]">Width (px)</label>
+                    <input type="number" id="export-custom-width"
+                        class="w-full bg-white/5 border border-glass-border rounded-xl px-4 py-2 text-white font-mono"
+                        value="1920">
+                </div>
+
+                <!-- Quality -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">JPEG Quality</label>
+                        <span id="export-quality-value" class="text-sm font-mono text-hot-pink">95%</span>
+                    </div>
+                    <input type="range" id="export-quality" class="studio-slider" min="50" max="100" value="95">
+                </div>
+
+                <!-- Metadata -->
+                <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-glass-border">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-sm text-white">Preserve Metadata (EXIF)</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input id="export-exif" type="checkbox" checked class="sr-only peer">
+                        <div
+                            class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-hot-pink">
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-8">
+                <button id="export-settings-cancel"
+                    class="py-3 px-4 rounded-xl bg-white/5 text-white text-sm font-semibold hover:bg-white/10 transition-all font-mono uppercase tracking-widest">Cancel</button>
+                <button id="export-settings-save"
+                    class="py-3 px-4 rounded-xl bg-deep-blue text-white text-sm font-semibold hover:bg-deep-blue/90 border border-blue-400/30 transition-all font-mono uppercase tracking-widest">Done</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Dynamic Startup Toast -->
     <div id="startup-toast"
         class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[200] pointer-events-none transition-opacity duration-1000">
@@ -1778,17 +1924,24 @@
     <script src="js/presets.js?v=14"></script>
     <script src="js/storage.js?v=14"></script>
     <script src="js/histogram.js?v=14"></script>
-    <script src="js/tone-curve.js?v=14"></script>
-    <script src="js/history.js?v=14"></script>
-    <script src="js/state-manager.js?v=14"></script>
+    <script src="js/history.js"></script>
+    <!-- Tools -->
+    <script src="js/tone-curve.js"></script>
+    <script src="js/color-wheels.js"></script>
+    <script src="js/vectorscope.js"></script>
+    <script src="js/webgl-engine.js"></script>
+    <script src="js/export-manager.js"></script>
     <script src="js/crop-tool.js?v=14"></script>
     <script src="js/gesture-handler.js?v=14"></script>
-    <script src="js/export-manager.js?v=14"></script>
     <script src="js/raw-decoder.js?v=14"></script>
     <script src="js/lut-exporter.js?v=14"></script>
-    <script src="js/webgl-engine.js?v=16"></script>
     <script src="js/textures.js?v=14"></script>
+    <script src="js/audio-engine.js?v=1"></script>
     <script src="js/app.js?v=16"></script>
+
+    <!-- Global CRT Overlay -->
+    <div id="crt-overlay"
+        class="pointer-events-none fixed inset-0 z-[999] opacity-0 transition-opacity duration-500 hidden"></div>
 
     <!-- Service Worker Registration -->
     <script>
