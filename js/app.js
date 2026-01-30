@@ -29,6 +29,12 @@ class UntitledStudio {
         this.customPresets = [];
         this.favoritePresets = JSON.parse(localStorage.getItem('favoritePresets') || '[]');
         this.museMode = localStorage.getItem('museMode') === 'true';
+        this.exportSettings = {
+            resolution: 'original',
+            customWidth: 1920,
+            quality: 95,
+            preserveExif: true
+        };
 
         // Initialize Startup Toast (Random)
         const toastContainer = document.getElementById('startup-toast');
@@ -205,6 +211,7 @@ class UntitledStudio {
         // initMasks is called inside init() typically, but initSecretMode is new.
         // Let's call them here to be safe or check init()
         this.initSecretMode();
+        this.initWasm(); // Initialize WebAssembly Core
 
         // LUT Parser
         this.lutParser = new LUTParser();
@@ -356,8 +363,8 @@ class UntitledStudio {
                 console.error('WebGL Engine init failed:', e);
                 // Don't halt the app; allow presets to load
             }
-            // Wrap critical async paths to prevent UI blocking
-            await storage.init().catch(err => console.error('Storage init failed:', err));
+            // storage.init() is now auto-called in StorageManager constructor
+            // ensuringReady() in storage methods handle concurrency.
 
             this.initWorker();
             this.initHistogram();
@@ -374,7 +381,7 @@ class UntitledStudio {
             this.initPresetAccordion(); // New: Collapsible Menu
             this.initCRT();         // CRT Visualization Mode
 
-            await this.loadSavedImages().catch(err => console.warn('Failed to load saved images:', err));
+            await this.loadSavedSessions().catch(err => console.warn('Failed to load saved sessions:', err));
             await this.loadCustomPresets().catch(err => console.warn('Failed to load presets:', err));
             this.populatePresets('all');
 
@@ -680,7 +687,7 @@ class UntitledStudio {
             exportFormat: document.getElementById('export-format'),
             exportBtn: document.getElementById('export-btn'),
             exportModal: document.getElementById('export-modal'),
-            exportSettingsBtn: document.getElementById('export-settings-btn'),
+            exportSettingsBtn: document.querySelectorAll('#export-settings-btn'),
             exportSettingsModal: document.getElementById('export-settings-modal'),
             exportResolution: document.getElementById('export-resolution'),
             exportCustomWidth: document.getElementById('export-custom-width'),
@@ -692,7 +699,7 @@ class UntitledStudio {
             exportSettingsSave: document.getElementById('export-settings-save'),
             progressRingFill: document.querySelector('.progress-ring-fill'),
             progressText: document.querySelector('.progress-text'),
-            savePresetBtn: document.getElementById('save-preset-btn'),
+            savePresetBtn: document.querySelectorAll('#save-preset-btn'),
 
             // Save Preset Modal
             savePresetModal: document.getElementById('save-preset-modal'),
@@ -730,8 +737,29 @@ class UntitledStudio {
     }
 
     initEngine() {
-        this.engine = new WebGLEngine(this.elements.canvas);
+        // Mobile Optimization: Limit render size on smaller screens
+        // Desktop: 4K (4096), Mobile: 2K (2048) or even 1080p if very small
+        const isMobile = window.innerWidth < 800;
+        const config = {
+            maxRenderSize: isMobile ? 2048 : 4096
+        };
+        console.log(`[App] Initializing Engine (Mobile=${isMobile}, MaxSize=${config.maxRenderSize})`);
+
+        this.engine = new WebGLEngine(this.elements.canvas, config);
         this.currentAdjustments = this.engine.getAdjustments();
+    }
+
+    async initWasm() {
+        try {
+            const { WasmLoader } = await import('./wasm-loader.js');
+            this.wasmLoader = new WasmLoader();
+            const success = await this.wasmLoader.init();
+            if (success) {
+                console.log('[App] Wasm Core Integrated.');
+            }
+        } catch (e) {
+            console.warn('[App] Wasm initialization skipped.', e);
+        }
     }
 
     initWorker() {
@@ -742,6 +770,24 @@ class UntitledStudio {
             console.log('✓ Batch Worker initialized');
         } catch (error) {
             console.warn('Web Worker not available:', error);
+        }
+    }
+
+    async updateWasmGrain() {
+        if (!this.wasmLoader || !this.wasmLoader.isReady || !this.engine) return;
+
+        // Settings
+        const size = 512; // Tiled grain size
+        const seed = this.engine.adjustments.filmSeed || Math.random() * 1000;
+
+        // Generate buffer in Rust
+        const buffer = this.wasmLoader.generateGrain(size, size, 255, seed);
+
+        if (buffer) {
+            // Tell engine to use Wasm grain instead of procedural
+            this.engine.setAdjustment('useWasmGrain', true);
+            // Upload to GPU
+            this.engine.updateTextureFromBuffer('u_wasmGrainTexture', buffer, size, size);
         }
     }
 
@@ -961,6 +1007,7 @@ class UntitledStudio {
                 // If specific listeners exist, this runs twice (harmless)
                 // If NO listener exists, this saves the day
                 if (name) {
+                    if (!this.engine) return;
                     const value = parseFloat(e.target.value);
                     this.engine.setAdjustment(name, value);
 
@@ -979,7 +1026,14 @@ class UntitledStudio {
         this.initSplitViewControls();
         this.initUniversalSliders(); // Fix Missing FX
         const on = (el, event, handler) => {
-            if (el) el.addEventListener(event, handler);
+            if (!el) return;
+            if (el instanceof NodeList || Array.isArray(el)) {
+                el.forEach(e => { if (e) e.addEventListener(event, handler); });
+            } else if (el instanceof HTMLCollection) {
+                Array.from(el).forEach(e => { if (e) e.addEventListener(event, handler); });
+            } else {
+                el.addEventListener(event, handler);
+            }
         };
 
         // Secret Muse Mode Trigger
@@ -1372,18 +1426,6 @@ class UntitledStudio {
             on(exportLutBtn, 'click', () => this.exportLUT());
         }
 
-        // Randomize
-        const rndBtn = document.getElementById('randomize-seed-btn');
-        if (rndBtn) {
-            on(rndBtn, 'click', () => {
-                const seed = Math.random() * 100.0;
-                this.engine.setAdjustment('filmSeed', seed);
-                // Animate button slightly?
-                rndBtn.classList.add('scale-95');
-                setTimeout(() => rndBtn.classList.remove('scale-95'), 100);
-            });
-        }
-
 
         if (this.elements.blendModeBtns) {
             this.elements.blendModeBtns.forEach(btn => {
@@ -1508,67 +1550,6 @@ class UntitledStudio {
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => this.handleKeyboard(e));
-
-        // --- TOOLBAR SAVE PRESET ---
-        if (this.elements.savePresetBtn) {
-            this.elements.savePresetBtn.addEventListener('click', () => {
-                this.showSavePresetModal();
-            });
-        }
-
-        // --- PRESET MODAL ---
-        if (this.elements.savePresetCancel) {
-            this.elements.savePresetCancel.addEventListener('click', () => {
-                this.hideSavePresetModal();
-            });
-        }
-
-        if (this.elements.savePresetConfirm) {
-            this.elements.savePresetConfirm.addEventListener('click', () => {
-                this.saveCustomPreset();
-            });
-        }
-
-        if (this.elements.presetNameInput) {
-            this.elements.presetNameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') this.saveCustomPreset();
-            });
-        }
-
-        // --- EXPORT SETTINGS ---
-        if (this.elements.exportSettingsBtn) {
-            this.elements.exportSettingsBtn.addEventListener('click', () => {
-                this.showExportSettings();
-            });
-        }
-
-        if (this.elements.exportSettingsCancel) {
-            this.elements.exportSettingsCancel.addEventListener('click', () => {
-                this.hideExportSettings();
-            });
-        }
-
-        if (this.elements.exportSettingsSave) {
-            this.elements.exportSettingsSave.addEventListener('click', () => {
-                this.saveExportSettings();
-            });
-        }
-
-        if (this.elements.exportResolution) {
-            this.elements.exportResolution.addEventListener('change', (e) => {
-                if (this.elements.customResolutionGroup) {
-                    this.elements.customResolutionGroup.classList.toggle('hidden', e.target.value !== 'custom');
-                }
-            });
-        }
-
-        if (this.elements.exportQuality) {
-            this.elements.exportQuality.addEventListener('input', (e) => {
-                if (this.elements.exportQualityValue) {
-                    this.elements.exportQualityValue.textContent = e.target.value + '%';
-                }
-            });
-        }
     }
 
     openFilePicker() {
@@ -1775,7 +1756,9 @@ class UntitledStudio {
         // Code to show placeholder
         document.getElementById('placeholder-container').style.opacity = '1';
         document.getElementById('canvas-container').style.opacity = '0';
-        this.engine.currentImage = null;
+        if (this.engine) {
+            this.engine.currentImage = null;
+        }
     }
 
     // --- GALLERY MODE ---
@@ -1946,7 +1929,9 @@ class UntitledStudio {
         this.updateHistogram();
 
         // Push initial state to history
-        this.history.pushImmediate(imageData.adjustments, 'Load Image');
+        if (this.history) {
+            this.history.pushImmediate(imageData.adjustments, 'Load Image');
+        }
 
         // Hide crop tool
         if (this.cropTool) {
@@ -2055,8 +2040,17 @@ class UntitledStudio {
         }
 
         // Apply to engine
-        this.engine.setAdjustment(name, value);
-        this.currentAdjustments[name] = value;
+        if (this.engine) {
+            this.engine.setAdjustment(name, value);
+
+            // Trigger Wasm Grain update if applicable
+            if (this.wasmLoader && this.wasmLoader.isReady && (name === 'grainGlobal' || name === 'grainShadow' || name === 'grainHighlight')) {
+                this.updateWasmGrain();
+            }
+        }
+        if (this.currentAdjustments) {
+            this.currentAdjustments[name] = value;
+        }
 
         // Haptic Detents
         if (navigator.vibrate) {
@@ -2187,6 +2181,7 @@ class UntitledStudio {
     }
 
     undo() {
+        if (!this.history) return;
         const state = this.history.undo();
         if (state) {
             this.applyState(state);
@@ -2194,6 +2189,7 @@ class UntitledStudio {
     }
 
     redo() {
+        if (!this.history) return;
         const state = this.history.redo();
         if (state) {
             this.applyState(state);
@@ -2302,7 +2298,9 @@ class UntitledStudio {
             this.cropTool.hide();
 
             // Push to history
-            this.history.pushImmediate(this.engine.getAdjustments(), 'Crop Applied');
+            if (this.history) {
+                this.history.pushImmediate(this.engine.getAdjustments(), 'Crop Applied');
+            }
         }, 'image/jpeg', 0.95);
     }
 
@@ -2398,22 +2396,41 @@ class UntitledStudio {
 
         // Helper to generate CSS filter from preset values
         const generatePresetFilter = (p) => {
-            const sat = 100 + (p.saturation || 0);
+            // Amplify values for visible preview
+            const sat = 100 + ((p.saturation || 0) * 1.5);
             const bright = 100 + ((p.exposure || 0) * 50);
-            const contrast = 100 + (p.contrast || 0);
-            const hueRotate = (p.temperature || 0) * 0.5; // Approximate hue shift from temp
-            return `saturate(${sat}%) brightness(${bright}%) contrast(${contrast}%) hue-rotate(${hueRotate}deg)`;
+            const contrast = 100 + ((p.contrast || 0) * 1.2);
+
+            // Temperature & Tint APPROXIMATION
+            // We need to exaggerate these to show "Warm vs Cool" on small swatches
+
+            let sepia = 0;
+            let hueRotate = (p.tint || 0) * 2.0; // Boost tint visibility
+
+            if (p.temperature > 0) {
+                // Warm
+                sepia = p.temperature * 1.5;
+                hueRotate += p.temperature * 0.5;
+            } else if (p.temperature < 0) {
+                // Cool (Blueish shift via hue rotate)
+                hueRotate += p.temperature * 0.5;
+                // Slight saturation boost to make blue pop?
+            }
+
+            // Split Toning (Check different naming keys if any)
+            // It seems presets use 'splitHighlightHue' but grep failed?
+            // Checking standard 'hslRed', etc might be better?
+            // For now, let's trust the standard temp/tint are dominant.
+
+            // CLAMP values
+            return `saturate(${Math.max(0, sat)}%) brightness(${Math.max(0, bright)}%) contrast(${Math.max(0, contrast)}%) sepia(${Math.max(0, Math.min(100, sepia))}%) hue-rotate(${hueRotate}deg)`;
         };
 
-        // Base color swatches (red, orange, yellow, green, cyan, blue, magenta, skin)
-        const swatchColors = ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#1abc9c', '#3498db', '#9b59b6', '#deb887'];
-
+        // Render Simplified Wheel Cards (2 swatches instead of 8 for performance)
         wheel.innerHTML = presetsToRender.map(preset => {
+            // Simplified preview: Just red and blue to show contrast/tone shift
+            // This reduces DOM elements per card from 9 to 3
             const filter = generatePresetFilter(preset);
-            const swatchesHtml = swatchColors.map(color =>
-                `<div style="background-color: ${color}; filter: ${filter};"></div>`
-            ).join('');
-
             const isFavorite = this.favoritePresets.includes(preset.name);
             const starClass = isFavorite ? 'text-yellow-400' : 'text-gray-500 opacity-0 group-hover:opacity-100';
 
@@ -2425,8 +2442,9 @@ class UntitledStudio {
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                     </svg>
                 </button>
-                <div class="wheel-card-preview preset-swatch-grid">
-                    ${swatchesHtml}
+                <div class="wheel-card-preview preset-swatch-grid simple">
+                   <div style="background-color: #e74c3c; filter: ${filter};"></div>
+                   <div style="background-color: #3498db; filter: ${filter};"></div>
                 </div>
                 <div class="wheel-card-label flex items-center justify-center gap-1">
                     ${preset.name}
@@ -2471,11 +2489,18 @@ class UntitledStudio {
                         nameDisplay.classList.remove('opacity-0');
                     }
 
-                    // Apply Preset (Debounce could be added here if needed, but direct apply feels snappier if performant)
+                    // DEBOUNCED PRESET APPLICATION
+                    // Clear pending timeout
+                    if (this.presetDebounceTimer) clearTimeout(this.presetDebounceTimer);
+
                     if (this.currentPresetName !== presetName) {
-                        this.applyPreset(presetName);
-                        // Haptic feedback
-                        if (navigator.vibrate) navigator.vibrate(5);
+                        // Apply immediately if not scrolling fast/first load (simulated check)? 
+                        // No, always debounce slightly to prevent "machine gun" effect
+                        this.presetDebounceTimer = setTimeout(() => {
+                            this.applyPreset(presetName);
+                            // Haptic feedback
+                            if (navigator.vibrate) navigator.vibrate(5);
+                        }, 150); // 150ms debounce
                     }
                 }
             });
@@ -2630,7 +2655,9 @@ class UntitledStudio {
         this.updateSlidersFromAdjustments(adjustments);
         this.updateHistogram();
 
-        this.history.pushImmediate(adjustments, `Preset: ${name}`);
+        if (this.history) {
+            this.history.pushImmediate(adjustments, `Preset: ${name}`);
+        }
     }
 
     /**
@@ -2752,6 +2779,12 @@ class UntitledStudio {
         }
     }
 
+    showExportSettings() {
+        if (this.elements.exportSettingsModal) {
+            this.elements.exportSettingsModal.classList.remove('hidden');
+        }
+    }
+
     hideExportSettings() {
         if (this.elements.exportSettingsModal) {
             this.elements.exportSettingsModal.classList.add('hidden');
@@ -2795,19 +2828,71 @@ class UntitledStudio {
     }
 
     updateSlidersFromAdjustments(adjustments) {
+        if (!adjustments) return;
+
+        // 1. Standard Sliders
         document.querySelectorAll('.studio-slider').forEach(slider => {
             const name = slider.id;
-            if (name in adjustments && typeof adjustments[name] === 'number') {
-                slider.value = adjustments[name];
-
-                const valueDisplay = document.querySelector(`.slider-value[data-for="${name}"]`);
-                if (valueDisplay) {
-                    valueDisplay.textContent = name === 'exposure' ? adjustments[name].toFixed(2) :
-                        name === 'grainSize' ? adjustments[name].toFixed(1) :
-                            adjustments[name];
+            if (name in adjustments) {
+                const val = adjustments[name];
+                if (typeof val === 'number') {
+                    slider.value = val;
+                    const valueDisplay = document.querySelector(`.slider-value[data-for="${name}"]`);
+                    if (valueDisplay) {
+                        valueDisplay.textContent = name === 'exposure' ? val.toFixed(2) :
+                            name === 'grainSize' ? val.toFixed(1) :
+                                Math.round(val);
+                    }
                 }
             }
         });
+
+        // 2. HSL Mixer (Update currently active channel sliders)
+        if (this.hslChannel) {
+            this.switchHSLChannel(this.hslChannel);
+        }
+
+        // 3. Color Wheels (Shadows/Midtones/Highlights)
+        if (this.shadowWheel) {
+            this.shadowWheel.hue = adjustments.splitShadowHue || 0;
+            this.shadowWheel.sat = adjustments.splitShadowSat || 0;
+            this.shadowWheel.draw();
+        }
+        if (this.midtoneWheel) {
+            this.midtoneWheel.hue = adjustments.splitMidtoneHue || 0;
+            this.midtoneWheel.sat = adjustments.splitMidtoneSat || 0;
+            this.midtoneWheel.draw();
+        }
+        if (this.highlightWheel) {
+            this.highlightWheel.hue = adjustments.splitHighlightHue || 0;
+            this.highlightWheel.sat = adjustments.splitHighlightSat || 0;
+            this.highlightWheel.draw();
+        }
+
+        // 4. Output Transform Buttons
+        if (this.elements.printStockBtns && adjustments.outputTransform !== undefined) {
+            this.elements.printStockBtns.forEach(btn => {
+                const mode = parseInt(btn.dataset.mode);
+                const isActive = mode === adjustments.outputTransform;
+                btn.classList.toggle('active', isActive);
+                btn.classList.toggle('bg-hot-pink/20', isActive);
+                btn.classList.toggle('text-hot-pink', isActive);
+                btn.classList.toggle('font-semibold', isActive);
+            });
+        }
+
+        // 5. Checkboxes (Toggles)
+        const toggles = {
+            'border-toggle': 'borderEnabled',
+            'gallery-frame-toggle': 'galleryFrame',
+            'clipping-toggle': 'showClipping'
+        };
+        for (const [id, adjKey] of Object.entries(toggles)) {
+            const el = document.getElementById(id);
+            if (el && adjustments[adjKey] !== undefined) {
+                el.checked = !!adjustments[adjKey];
+            }
+        }
     }
 
     syncAllImages() {
@@ -2860,7 +2945,9 @@ class UntitledStudio {
             }
         }
 
-        this.history.pushImmediate(adjustments, 'Reset All');
+        if (this.history) {
+            this.history.pushImmediate(adjustments, 'Reset All');
+        }
     }
 
     async exportImage() {
@@ -4030,6 +4117,40 @@ class UntitledStudio {
         reader.readAsText(file);
         // Reset input
         e.target.value = '';
+    }
+
+    showExportSettings() {
+        if (this.elements.exportSettingsModal) {
+            this.elements.exportSettingsModal.classList.remove('hidden');
+            // Sync UI with state
+            if (this.elements.exportResolution) this.elements.exportResolution.value = this.exportSettings.resolution;
+            if (this.elements.exportCustomWidth) this.elements.exportCustomWidth.value = this.exportSettings.customWidth;
+            if (this.elements.exportQuality) this.elements.exportQuality.value = this.exportSettings.quality;
+            if (this.elements.exportQualityValue) this.elements.exportQualityValue.textContent = this.exportSettings.quality + '%';
+            if (this.elements.exportExif) this.elements.exportExif.checked = this.exportSettings.preserveExif;
+
+            // Toggle custom width visibility
+            if (this.elements.customResolutionGroup) {
+                this.elements.customResolutionGroup.classList.toggle('hidden', this.exportSettings.resolution !== 'custom');
+            }
+        }
+    }
+
+    hideExportSettings() {
+        if (this.elements.exportSettingsModal) {
+            this.elements.exportSettingsModal.classList.add('hidden');
+        }
+    }
+
+    saveExportSettings() {
+        if (this.elements.exportResolution) this.exportSettings.resolution = this.elements.exportResolution.value;
+        if (this.elements.exportCustomWidth) this.exportSettings.customWidth = parseInt(this.elements.exportCustomWidth.value) || 1920;
+        if (this.elements.exportQuality) this.exportSettings.quality = parseInt(this.elements.exportQuality.value) || 95;
+        if (this.elements.exportExif) this.exportSettings.preserveExif = this.elements.exportExif.checked;
+
+        this.hideExportSettings();
+        this.showToast('Export settings saved');
+        this.hapticFeedback('success');
     }
 
     initPresetAccordion() {

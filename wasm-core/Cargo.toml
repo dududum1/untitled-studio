@@ -1,0 +1,12 @@
+[package]
+name = "wasm-core"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+# We'll use a simple PCG or LCG RNG implementation to avoid dragging in the entire rand crate tree for sheer speed and binary size.

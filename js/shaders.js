@@ -140,6 +140,10 @@ const Shaders = {
 
         // Output Transform (Print Stock)
         uniform int u_outputTransform;     // 0=None, 1=Kodak 2383, 2=Fuji 3513
+
+        // Wasm Core Enhancements
+        uniform sampler2D u_wasmGrainTexture;
+        uniform bool u_useWasmGrain;
         
         in vec2 v_texCoord;
         out vec4 fragColor;
@@ -576,11 +580,14 @@ const Shaders = {
             
             // Generate Noise
             vec2 grainUV = uv * u_resolution / size;
-            float noise = random(grainUV + fract(u_time * 0.1));
+            float noise;
             
-            // Soft Light Blending Formula:
-            // (1.0 - 2.0 * noise) * (x^2) + 2.0 * noise * x if noise < 0.5
-            // But we can simplify for monochromatic noise overlay:
+            if (u_useWasmGrain) {
+                // Tiled texture sampling
+                noise = texture(u_wasmGrainTexture, fract(grainUV)).r;
+            } else {
+                noise = random(grainUV + fract(u_time * 0.1));
+            }
             
             vec3 noiseVec = vec3(noise);
             
@@ -1268,9 +1275,18 @@ const Shaders = {
     compositeFragment: `#version 300 es
         precision highp float;
         
-        uniform sampler2D u_image; // Original image
+        uniform sampler2D u_image; // Original image (from first pass)
         uniform sampler2D u_bloom; // Blurred highlights
         uniform sampler2D u_grainTexture; // Scanned grain texture (Grain 2.0)
+        uniform sampler2D u_originalImage; // Raw UNEDITED image (for split view)
+        
+        // Split View
+        uniform float u_splitPos; // -1.0 = off, 0.0 to 1.0 = position
+        
+        // Geometry (for original image sampling in split view)
+        uniform float u_contentRotation;
+        uniform float u_contentFlipX;
+        uniform float u_contentFlipY;
         
         // Bloom/Halation/Mist
         uniform float u_amount;      // Bloom/Halation Strength
@@ -1498,6 +1514,28 @@ const Shaders = {
             }
 
             fragColor = vec4(color, 1.0);
+
+            // 9. Split View (Before/After)
+            if (u_splitPos >= 0.0) {
+                // Determine if we are on the "original" side (left)
+                if (v_texCoord.x < u_splitPos) {
+                    // Sample from original image
+                    // We need to apply basic flip/rotate to match the processed side geometry
+                    vec2 origUV = v_texCoord;
+                    
+                    // Simple flip logic if needed
+                    if (u_contentFlipX > 0.5) origUV.x = 1.0 - origUV.x;
+                    if (u_contentFlipY > 0.5) origUV.y = 1.0 - origUV.y;
+                    
+                    fragColor = texture(u_originalImage, origUV);
+                }
+                
+                // Draw vertical divider line
+                float dist = abs(v_texCoord.x - u_splitPos);
+                if (dist < 0.001) {
+                    fragColor = vec4(1.0, 1.0, 1.0, 1.0); // White line
+                }
+            }
         }
     `,
     // Mask Generation (Phase 4)

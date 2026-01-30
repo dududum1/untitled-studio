@@ -17,3 +17,10 @@ package-lock.json
 tmp/
 temp/
 *.log
+
+# Wasm / Rust
+wasm-core/target/
+js/pkg/
+**/*.rs.bk
+debug/
+release/

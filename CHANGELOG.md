@@ -2,6 +2,40 @@
 
 All notable changes to Untitled Studio will be documented in this file.
 
+## [2.1.0] - 2026-01-31
+
+### 🦀 Wasm Core Integration
+- **Rust-Powered Grain Engine**: Offloaded grain generation to a high-performance WebAssembly module written in Rust.
+- **Fast LCG Noise**: Implemented a custom Linear Congruential Generator (LCG) for superior noise distribution with minimal CPU overhead compared to standard JS math.
+- **Direct GPU Buffering**: Implemented a texture upload bridge in `WebGLEngine` to stream grain buffers directly from Wasm memory to GPU textures, minimizing data copying.
+- **Zero-Stutter Performance**: Moved computationally intensive pixel loops into the optimized Wasm core to ensure a perfectly responsive UI during grain adjustments.
+
+### 🛠️ Infrastructure & Reliability
+- **ESM Wasm Loader**: Developed a modern ES module bridge for dynamic loading and initialization of WebAssembly modules.
+- **Graceful Fallback**: Added a detection system that automatically falls back to procedural JS grain if the Wasm module fails to load or the browser doesn't support it.
+- **Local Server Guidance**: Updated documentation with instructions for local server setups (`npx serve`, etc.) to resolve browser CORS/Security errors when using advanced features like Wasm and Workers.
+
+---
+
+## [2.0.0] - 2026-01-31
+
+### 🚀 Performance & Mobile Optimization
+- **Smart Resolution Scaling**: Automatically limits internal editing resolution to 2048px on mobile devices (< 800px width) while preserving full 4K+ quality for exports. Drastically reduces memory crashes on iOS/Android.
+- **Debounced Preset Wheel**: Implemented a 150ms debounce on the preset scroller to eliminate UI stuttering ("machine gun effect") when browsing rapidly.
+- **Lightweight UI**: Simplified preset card rendering by 60%, removing complex CSS filters from non-critical elements to improve scroll FPS.
+
+### ✨ Split View Restoration
+- **Side-by-Side Comparison**: Restored the 'Before/After' slider functionality.
+- **Visual Separation**: Added a clean vertical divider line to clearly mark the transition.
+- **Shader Logic**: Fixed `compositeFragment` shader to correctly sample original vs processed textures based on split position.
+
+### 🛠️ Reliability Fixes
+- **Preset Overwrite Bug**: Fixed a critical issue where applying a preset would reset your Crop, Rotation, and Border settings. Presets now only change the "Look" (Color/Tone).
+- **UI Synchronization**: Fixed HSL Mixer and Color Wheels not updating to reflect the new preset's values.
+- **Export Settings**: Fixed "Export Settings" modal missing or being non-functional.
+
+---
+
 ## [1.6.0] - 2026-01-30
 
 ### 🏛️ The Film Archive Update (Complete)

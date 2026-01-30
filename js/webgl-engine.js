@@ -5,9 +5,11 @@
  */
 
 class WebGLEngine {
-    constructor(canvas) {
+    constructor(canvas, config = {}) {
         this.canvas = canvas;
         this.gl = null;
+        this.config = config;
+        this.maxRenderSize = config.maxRenderSize || 4096; // Default safe limit
         this.program = null;
         this.texture = null;
         this.toneCurveLUT = null;
@@ -99,9 +101,6 @@ class WebGLEngine {
             splitPos: -1,
             rotation: 0,
             flipX: false,
-            splitPos: -1,
-            rotation: 0,
-            flipX: false,
             flipY: false,
             outputTransform: 0, // 0=None, 1=Kodak 2383, 2=Fuji 3513, 3=Cineon
             grainType: 0 // 0=Digital, 1=Negative, 2=Slide
@@ -164,10 +163,27 @@ class WebGLEngine {
     async loadImage(bitmap) {
         this.currentImage = bitmap;
 
-        // Resize canvas to match image
-        this.canvas.width = bitmap.width;
-        this.canvas.height = bitmap.height;
-        this.gl.viewport(0, 0, bitmap.width, bitmap.height);
+        // Calculate target size respecting maxRenderSize
+        let width = bitmap.width;
+        let height = bitmap.height;
+        const max = this.maxRenderSize;
+
+        if (width > max || height > max) {
+            const aspect = width / height;
+            if (width > height) {
+                width = max;
+                height = Math.round(width / aspect);
+            } else {
+                height = max;
+                width = Math.round(height * aspect);
+            }
+            console.log(`[Engine] Resizing for performance: ${bitmap.width}x${bitmap.height} -> ${width}x${height}`);
+        }
+
+        // Resize canvas to match image (or constrained size)
+        this.canvas.width = width;
+        this.canvas.height = height;
+        this.gl.viewport(0, 0, width, height);
 
         if (this.texture) {
             this.gl.deleteTexture(this.texture);
@@ -683,8 +699,30 @@ class WebGLEngine {
     }
 
     applyPreset(preset) {
+        // PRESERVE corrective/decorative state
+        const preserved = {
+            rotation: this.adjustments.rotation,
+            flipX: this.adjustments.flipX,
+            flipY: this.adjustments.flipY,
+            splitPos: this.adjustments.splitPos,
+            borderEnabled: this.adjustments.borderEnabled,
+            borderWidth: this.adjustments.borderWidth,
+            borderColor: this.adjustments.borderColor,
+            outputTransform: this.adjustments.outputTransform,
+            overlayOpacity: this.adjustments.overlayOpacity,
+            overlayBlendMode: this.adjustments.overlayBlendMode,
+            showClipping: this.adjustments.showClipping
+        };
+        const savedOverlayTex = this.overlayTexture;
+
+        // Reset to clear "look" from previous preset
         this.resetAdjustments();
 
+        // RESTORE preserved state
+        Object.assign(this.adjustments, preserved);
+        this.overlayTexture = savedOverlayTex;
+
+        // APPLY new preset look
         Object.keys(preset).forEach(key => {
             if (key !== 'name' && key !== 'category' && key in this.adjustments) {
                 this.adjustments[key] = preset[key];
@@ -1536,6 +1574,36 @@ class WebGLEngine {
         if (this.program) {
             this.gl.deleteProgram(this.program);
         }
+    }
+
+    /**
+     * Efficiently update a texture from a raw buffer (used by Wasm)
+     * @param {string} uniformName Name of the uniform to update
+     * @param {Uint8Array} buffer RGBA pixel data
+     * @param {number} width 
+     * @param {number} height 
+     */
+    updateTextureFromBuffer(uniformName, buffer, width, height) {
+        if (!this.gl) return;
+        const gl = this.gl;
+
+        // Find or create the texture for this uniform
+        if (!this.customTextures) this.customTextures = {};
+
+        let tex = this.customTextures[uniformName];
+        if (!tex) {
+            tex = gl.createTexture();
+            this.customTextures[uniformName] = tex;
+        }
+
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        this.render();
     }
     renderMaskOverlay(mask) {
         const gl = this.gl;

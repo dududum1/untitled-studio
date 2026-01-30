@@ -10,6 +10,12 @@ class StorageManager {
     constructor() {
         this.db = null;
         this.isReady = false;
+        this._readyPromise = this.init();
+    }
+
+    async ensuringReady() {
+        if (this.isReady) return;
+        await this._readyPromise;
     }
 
     /**
@@ -74,6 +80,7 @@ class StorageManager {
      * Save an image with its adjustments
      */
     async saveImage(imageData) {
+        await this.ensuringReady();
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['images'], 'readwrite');
             const store = transaction.objectStore('images');
@@ -95,6 +102,7 @@ class StorageManager {
      * Load an image by ID
      */
     async loadImage(id) {
+        await this.ensuringReady();
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['images'], 'readonly');
             const store = transaction.objectStore('images');
@@ -109,6 +117,7 @@ class StorageManager {
      * Get all stored images
      */
     async getAllImages() {
+        await this.ensuringReady();
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['images'], 'readonly');
             const store = transaction.objectStore('images');
@@ -123,6 +132,7 @@ class StorageManager {
      * Delete an image by ID
      */
     async deleteImage(id) {
+        await this.ensuringReady();
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['images'], 'readwrite');
             const store = transaction.objectStore('images');
@@ -137,6 +147,7 @@ class StorageManager {
      * Save a custom preset
      */
     async savePreset(preset) {
+        await this.ensuringReady();
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['presets'], 'readwrite');
             const store = transaction.objectStore('presets');
@@ -157,6 +168,7 @@ class StorageManager {
      * Get all custom presets
      */
     async getAllPresets() {
+        await this.ensuringReady();
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['presets'], 'readonly');
             const store = transaction.objectStore('presets');
@@ -171,6 +183,7 @@ class StorageManager {
      * Delete a custom preset
      */
     async deletePreset(id) {
+        await this.ensuringReady();
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['presets'], 'readwrite');
             const store = transaction.objectStore('presets');
@@ -185,6 +198,7 @@ class StorageManager {
      * Save a setting
      */
     async saveSetting(key, value) {
+        await this.ensuringReady();
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['settings'], 'readwrite');
             const store = transaction.objectStore('settings');
@@ -199,6 +213,7 @@ class StorageManager {
      * Get a setting
      */
     async getSetting(key) {
+        await this.ensuringReady();
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['settings'], 'readonly');
             const store = transaction.objectStore('settings');
@@ -242,6 +257,7 @@ class StorageManager {
      * Clear all data (for debugging)
      */
     async clearAll() {
+        await this.ensuringReady();
         const stores = ['images', 'presets', 'settings', 'history', 'textures'];
 
         for (const storeName of stores) {
@@ -290,6 +306,7 @@ class StorageManager {
      * Get all custom textures
      */
     async getAllTextures() {
+        await this.ensuringReady();
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['textures'], 'readonly');
             const store = transaction.objectStore('textures');
@@ -304,6 +321,7 @@ class StorageManager {
      * Delete a texture
      */
     async deleteTexture(id) {
+        await this.ensuringReady();
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['textures'], 'readwrite');
             const store = transaction.objectStore('textures');
