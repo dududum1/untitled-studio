@@ -48,6 +48,15 @@ A massive expansion converting the app into a "Museum Grade" film emulation libr
 - **Sticky Navigation**: Group headers (Manufacturers, Archives, Creative) stay pinned during scroll.
 - **Smooth Interaction**: Added chevron animations and height transitions for a premium Feel.
 
+### ☢️ Chaos Toast System
+- **Dynamic Startup**: Messages now simulate a degrading film lab hardware environment.
+- **Visual Types**:
+  - **Normal (60%)**: Green "Kodak Viewfinder" HUD style.
+  - **Warning (15%)**: Yellow flickering alerts (e.g., "Developer temp critical").
+  - **Critical (10%)**: Red shaking fatal errors (e.g., "Film jammed").
+  - **ASCII (15%)**: Retro "DND" logo logic.
+- **Aesthetic**: Digital mono-spaced font with glow effects and technical borders.
+
 ### 🧹 Fixes & Improvements
 - **Database Repair**: Fixed syntax error in `presets.js` causing database load failures.
 - **Refactor**: Complete code cleanup of the preset loading engine.

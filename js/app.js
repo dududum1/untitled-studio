@@ -27,15 +27,78 @@ class UntitledStudio {
         this.favoritePresets = JSON.parse(localStorage.getItem('favoritePresets') || '[]');
         this.museMode = localStorage.getItem('museMode') === 'true';
 
-        // Initialize Startup Toast
-        setTimeout(() => {
-            const toast = document.getElementById('ascii-toast');
-            if (toast) {
-                toast.classList.add('hidden');
-                // Remove from DOM after fade out to clean up
-                setTimeout(() => toast.remove(), 1000);
+        // Initialize Startup Toast (Random)
+        const toastContainer = document.getElementById('startup-toast');
+        if (toastContainer) {
+            // 1. Define Message Pools
+            const normalMessages = [
+                "Calibrating scanner lens...",
+                "Replenishing C-41 chemistry...",
+                "Spooling film to take-up reel...",
+                "Agitating developer tank...",
+                "Scanning resolution: 4000 DPI...",
+                "Developing chemicals... please wait.",
+                "When yah kamera fuji"
+            ];
+
+            const warningMessages = [
+                "WARN: Developer temp critical (39°C)...",
+                "Stabilizer exhausted. Replenish immediately.",
+                "Scanner drum imbalance detected.",
+                "Halation matrix desync. Retrying...",
+                "WARN: Silver retention high in bleach bypass.",
+                "Dust removal algorithm failing...",
+                "Memory low: Unable to cache grain structure."
+            ];
+
+            const errorMessages = [
+                "FATAL: Film jammed in transport gate.",
+                "ERR_LIGHT_LEAK: Massive fogging detected.",
+                "CRITICAL: Emulsion melting. Process halted.",
+                "ERR_CORRUPT: Negative density unreadable.",
+                "SYSTEM FAILURE: Scanner bulb blowout.",
+                "ERR_404: Film stock profile not found.",
+                "BUFFER_OVERFLOW: Grain engine crash.",
+                "FATAL: Shutter curtain stuck open."
+            ];
+
+            const asciiDND = `
+██████╗ ███╗   ██╗██████╗
+██╔══██╗████╗  ██║██╔══██╗
+██║  ██║██╔██╗ ██║██║  ██║
+██║  ██║██║╚██╗██║██║  ██║
+██████╔╝██║ ╚████║██████╔╝
+╚═════╝ ╚═╝  ╚═══╝╚═════╝`;
+
+            // 15% chance for ASCII DND, else random text
+            const rand = Math.random();
+            let contentHTML = '';
+
+            if (rand < 0.15) {
+                contentHTML = `<div class="ascii-content">${asciiDND}</div>`;
+            } else if (rand < 0.75) {
+                // 60% Normal (Green HUD)
+                const msg = normalMessages[Math.floor(Math.random() * normalMessages.length)];
+                contentHTML = `<div class="viewfinder-hud">${msg}</div>`;
+            } else if (rand < 0.90) {
+                // 15% Warning (Yellow Flicker)
+                const msg = warningMessages[Math.floor(Math.random() * warningMessages.length)];
+                contentHTML = `<div class="viewfinder-hud toast-warning">${msg}</div>`;
+            } else {
+                // 10% Critical Error (Red Shake)
+                const msg = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+                contentHTML = `<div class="viewfinder-hud toast-error">${msg}</div>`;
             }
-        }, 5000); // 5 seconds
+
+            // 3. Inject and Animate
+            toastContainer.innerHTML = contentHTML;
+
+            // Fade out
+            setTimeout(() => {
+                toastContainer.classList.add('opacity-0');
+                setTimeout(() => toastContainer.remove(), 1000);
+            }, 4000);
+        }
 
         // HOLOGRAPHIC PRISM TILT EFFECT
         const placeholderContainer = document.getElementById('placeholder-container');
@@ -988,7 +1051,6 @@ class UntitledStudio {
         });
 
         // Preset categories (Delegated or updated)
-        this.initPresetAccordion();
         this.elements.presetBrowser.addEventListener('click', (e) => {
             const btn = e.target.closest('.preset-category');
             if (btn) {
@@ -2143,13 +2205,8 @@ class UntitledStudio {
             });
         } else {
             console.log(`[Presets] Loading category: ${category}`);
-            // If category is the secret one, only show if unlocked
-            if (category === 'muse' && !this.museMode) {
-                presetsToRender = [];
-            } else {
-                const rawPresets = getPresetsByCategory(category) || [];
-                presetsToRender = rawPresets.filter(p => !p.hidden || this.museMode);
-            }
+            const rawPresets = getPresetsByCategory(category) || [];
+            presetsToRender = rawPresets.filter(p => !p.hidden);
         }
 
         if (presetsToRender.length === 0) {

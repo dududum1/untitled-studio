@@ -4260,6 +4260,122 @@ const FilmPresets = {
         }
     ],
 
+    // ============ MUSE (STARTER PACK) ============
+    muse: [
+        {
+            name: "Velvet Goldmine",
+            category: "muse",
+            grainType: 1,
+            contrast: 10,
+            temperature: 15,
+            vibrance: 20,
+            saturation: 5,
+            shadows: 10,
+            bloomStrength: 15,
+            hsl: [{ channel: "yellow", sat: 20, lum: 10 }]
+        },
+        {
+            name: "Porcelain Skin",
+            category: "muse",
+            grainType: 1,
+            contrast: -10,
+            exposure: 0.1,
+            whites: 20,
+            saturation: -20,
+            vibrance: -10,
+            bloomStrength: 30,
+            bloomThreshold: 60
+        },
+        {
+            name: "Midnight in Paris",
+            category: "muse",
+            grainType: 2,
+            contrast: 20,
+            temperature: -20,
+            tint: 5,
+            shadows: -15,
+            blacks: -10,
+            vibrance: -5,
+            fade: 10
+        },
+        {
+            name: "Saffron Spice",
+            category: "muse",
+            grainType: 1,
+            temperature: 25,
+            tint: 10,
+            saturation: 15,
+            contrast: 15,
+            hsl: [{ channel: "orange", sat: 20 }, { channel: "red", hue: 15 }]
+        },
+        {
+            name: "Ethereal Glow",
+            category: "muse",
+            grainType: 2,
+            exposure: 0.15,
+            contrast: -15,
+            bloomStrength: 50,
+            bloomThreshold: 40,
+            saturation: -10,
+            whites: 10
+        },
+        {
+            name: "Noir Femme",
+            category: "muse",
+            grainType: 1,
+            saturation: -100,
+            contrast: 30,
+            highlights: -10,
+            shadows: 20,
+            bloomStrength: 15,
+            grain: 20
+        },
+        {
+            name: "Crimson Peak",
+            category: "muse",
+            grainType: 1,
+            contrast: 25,
+            temperature: 10,
+            tint: 30,
+            splitShadowHue: 0, // Red
+            splitShadowSat: 20,
+            splitHighlightHue: 200, // Cyan
+            splitHighlightSat: 15
+        },
+        {
+            name: "Azure Dreams",
+            category: "muse",
+            grainType: 2,
+            temperature: -15,
+            contrast: 10,
+            blacks: 10,
+            hsl: [{ channel: "blue", sat: 20, lum: 10 }, { channel: "cyan", sat: 15 }],
+            fade: 15
+        },
+        {
+            name: "Golden Era",
+            category: "muse",
+            grainType: 1,
+            temperature: 30,
+            contrast: 5,
+            saturation: -20,
+            vibrance: 10,
+            texture: "dust_1", // Assuming texture support or ignored
+            grain: 15
+        },
+        {
+            name: "Faded Memory",
+            category: "muse",
+            grainType: 1,
+            contrast: -20,
+            exposure: -0.05,
+            blacks: 30,
+            whites: -20,
+            temperature: 10,
+            fade: 40,
+            grain: 25
+        }
+    ]
 };
 
 /**

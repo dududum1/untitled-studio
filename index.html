@@ -1259,26 +1259,38 @@
             <div id="presets-panel" class="panel hidden h-full flex flex-col overflow-hidden">
                 <!-- Categorized Browser -->
                 <div id="preset-browser" class="flex-1 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
-                    
+
                     <!-- Essential / User -->
                     <div class="preset-group expanded" data-group="essentials">
-                        <div class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
+                        <div
+                            class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
                             <span class="text-xs font-bold tracking-widest text-hot-pink uppercase">Essentials</span>
-                            <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
                         </div>
                         <div class="group-content p-2 grid grid-cols-2 gap-2">
                             <button class="preset-category active" data-category="all">All Films</button>
                             <button class="preset-category" data-category="favorites">⭐ Favorites</button>
                             <button class="preset-category" data-category="custom">My Presets</button>
-                            <button id="save-preset-btn" class="px-3 py-1 rounded-lg bg-hot-pink/20 text-hot-pink text-xs font-semibold hover:bg-hot-pink/30">+ Save New</button>
+                            <button id="save-preset-btn"
+                                class="px-3 py-1 rounded-lg bg-hot-pink/20 text-hot-pink text-xs font-semibold hover:bg-hot-pink/30">+
+                                Save New</button>
                         </div>
                     </div>
 
                     <!-- Major Brands -->
                     <div class="preset-group" data-group="brands">
-                        <div class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
-                            <span class="text-xs font-bold tracking-widest text-moonstone uppercase">Manufacturers</span>
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        <div
+                            class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
+                            <span
+                                class="text-xs font-bold tracking-widest text-moonstone uppercase">Manufacturers</span>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
                         </div>
                         <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
                             <button class="preset-category" data-category="kodak">Kodak</button>
@@ -1295,9 +1307,13 @@
 
                     <!-- Collections -->
                     <div class="preset-group" data-group="collections">
-                        <div class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
+                        <div
+                            class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
                             <span class="text-xs font-bold tracking-widest text-emerald-400 uppercase">Archives</span>
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
                         </div>
                         <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
                             <button class="preset-category" data-category="vintage">Vintage</button>
@@ -1307,9 +1323,13 @@
 
                     <!-- Creative Styles -->
                     <div class="preset-group" data-group="styles">
-                        <div class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
+                        <div
+                            class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
                             <span class="text-xs font-bold tracking-widest text-purple-400 uppercase">Creative</span>
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
                         </div>
                         <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
                             <button class="preset-category" data-category="modern">Modern</button>
@@ -1746,13 +1766,10 @@
         </div>
     </div>
 
-    <!-- ASCII Toast Message -->
-    <div id="ascii-toast" class="ascii-toast">
-        <pre>
-┌──────────────┐
-│  yap yap 😝  │
-└──────────────┘
-        </pre>
+    <!-- Dynamic Startup Toast -->
+    <div id="startup-toast"
+        class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[200] pointer-events-none transition-opacity duration-1000">
+        <!-- Content injected by JS -->
     </div>
 
     <!-- Core Scripts -->
