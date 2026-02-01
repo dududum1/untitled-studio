@@ -67,7 +67,9 @@ class WebGLEngine {
             clarity: 0,
             chromaticAberration: 0,
             halation: 0,
-            asciiSize: 0, // Added ASCII
+            asciiSize: 0,
+            asciiMode: 0, // 0=Original, 1=Matrix, 2=Amber, 3=B&W
+            asciiColor: [0.0, 1.0, 0.4], // Custom color
             bloomStrength: 0,
             bloomThreshold: 70,
             grainGlobal: 1.0,
@@ -383,7 +385,7 @@ class WebGLEngine {
             'u_overlayTexture', 'u_useOverlay', 'u_overlayOpacity', 'u_overlayBlendMode',
             'u_lightLeak', 'u_scratches', 'u_filmSeed',
             'u_galleryFrame', 'u_filmGateWeave',
-            'u_asciiSize', 'u_posterize', 'u_barrelDistortion',
+            'u_asciiSize', 'u_asciiMode', 'u_asciiColor', 'u_posterize', 'u_barrelDistortion',
             'u_splitToneBalance', 'u_noiseColorHue', 'u_showClipping', 'u_denoise',
             // Secret FX
             'u_pixelateSize', 'u_glitchStrength', 'u_ditherType', 'u_ditherDepth', 'u_ditherStrength', 'u_scanlineIntensity',
@@ -1055,6 +1057,8 @@ class WebGLEngine {
 
         // ASCII
         gl.uniform1f(this.uniforms.u_asciiSize, adj.asciiSize || 0);
+        gl.uniform1i(this.uniforms.u_asciiMode, adj.asciiMode || 0);
+        gl.uniform3fv(this.uniforms.u_asciiColor, adj.asciiColor || [0, 1, 0.4]);
 
         // New FX (Phase 7)
         gl.uniform1f(this.uniforms.u_posterize, adj.posterize || 0);

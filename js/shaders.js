@@ -123,6 +123,8 @@ const Shaders = {
 
         // ASCII
         uniform float u_asciiSize; // 0.0 to 2.0 (density)
+        uniform int u_asciiMode;   // 0=Original, 1=Matrix, 2=Amber, 3=B&W, 4=Custom
+        uniform vec3 u_asciiColor; // For custom mode
 
         // New FX (Phase 7)
         uniform float u_posterize;        // 0-100: Color reduction (2-256 levels)
@@ -198,21 +200,22 @@ const Shaders = {
             
             switch(n) {
                 case 0: bits = 0; break;      // space
-                case 1: bits = 4096; break;   // . (bottom left-ish)
-                case 2: bits = 8192; break;   // ,
-                case 3: bits = 3584; break;   // -
-                case 4: bits = 2730; break;   // ~ (checker) or similar
-                case 5: bits = 1040; break;   // :
-                case 6: bits = 9232; break;   // ;
-                case 7: bits = 3640; break;   // =
-                case 8: bits = 18450; break;  // !
-                case 9: bits = 21157; break;  // *
-                case 10: bits = 22101; break; // % 
-                case 11: bits = 15307; break; // $
-                case 12: bits = 12762; break; // &
-                case 13: bits = 14269; break; // 8
-                case 14: bits = 23989; break; // W
-                case 15: bits = 32319; break; // @
+                case 1: bits = 2; break;      // . 
+                case 2: bits = 1026; break;   // :
+                case 3: bits = 2186; break;   // .:.
+                case 4: bits = 3584; break;   // -
+                case 5: bits = 11333; break;  // +
+                case 6: bits = 12300; break;  // = (plus-ish)
+                case 7: bits = 11410; break;  // x
+                case 8: bits = 14358; break;  // *
+                case 9: bits = 23245; break;  // #
+                // Higher density
+                case 10: bits = 27306; break; // % 
+                case 11: bits = 31258; break; // &
+                case 12: bits = 31710; break; // 8
+                case 13: bits = 32734; break; // @
+                case 14: bits = 32765; break; // W
+                case 15: bits = 32767; break; // █
                 default: bits = 0; break;
             }
             
@@ -1032,63 +1035,53 @@ const Shaders = {
             // Diffusion now handled in post-pass for higher quality (Bloom 2.0)
 
             // === ASCII ===
-            // This replaces the whole visual, so do it last or near last
             if (u_asciiSize > 0.01) {
-                float density = u_asciiSize * 300.0; // Slider 0-2 -> 0-600 chars width
+                float density = (u_asciiSize * 400.0); // 0-2 -> 0-800 chars width
                 if (density < 10.0) density = 10.0;
 
-                vec2 charGrid = vec2(density, density * (u_resolution.y / u_resolution.x) * 1.66); // Aspect (5/3 = 1.66)
+                vec2 charGrid = vec2(density, density * (u_resolution.y / u_resolution.x) * 1.5); // Aspect adjustment
                 
                 vec2 charPos = floor(uv * charGrid) / charGrid;
                 vec2 charUV = fract(uv * charGrid);
                 
-                // Sample brightness at center of char
-                vec3 pixel = texture(u_image, charPos + (0.5/charGrid)).rgb;
-                // Apply current effects to it?
-                // Ideally we sample 'color' but 'color' is global var. 
-                // Since this is a post-process effect, technically we should have been modifying 'color' all along.
-                // But texture(u_image) gets ORIGINAL.
-                // We should assume 'color' IS the current pixel processed so far? 
+                // Sample processed color at cell center for quantization
+                vec3 cellColor = color; 
+                // Since we are in a single pass, we use the color calculated so far for *this* pixel
+                // effectively "smearing" the color across the whole character cell.
                 
-                // IMPORTANT: The shader structure modifies 'color' in place. 
-                // To pixelate/ascii, we essentially need to "re-sample" the PROCESSED color at a quantized position.
-                // BUT we can't easily jump back in the pipeline.
-                // Workaround: We pixelate the UVs used for earlier steps? No, that breaks everything.
-                // Real ASCII usually requires a 2nd pass or simply applying it on top of the "current" color result.
-                // Since we can't re-run the whole pipeline for a neighbor pixel, 
-                // we will just use the CURRENT pixel's brightness to pick a char, 
-                // and draw a predefined color (e.g. green or white) or the pixel's color.
+                float gray = luminance(cellColor);
                 
-                // Let's go with "Draw simplistic ASCII on top of result":
-                float gray = dot(color, vec3(0.299, 0.587, 0.114));
-                int charIndex = int(gray * 15.99);   
-                
-                // We need quantized brightness though to make it look blocky
-                // But since we can't query neighbors, we'll just check if *this* pixel falls into the char shape 
-                // determined by *its own* coordinate quantization?
-                // This is tricky in a single pass without texture lookups.
-                // Better approach for single pass:
-                // 1. Quantize UV
-                // 2. We can't know the brightness of the "cell" without a texture lookup of the *result*.
-                //    Since we don't have a computed texture of the result yet, we can only lookup the INPUT texture.
-                //    So ASCII will verify based on INPUT image 
-                //    (or we accept that effects applied *before* ASCII won't influence char shape, only char color if we use it).
-                
-                vec3 quantizedSource = texture(u_image, charPos + (0.5/charGrid)).rgb;
-                // Apply basic luminance check on source
-                float qGray = dot(quantizedSource, vec3(0.299, 0.587, 0.114));
-                
-                int idx = int(qGray * 15.99);
+                // Enhanced Grayscale Ramp (16 steps)
+                int idx = int(gray * 15.99);
                 float isChar = getCharacter(idx, charUV);
                 
-                // Replace color
-                // Matrix style: Green text on black
-                // Or just white text on black? Or text * color?
-                // Let's do colored text on black background
-                color = isChar * quantizedSource; 
+                // Color Logic
+                vec3 asciiColor = cellColor; // Mode 0: Original
                 
-                // Optional: Matrix green tint
-                // color = isChar * vec3(0.0, 1.0, 0.2) * qGray;
+                if (u_asciiMode == 1) {
+                    // Matrix Green
+                    asciiColor = vec3(0.0, 1.0, 0.3) * gray;
+                    // Add slight random flicker
+                    asciiColor *= 0.8 + 0.2 * sin(u_time * 10.0 + charPos.x * 100.0);
+                } else if (u_asciiMode == 2) {
+                    // Amber Terminal
+                    asciiColor = vec3(1.0, 0.7, 0.1) * gray;
+                } else if (u_asciiMode == 3) {
+                    // B&W
+                    asciiColor = vec3(gray);
+                } else if (u_asciiMode == 4) {
+                    // Custom
+                    asciiColor = u_asciiColor * gray;
+                }
+                
+                // Shimmer/Scanline effect
+                float shimmer = 0.95 + 0.05 * sin(charUV.y * 10.0 + u_time * 5.0);
+                
+                color = isChar * asciiColor * shimmer;
+                
+                // Background Detail (Faint original image or black)
+                float bgMask = 1.0 - isChar;
+                color += bgMask * cellColor * 0.05; // 5% background bleed
             }
 
             // === TEXTURE OVERLAY ===

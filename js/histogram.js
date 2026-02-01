@@ -81,12 +81,20 @@ class Histogram {
     /**
      * Calculate histogram from WebGL canvas with optimized sampling
      */
+    calculateFromBuffer(pixels) {
+        if (!pixels) return;
+        this.processPixelData(pixels);
+        this.draw();
+    }
+
     calculateFromWebGL(glCanvas, gl) {
         const width = glCanvas.width;
         const height = glCanvas.height;
 
-        // Sample a subset for performance (every 4th pixel in both dimensions)
-        const sampleRate = 4;
+        // Mobile Optimization: Increase skip rate for faster readPixels
+        const isMobile = window.innerWidth < 800;
+        const sampleRate = isMobile ? 8 : 4;
+
         const sampledWidth = Math.floor(width / sampleRate);
         const sampledHeight = Math.floor(height / sampleRate);
         const requiredSize = sampledWidth * sampledHeight * 4;

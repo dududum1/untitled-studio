@@ -2,6 +2,17 @@
 
 All notable changes to Untitled Studio will be documented in this file.
 
+## [2.2.0] - 2026-02-01
+
+### 👾 ASCII 2.0: The Terminal Update
+- **Multi-Mode Engine**: Added 5 distinct rendering modes: **Full Color**, **Matrix Green** (with flicker), **Amber Terminal**, **B&W**, and **Custom Tint**.
+- **Refined Grayscale Ramp**: Completely overhauled the character set with a hand-tuned **16-level 3x5 bitmap ramp** for superior image fidelity.
+- **Atmospheric Effects**: Implemented vertical scanline shimmer and low-frequency column flicker to simulate legacy hardware.
+- **UI Integration**: Added a dedicated mode selector and color picker to the Digital FX panel.
+- **Background Bleed**: Fine-tuned character transparency to allow a 5% original image bleed for better structural context.
+
+---
+
 ## [2.1.0] - 2026-01-31
 
 ### 🦀 Wasm Core Integration

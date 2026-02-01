@@ -29,6 +29,7 @@ class UntitledStudio {
         this.customPresets = [];
         this.favoritePresets = JSON.parse(localStorage.getItem('favoritePresets') || '[]');
         this.museMode = localStorage.getItem('museMode') === 'true';
+        this.isMobile = window.innerWidth < 800;
         this.exportSettings = {
             resolution: 'original',
             customWidth: 1920,
@@ -373,6 +374,7 @@ class UntitledStudio {
             this.initColorWheels(); // Color Grading
             this.initVectorscope(); // Analysis
             this.initHistory();
+            this.initDigitalControls();
             this.initCropTool();
             this.initGestures();
             this.initScrubbing(); // Mobile Extra 1
@@ -984,6 +986,45 @@ class UntitledStudio {
                 if (splitLine) splitLine.style.left = `${val * 100}%`;
             });
         }
+    }
+
+    initDigitalControls() {
+        const asciiMode = document.getElementById('asciiMode');
+        const asciiColor = document.getElementById('asciiColor');
+
+        if (asciiMode) {
+            asciiMode.addEventListener('change', (e) => {
+                const mode = parseInt(e.target.value);
+                this.engine.setAdjustment('asciiMode', mode);
+                if (asciiColor) {
+                    asciiColor.classList.toggle('hidden', mode !== 4);
+                }
+            });
+        }
+
+        if (asciiColor) {
+            asciiColor.addEventListener('input', (e) => {
+                this.engine.setAdjustment('asciiColor', this.hexToRgb(e.target.value));
+            });
+        }
+    }
+
+    hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [
+            parseInt(result[1], 16) / 255,
+            parseInt(result[2], 16) / 255,
+            parseInt(result[3], 16) / 255
+        ] : [1, 1, 1];
+    }
+
+    rgbToHex(rgb) {
+        if (!rgb || rgb.length < 3) return '#ffffff';
+        const toHex = (n) => {
+            const hex = Math.round(n * 255).toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        };
+        return `#${toHex(rgb[0])}${toHex(rgb[1])}${toHex(rgb[2])}`;
     }
 
     initUniversalSliders() {
@@ -2253,11 +2294,26 @@ class UntitledStudio {
     }
 
     updateHistogram() {
-        if (this.engine && this.histogram && this.engine.canvas) {
-            // Use setTimeout to allow WebGL to finish rendering
-            setTimeout(() => {
-                this.histogram.calculate(this.engine.canvas);
-            }, 50);
+        if (!this.engine || !this.histogram || !this.engine.canvas) return;
+
+        // Throttling: Histogram is heavy.
+        // Desktop: ~30fps (32ms), Mobile: ~10fps (100ms) - balance between responsiveness and battery
+        const throttle = this.isMobile ? 100 : 32;
+        const now = performance.now();
+
+        if (this.lastHistogramUpdate && (now - this.lastHistogramUpdate < throttle)) {
+            return;
+        }
+        this.lastHistogramUpdate = now;
+
+        // Optimization: Use the 256x256 analysis buffer instead of reading from a 4K canvas!
+        // This makes histogram calculation nearly "free" for the CPU/GPU readback.
+        const size = 256;
+        const pixels = this.engine.getAnalysisData(size);
+
+        if (pixels) {
+            // New method name: calculateFromBuffer
+            this.histogram.calculateFromBuffer(pixels, size, size);
         }
     }
 
@@ -2893,6 +2949,19 @@ class UntitledStudio {
                 el.checked = !!adjustments[adjKey];
             }
         }
+
+        // 6. Selects & Color Pickers
+        const asciiMode = document.getElementById('asciiMode');
+        if (asciiMode && adjustments.asciiMode !== undefined) {
+            asciiMode.value = adjustments.asciiMode;
+            const asciiColor = document.getElementById('asciiColor');
+            if (asciiColor) {
+                asciiColor.classList.toggle('hidden', adjustments.asciiMode !== 4);
+                if (adjustments.asciiColor) {
+                    asciiColor.value = this.rgbToHex(adjustments.asciiColor);
+                }
+            }
+        }
     }
 
     syncAllImages() {
@@ -3238,16 +3307,18 @@ class UntitledStudio {
     updateVectorscope() {
         if (!this.vectorscope || !this.isVectorscopeVisible) return;
 
-        // Throttling to ~30fps to save battery/CPU
+        // Throttling to protect battery/CPU. Desktop: 30fps (32ms), Mobile: 15fps (64ms)
+        const isMobile = window.innerWidth < 800; // Recalculate or use this.isMobile
+        const throttle = isMobile ? 64 : 32;
+
         const now = performance.now();
-        if (this.lastVectorscopeUpdate && (now - this.lastVectorscopeUpdate < 32)) {
+        if (this.lastVectorscopeUpdate && (now - this.lastVectorscopeUpdate < throttle)) {
             return;
         }
         this.lastVectorscopeUpdate = now;
 
-        // Use efficient GPU downsampling (256x256)
-        // This avoids reading 4K+ pixels from the GPU which causes massive lag
-        const size = 256;
+        // Use efficient GPU downsampling. Mobile uses even smaller buffer for speed.
+        const size = isMobile ? 128 : 256;
         const pixels = this.engine.getAnalysisData(size);
 
         if (pixels) {

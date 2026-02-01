@@ -10,7 +10,8 @@ class Vectorscope {
         this.radius = Math.min(this.cx, this.cy) - 2;
 
         // Performance subsampling
-        this.skip = 4; // Check every 4th pixel to save CPU
+        const isMobile = window.innerWidth < 800;
+        this.skip = isMobile ? 8 : 4; // Check every Nth pixel to save CPU
 
         // Background cache
         this.bgCanvas = document.createElement('canvas');
@@ -73,20 +74,18 @@ class Vectorscope {
     }
 
     update(data, width, height) {
-        // Fade out previous frame
-        this.ctx.fillStyle = 'rgba(10, 10, 10, 0.2)'; // Trail effect
+        // Fade out previous frame (trail effect)
+        this.ctx.globalCompositeOperation = 'source-over';
+        this.ctx.fillStyle = 'rgba(10, 10, 10, 0.2)';
         this.ctx.fillRect(0, 0, this.width, this.height);
 
-        // Draw Graticule Overlay if needed or just clear?
-        // Let's re-draw grid lightly or just clear. 
-        // For "Scope" look, usually we clear black.
+        // Draw Graticule
         this.ctx.drawImage(this.bgCanvas, 0, 0);
 
-        const imgData = this.ctx.getImageData(0, 0, this.width, this.height);
-        const pixels = imgData.data;
+        // Plot points using GPU-accelerated drawing instead of slow pixel manipulation
+        this.ctx.globalCompositeOperation = 'lighter';
+        this.ctx.fillStyle = 'rgba(74, 222, 128, 0.4)'; // Green Phosphor
 
-        // Plot points
-        // data is RGBA Uint8Array
         const len = data.length;
         const skip = this.skip * 4;
 
@@ -96,29 +95,17 @@ class Vectorscope {
             const b = data[i + 2];
 
             // Convert to CbCr
-            // Y  =  0.299R + 0.587G + 0.114B
-            // Cb = -0.169R - 0.331G + 0.500B
-            // Cr =  0.500R - 0.419G - 0.081B
-
             const cb = -0.168736 * r - 0.331264 * g + 0.500000 * b;
             const cr = 0.500000 * r - 0.418688 * g - 0.081312 * b;
 
             // Map to canvas
-            // Cb/Cr range is roughly -128 to 128
             const x = this.cx + cb;
-            const y = this.cy - cr; // Flip Y because canvas Y is down
+            const y = this.cy - cr;
 
-            // Draw pixel (Green phosphor look)
-            const idx = (Math.floor(x) + Math.floor(y) * this.width) * 4;
-            if (idx >= 0 && idx < pixels.length) {
-                // Additive blending manually
-                pixels[idx] = Math.min(255, pixels[idx] + 0);   // R
-                pixels[idx + 1] = Math.min(255, pixels[idx + 1] + 200); // G (Phosphor)
-                pixels[idx + 2] = Math.min(255, pixels[idx + 2] + 100); // B
-                pixels[idx + 3] = 255; // Alpha
-            }
+            // Drawing 1x1 rects is much faster than getImageData/putImageData on mobile
+            this.ctx.fillRect(x, y, 1, 1);
         }
 
-        this.ctx.putImageData(imgData, 0, 0);
+        this.ctx.globalCompositeOperation = 'source-over';
     }
 }
