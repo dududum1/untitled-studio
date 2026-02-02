@@ -1,0 +1,9 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dust Placeholder -->
+  <rect x="0" y="0" width="800" height="600" fill="black" />
+  <circle cx="100" cy="100" r="2" fill="white" opacity="0.5" />
+  <circle cx="200" cy="300" r="1" fill="white" opacity="0.7" />
+  <circle cx="500" cy="50" r="3" fill="white" opacity="0.3" />
+  <path d="M400,200 L420,205" stroke="white" stroke-width="1" opacity="0.4" />
+  <text x="400" y="300" font-size="20" text-anchor="middle" fill="white" opacity="0.5">Dust & Scratches</text>
+</svg>

@@ -1,0 +1,6 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Torn Border Placeholder -->
+  <rect x="0" y="0" width="800" height="600" fill="none" stroke="black" stroke-width="50" />
+  <path d="M40,40 L760,40 L760,560 L40,560 Z" fill="none" stroke="white" stroke-width="2" />
+  <text x="400" y="300" font-size="20" text-anchor="middle" fill="white">Torn Paper Border</text>
+</svg>
