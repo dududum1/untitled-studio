@@ -2028,7 +2028,7 @@ const FilmPresets = {
             hslBlue: [-20, -30, 10]
         },
         {
-            name: "Retro PC",
+            name: "CGA Dither 4-bit",
             category: "vintage",
             grainType: 1,
             description: "CGA Graphics era. 4-bit dither.",
@@ -2060,7 +2060,7 @@ const FilmPresets = {
             fade: 0
         },
         {
-            name: "Silent Sepia",
+            name: "Sulfide Toning Process",
             category: "vintage",
             grainType: 1,
             exposure: 0.1,
@@ -2455,7 +2455,7 @@ const FilmPresets = {
             hslBlue: [0, 20, 10]
         },
         {
-            name: "Western",
+            name: "Selenium Tone Warmth",
             category: "modern",
             grainType: 1,
             exposure: 0.1,
@@ -2476,7 +2476,7 @@ const FilmPresets = {
             vignette: 25
         },
         {
-            name: "Thriller",
+            name: "Cross-Process Green Bias",
             category: "modern",
             grainType: 1,
             exposure: -0.15,
@@ -2516,7 +2516,7 @@ const FilmPresets = {
             fade: 10
         },
         {
-            name: "Clean & Crisp",
+            name: "Reference Standard D65",
             category: "modern",
             grainType: 1,
             exposure: 0.05,
@@ -2537,7 +2537,7 @@ const FilmPresets = {
             fade: 0
         },
         {
-            name: "Moody",
+            name: "Cinema Low-Key (Bleach Bypass)",
             category: "modern",
             grainType: 1,
             exposure: -0.1,
@@ -2559,7 +2559,7 @@ const FilmPresets = {
             vignette: 20
         },
         {
-            name: "Light & Airy",
+            name: "High-Key Overexposed Emulsion",
             category: "modern",
             grainType: 1,
             exposure: 0.3,
@@ -2580,7 +2580,7 @@ const FilmPresets = {
             fade: 15
         },
         {
-            name: "Rich & Bold",
+            name: "Positive Film Saturation Boost",
             category: "modern",
             grainType: 1,
             exposure: 0,
@@ -2601,7 +2601,7 @@ const FilmPresets = {
             fade: 0
         },
         {
-            name: "Matte Film",
+            name: "Photometric Black Point Lift",
             category: "modern",
             grainType: 1,
             exposure: 0.05,
@@ -2622,7 +2622,7 @@ const FilmPresets = {
             fade: 20
         },
         {
-            name: "Golden Hour",
+            name: "Warm Bias 3200K Shift",
             category: "modern",
             grainType: 1,
             exposure: 0.15,
@@ -2643,7 +2643,7 @@ const FilmPresets = {
             fade: 5
         },
         {
-            name: "Blue Hour",
+            name: "Cold Bias 6500K Shift",
             category: "modern",
             grainType: 1,
             exposure: -0.05,
@@ -2664,7 +2664,7 @@ const FilmPresets = {
             fade: 10
         },
         {
-            name: "Pastel Dream",
+            name: "Chromogenic Emulation Type C",
             category: "modern",
             grainType: 1,
             exposure: 0.2,
@@ -2728,7 +2728,7 @@ const FilmPresets = {
             hslYellow: [-20, 0, -20]
         },
         {
-            name: "Wedding Cam",
+            name: "Direct Flash Simulation",
             category: "modern",
             grainType: 1,
             description: "Table camera aesthetic. Harsh flash simulation.",
@@ -2751,7 +2751,7 @@ const FilmPresets = {
             vignette: 0.5
         },
         {
-            name: "Hackerman",
+            name: "Data Corruption Artifact",
             category: "modern",
             grainType: 1,
             description: "System brea__kdown. Glitch + Dither.",
