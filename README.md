@@ -62,7 +62,8 @@ Open `http://localhost:3000` (or 8000) in your browser.
 Triple-click the "Developed by MHS" credit in the bottom bar for a special dedication.
 
 ## 📄 License
-MIT License. Free to use and modify.
+Copyright (c) 2026 MHS. All Rights Reserved.
+This project is proprietary software. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited.
 
 ---
 *Developed by MHS.*
