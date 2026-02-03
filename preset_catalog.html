@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untitled Studio - Preset Catalog</title>
+    <!-- Use the same font as the main app for consistency -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
+
+    <!-- Load the Presets Data -->
+    <script src="js/presets.js"></script>
+
+    <style>
+        :root {
+            --bg: #121212;
+            --card-bg: #1e1e1e;
+            --primary: #e0e0e0;
+            --text-light: #999;
+            --border: #333;
+            --accent: #ed2788;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--primary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.4;
+        }
+
+        /* Screen-only styling for the container */
+        .page-container {
+            max-width: 210mm;
+            /* A4 width */
+            margin: 40px auto;
+            padding: 40px;
+            background: var(--bg);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Controls that shouldn't appear in print */
+        .no-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s;
+        }
+
+        .no-print:hover {
+            transform: scale(1.05);
+            background: #ff4da6;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+            color: white;
+            border-bottom: 4px solid var(--accent);
+            padding-bottom: 20px;
+            display: inline-block;
+        }
+
+        .meta-header {
+            margin-bottom: 40px;
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .category-section {
+            margin-bottom: 40px;
+            page-break-after: always;
+        }
+
+        .category-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            page-break-after: avoid;
+        }
+
+        .presets-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .preset-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            background: var(--card-bg);
+            page-break-inside: avoid;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preset-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed var(--border);
+            padding-bottom: 10px;
+        }
+
+        .preset-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .preset-tag {
+            font-size: 12px;
+            background: var(--border);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .tag-kodak {
+            background: #ffbb00;
+            color: black;
+        }
+
+        .tag-fuji {
+            background: #009639;
+        }
+
+        .tag-ilford {
+            background: #eee;
+            color: black;
+        }
+
+        .tag-cine {
+            background: #ed2788;
+        }
+
+        .tag-agfa {
+            background: #e20613;
+        }
+
+        .tag-lomography {
+            background: #00a0e9;
+        }
+
+
+        .preset-desc {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #888;
+        }
+
+        .recipe-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .recipe-label {
+            font-weight: bold;
+            color: #666;
+        }
+
+        .recipe-val {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* Print Media Queries - Force White/Paper Look */
+        @media print {
+            body {
+                background: white;
+                color: black;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .page-container {
+                width: 100%;
+                max-width: none;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                background: white;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            h1 {
+                color: black;
+            }
+
+            .preset-card {
+                border: 1px solid #ccc;
+                background: white;
+                color: black;
+            }
+
+            .preset-name {
+                color: black;
+            }
+
+            .recipe-item {
+                background: white;
+                border: 1px solid #eee;
+            }
+
+            .recipe-val {
+                color: black;
+            }
+
+            .preset-desc {
+                color: #555;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <button class="no-print" onclick="window.print()">🖨️ Print to PDF</button>
+
+    <div class="page-container">
+        <h1>Untitled Studio // Data Sheet</h1>
+        <div class="meta-header">
+            FILM PRESET DATABASE v1.0 <br>
+            GENERATED: <span id="gen-date"></span>
+        </div>
+
+        <div id="catalog-content">
+            <!-- Content Injected Here -->
+        </div>
+    </div>
+
+    <script>
+        // Set date
+        document.getElementById('gen-date').innerText = new Date().toLocaleDateString();
+
+        const catalog = document.getElementById('catalog-content');
+
+        // Parameter mapping to human readable params
+        const paramMap = {
+            'grainType': 'Grain Type',
+            'exposure': 'Exposure',
+            'contrast': 'Contrast',
+            'highlights': 'Highlights',
+            'shadows': 'Shadows',
+            'whites': 'Whites',
+            'blacks': 'Blacks',
+            'temperature': 'Temp',
+            'tint': 'Tint',
+            'vibrance': 'Vibrance',
+            'saturation': 'Sat',
+            'grain': 'Grain Amt',
+            'grainGlobal': 'Grain Global',
+            'grainSize': 'Grain Size',
+            'bloomStrength': 'Bloom',
+            'bloomThreshold': 'Bloom Thresh',
+            'fade': 'Fade',
+            'sharpen': 'Sharpen',
+            'curvature': 'Curvature',
+            'vignette': 'Vignette',
+            'halation': 'Halation',
+            'chromaticAberration': 'Lens Fringe',
+
+            // HSL
+            'hslRed': 'HSL Red',
+            'hslOrange': 'HSL Orange',
+            'hslYellow': 'HSL Yellow',
+            'hslGreen': 'HSL Green',
+            'hslAqua': 'HSL Aqua',
+            'hslBlue': 'HSL Blue',
+            'hslPurple': 'HSL Purple',
+            'hslMagenta': 'HSL Magenta',
+            'hslSkin': 'Skin Tone',
+
+            // Split Toning
+            'splitShadowHue': 'Split Shd Hue',
+            'splitHighlightHue': 'Split Hi Hue',
+        };
+
+        function renderCatalog() {
+            if (!window.FilmPresets) {
+                catalog.innerHTML = '<p>Error: Could not load FilmPresets from js/presets.js</p>';
+                return;
+            }
+
+            // Iterate categories
+            for (const [categoryKey, presets] of Object.entries(window.FilmPresets)) {
+                if (!Array.isArray(presets) || presets.length === 0) continue;
+
+                // Create Category Section
+                const section = document.createElement('div');
+                section.className = 'category-section';
+
+                const title = document.createElement('div');
+                title.className = 'category-title';
+                title.innerText = categoryKey;
+                section.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'presets-grid';
+
+                // Render each preset
+                presets.forEach(preset => {
+                    const card = document.createElement('div');
+                    card.className = 'preset-card';
+
+                    // Determine tag class
+                    let tagClass = 'tag-kodak';
+                    if (categoryKey.includes('fuji')) tagClass = 'tag-fuji';
+                    if (categoryKey.includes('ilford')) tagClass = 'tag-ilford';
+                    if (categoryKey.includes('cine')) tagClass = 'tag-cine';
+                    if (categoryKey.includes('agfa')) tagClass = 'tag-agfa';
+                    if (categoryKey.includes('lomo')) tagClass = 'tag-lomography';
+
+                    // Header
+                    const header = document.createElement('div');
+                    header.className = 'preset-header';
+                    header.innerHTML = `
+                        <span class="preset-name">${preset.name}</span>
+                        <span class="preset-tag ${tagClass}">${categoryKey}</span>
+                    `;
+                    card.appendChild(header);
+
+                    // Description
+                    if (preset.description) {
+                        const desc = document.createElement('div');
+                        desc.className = 'preset-desc';
+                        desc.innerText = preset.description;
+                        card.appendChild(desc);
+                    }
+
+                    // Recipe Grid
+                    const recipe = document.createElement('div');
+                    recipe.className = 'recipe-grid';
+
+                    // Filter technical keys only
+                    Object.keys(preset).forEach(key => {
+                        if (key === 'name' || key === 'category' || key === 'description' || key === 'id') return;
+
+                        // If it's a complex object (like arrays for HSL/Curves), simplify display
+                        let val = preset[key];
+                        if (Array.isArray(val)) {
+                            val = `[${val.join(', ')}]`;
+                        } else if (typeof val === 'number') {
+                            // Round decimals
+                            val = Math.round(val * 100) / 100;
+                        }
+
+                        const labelName = paramMap[key] || key;
+
+                        const item = document.createElement('div');
+                        item.className = 'recipe-item';
+                        item.innerHTML = `
+                            <span class="recipe-label">${labelName}</span>
+                            <span class="recipe-val">${val}</span>
+                        `;
+                        recipe.appendChild(item);
+                    });
+
+                    card.appendChild(recipe);
+                    grid.appendChild(card);
+                });
+
+                section.appendChild(grid);
+                catalog.appendChild(section);
+            }
+        }
+
+        renderCatalog();
+    </script>
+</body>
+
+</html>

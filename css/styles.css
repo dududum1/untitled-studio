@@ -1717,3 +1717,71 @@ body.crt-active canvas {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
     pointer-events: none;
 }
+
+/* ========== STARTUP TOAST STYLES ========== */
+.ascii-content {
+    font-family: 'Share Tech Mono', monospace;
+    white-space: pre;
+    color: var(--hot-pink);
+    text-shadow: 0 0 10px var(--hot-pink-glow);
+    font-size: 10px;
+    line-height: 10px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+}
+
+.viewfinder-hud {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    color: #4ade80;
+    /* Green */
+    text-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    border-radius: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.toast-warning {
+    color: #facc15;
+    /* Yellow */
+    border-color: rgba(250, 204, 21, 0.3);
+    text-shadow: 0 0 5px rgba(250, 204, 21, 0.5);
+}
+
+.toast-error {
+    color: #ef4444;
+    /* Red */
+    border-color: rgba(239, 68, 68, 0.3);
+    text-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+@keyframes shake {
+
+    10%,
+    90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}
