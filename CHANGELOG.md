@@ -14,6 +14,13 @@ All notable changes to Untitled Studio will be documented in this file.
 - **Layout Polish**: Fixed cropped Export button and ensured Preset Card previews fill the 100% of the card height.
 - **Slider Visuals**: Removed accidental "box" background from sliders for a cleaner look.
 
+### 🎞️ Preset Expansion
+- **New Stocks**: Added 7 unique films: **Harman Phoenix 200**, **Street Candy ATM 400**, **Lomo 800**, **JCH Street Pan**, **Ektar 25**, **Fuji Sensia**, **Agfa CT Precisa**.
+- **Technical Renaming**: Rebranded 12 generic presets to professional nomenclature (e.g., *Matte Film* → *Photometric Black Point Lift*).
+
+### 📄 Licensing
+- **Proprietary**: Changed license from MIT to **All Rights Reserved** (Proprietary) as requested.
+
 ## [2.2.0] - 2026-02-01
 
 ### 👾 ASCII 2.0: The Terminal Update
