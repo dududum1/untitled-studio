@@ -17,6 +17,17 @@ All notable changes to Untitled Studio will be documented in this file.
 ### 🎞️ Preset Expansion
 - **New Stocks**: Added 7 unique films: **Harman Phoenix 200**, **Street Candy ATM 400**, **Lomo 800**, **JCH Street Pan**, **Ektar 25**, **Fuji Sensia**, **Agfa CT Precisa**.
 - **Technical Renaming**: Rebranded 12 generic presets to professional nomenclature (e.g., *Matte Film* → *Photometric Black Point Lift*).
+- **Experimental & Boutique**: Added 20+ rare and exotic stocks including **Kodak Blue X-Ray**, **Aerochrome (Autumn/Inverted)**, **FPP Blue Ultra**, **Dubblefilm Apollo**, and **Silberra PAN 50**.
+- **New Brand**: Added **Yashica** category with 7 distinct looks (adding Gems: *Sapphire*, *Ruby*, *Mono*).
+- **New Collections**: Added **Hands on Film** (Experimental), **Cinemot** (Portuguese Cinema), **Candido** (Party Vibes), and **Lucky** (Chinese Dead Stock).
+- **Hand-Rolled Madness**: Added **Kono!** (Tinted), **Reflx Lab** (Cinema Re-spools), **Dubblefilm** (Effects), **FlicFilm** (Street), and **Karmir** (Armenian).
+- **Special FX & Monsters**: Added **Revolog** (Lightning/Textures), **FPP** (Dracula/Wolfman/Frankenstein), **Yodica** (Cosmic Collection: *Antares, Vega, Pegasus*), **Film Washi** (Industrial), and **Analogue Wonderland** Exclusives.
+- **House Specials**: Added **Mr. Negative** collection (8 presets) including *Silver Screen*, *Bat Country*, and *Zombie 400*.
+- **Glitch & Precision**: Added **Hanalogital** (Glitch Art), **Adox** (German Precision: *CMS 20 II*), **Harman Photo** (Phoenix V2), and **Berlin Specials**.
+- **Obscure Additions**: Added **Fomapan 200/400**, **UMI 800T**, **Sora 200D**, **Superia Reala 100**, and **Ilford Color 400**.
+- **Refactor**: Split generic categories into dedicated brand archives for **Orwo**, **Svema**, and **Fomapan**. Consolidated **Kodachrome** and **Ektachrome** into the main Kodak library.
+- **UI Overhaul**: Expanded sidebar "Manufacturers" and "Indie" sections to expose 41+ specific film categories.
+- **Manifesto**: Deprecated "Masking" in spirit. Updated UI text to "Shoot better next time". Added `MANIFESTO.md`.
 
 ### 📄 Licensing
 - **Proprietary**: Changed license from MIT to **All Rights Reserved** (Proprietary) as requested.

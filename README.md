@@ -6,13 +6,29 @@
 
 ## ✨ Key Features
 
-### 🎞️ The Film Archive (150+ Presets)
-Accurately simulates the physics of analog film with a massive curated library:
-- **Kodak Legends**: Portra (160/400/800), Gold, Ektar, Tri-X, T-Max, Vision3 Cinema Stocks.
-- **Fuji Masters**: Pro 400H, Superia, Velvia 50/100, Provia, Classic Chrome, Eterna.
-- **Cinema Print**: Kodak Vision 2383 (Hollywood Teal/Orange), Fuji 3513, Cineon Log.
-- **Vintage & Rare**: Expired Polaroid, Aerochrome (IR Pink), Lomo Metropolis, Agfa Scala.
-- **Physics-Based Engine**: Real-time grain synthesis (Negative vs Slide types), Halation, and Bloom.
+### 🎞️ The Film Archive (150+ Stocks)
+A physics-based analog engine simulating grain, halation, and chemical shifts. The library includes:
+
+**The Classics**
+*   **Kodak**: Portra (160/400/800), Gold 200, Ektar 100, Tri-X 400, T-Max 3200, Vision3 (500T/250D).
+*   **Fuji**: Pro 400H, Superia 400/800/1600, Velvia 50, Provia 100F, Classic Chrome, Neopan Acros.
+*   **Ilford**: HP5 Plus, FP4, Delta 3200, Ortho Plus, SFX 200 (Infrared).
+
+**Cinema & Broadcast**
+*   **Hollywood**: Kodak Vision 2383 Print Film (Dune/Joker Looks), Fuji 3513, Cineon Log.
+*   **Broadcast**: Technicolor Process 4, Bleach Bypass, 16mm Newsreel.
+
+**Boutique & Experimental (New)**
+*   **Mr. Negative House Specials**: *Bat Country* (Fear & Loathing), *Zombie 400* (Green Skin), *Silver Screen* (Home-made).
+*   **Glitch & Sci-Fi**: **Hanalogital** (Bokeh/Prism/Veins), **Yodica** (Cosmic Gradients), **Revolog** (Lightning/Fireflies).
+*   **Hand-Rolled**: **Kono!** (Moonstruck/Donau), **Dubblefilm** (Apollo/Bubblegum), **Reflx Lab** (Cinema Re-spools).
+*   **Dead Stock & Rare**: **Aerochrome** (Infrared Pink), **Lomo Metropolis**, **Agfa Scala**, **Peel-Apart Polaroid**.
+
+**Monsters & Oddities**
+*   **Eastern Bloc**: **Svema** (Ukraine), **Orwo** (GDR), **Fomapan** (Czech), **Lucky** (China).
+*   **FPP**: Dracula 64, Frankenstein 200, Wolfman 100, Infrared Color.
+*   **Washi**: "Z" (Near IR), "S" (Sound Recording), "X" (Surveillance).
+*   **Berlin Specials**: Analogheld, Optik Oldschool, King Film.
 
 ### ⚡ Professional Grading Suite
 - **Tone Curves**: 4-channel RGB+Luma curves with spline interpolation.

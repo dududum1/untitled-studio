@@ -2407,7 +2407,7 @@ class UntitledStudio {
 
         // Alias globals
         const FilmPresets = window.FilmPresets;
-        const getPresetsByCategory = window.getPresetsByCategory;
+        const getAllPresets = window.getAllPresets;
 
         if (!wheel) return;
 
@@ -2421,13 +2421,6 @@ class UntitledStudio {
             return;
         }
 
-        // Inject "My Presets" Button if not present
-        // Inject "My Presets" Button if not present - REMOVED (Exists in HTML, this selector was targeting top bar wrongly)
-        // const categoryContainer = document.querySelector('.preset-category-list') || document.querySelector('.flex.overflow-x-auto');
-        // if (categoryContainer && !categoryContainer.querySelector('[data-category="custom"]')) {
-        // ... (removed)
-        // }
-
         // 1. Get List of Presets
         let presetsToRender = [];
 
@@ -2435,28 +2428,16 @@ class UntitledStudio {
             presetsToRender = this.customPresets;
         } else if (category === 'favorites') {
             // Get all presets that are in favorites
-            const allCats = ['kodak', 'fuji', 'ilford', 'cinestill', 'agfa', 'polaroid', 'rollei', 'lomography', 'konica', 'vintage', 'obscure', 'modern', 'moody', 'dreamy', 'cinema', 'monochrome', 'experimental'];
-            if (this.museMode) allCats.push('muse');
+            const all = getAllPresets();
+            presetsToRender = all.filter(p => this.favoritePresets.includes(p.name));
 
-            allCats.forEach(cat => {
-                if (FilmPresets[cat]) {
-                    const catPresets = FilmPresets[cat].filter(p => this.favoritePresets.includes(p.name));
-                    presetsToRender = presetsToRender.concat(catPresets);
-                }
-            });
-            // Also check custom presets
+            // Also check custom presets (if not already included by getAllPresets return?)
+            // Custom presets are separate in this.customPresets
             presetsToRender = presetsToRender.concat(this.customPresets.filter(p => this.favoritePresets.includes(p.name)));
         } else if (category === 'all') {
             // Flatten all categories for the wheel
-            const allCats = ['kodak', 'fuji', 'ilford', 'cinestill', 'agfa', 'polaroid', 'rollei', 'lomography', 'konica', 'vintage', 'obscure', 'modern', 'moody', 'dreamy', 'cinema', 'monochrome', 'experimental'];
-            if (this.museMode) allCats.push('muse');
-
-            allCats.forEach(cat => {
-                if (FilmPresets[cat]) {
-                    const catPresets = FilmPresets[cat].filter(p => !p.hidden || this.museMode);
-                    presetsToRender = presetsToRender.concat(catPresets);
-                }
-            });
+            const all = getAllPresets();
+            presetsToRender = all.filter(p => !p.hidden || this.museMode);
         } else {
             console.log(`[Presets] Loading category: ${category}`);
             const rawPresets = getPresetsByCategory(category) || [];

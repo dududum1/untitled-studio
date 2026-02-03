@@ -397,7 +397,7 @@
                 <span class="text-xs font-semibold">Presets</span>
             </button>
             <button class="tab-btn" data-tab="mask">
-                <span class="text-xs font-semibold">Mask</span>
+                <span class="text-xs font-semibold">THERES NOTHING HERE</span>
             </button>
         </nav>
 
@@ -679,7 +679,7 @@
                         data-subtab="creative">Creative</button>
                     <button
                         class="fx-subtab-btn px-3 py-1.5 rounded-lg text-gray-400 text-xs font-semibold whitespace-nowrap hover:bg-white/10 hover:text-white transition-all"
-                        data-subtab="vibe">Vibe</button>
+                        data-subtab="vibe">Atmosphere</button>
                     <button
                         class="fx-subtab-btn px-3 py-1.5 rounded-lg text-gray-400 text-xs font-semibold whitespace-nowrap hover:bg-white/10 hover:text-white transition-all"
                         data-subtab="digital">Digital</button>
@@ -1473,8 +1473,8 @@
                 <div class="preset-group" data-group="brands">
                     <div
                         class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
-                        <span class="text-xs font-bold tracking-widest text-moonstone uppercase">Manufacturers</span>
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <span class="text-xs font-bold tracking-widest text-moonstone uppercase">Major Brands</span>
+                        <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </div>
@@ -1488,6 +1488,55 @@
                         <button class="preset-category" data-category="rollei">Rollei</button>
                         <button class="preset-category" data-category="lomography">Lomo</button>
                         <button class="preset-category" data-category="konica">Konica</button>
+                        <button class="preset-category" data-category="yashica">Yashica</button>
+                        <button class="preset-category" data-category="adox">Adox</button>
+                        <button class="preset-category" data-category="harman">Harman</button>
+                    </div>
+                </div>
+
+                <!-- Indie & Boutique -->
+                <div class="preset-group" data-group="indie">
+                    <div
+                        class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
+                        <span class="text-xs font-bold tracking-widest text-moonstone uppercase">Indie & Boutique</span>
+                        <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                    <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
+                        <button class="preset-category" data-category="orwo">Orwo</button>
+                        <button class="preset-category" data-category="svema">Svema</button>
+                        <button class="preset-category" data-category="fomapan">Fomapan</button>
+                        <button class="preset-category" data-category="lucky">Lucky</button>
+                        <button class="preset-category" data-category="revolog">Revolog</button>
+                        <button class="preset-category" data-category="fpp">FPP</button>
+                        <button class="preset-category" data-category="yodica">Yodica</button>
+                        <button class="preset-category" data-category="dubblefilm">Dubble</button>
+                        <button class="preset-category" data-category="washi">Washi</button>
+                        <button class="preset-category" data-category="kono">Kono!</button>
+                        <button class="preset-category" data-category="reflx">Reflx</button>
+                        <button class="preset-category" data-category="flicfilm">FlicFilm</button>
+                        <button class="preset-category" data-category="karmir">Karmir</button>
+                        <button class="preset-category" data-category="hanalogital">Hanalogital</button>
+                    </div>
+                </div>
+
+                <!-- Special Collections -->
+                <div class="preset-group" data-group="specials">
+                    <div
+                        class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
+                        <span class="text-xs font-bold tracking-widest text-moonstone uppercase">Curated</span>
+                        <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                    <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
+                        <button class="preset-category" data-category="mrnegative">Mr. Negative</button>
+                        <button class="preset-category" data-category="berlin">Berlin</button>
+                        <button class="preset-category" data-category="handsonfilm">HandsOnFilm</button>
+                        <button class="preset-category" data-category="cinemot">CineMot</button>
+                        <button class="preset-category" data-category="candido">Candido</button>
+                        <button class="preset-category" data-category="analogue">Analogue</button>
                     </div>
                 </div>
 
@@ -1566,13 +1615,13 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    New Mask
+                    Shoot better next time
                 </button>
 
                 <!-- Mask List -->
                 <div id="mask-list" class="space-y-2 max-h-40 overflow-y-auto">
                     <!-- Mask items injected by JS -->
-                    <div class="text-center text-xs text-gray-500 py-4">No masks created</div>
+                    <div class="text-center text-xs text-gray-500 py-4">No masks. Only Grain.</div>
                 </div>
 
                 <!-- Active Mask Controls (Initially Hidden) -->
