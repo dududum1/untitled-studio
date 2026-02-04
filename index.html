@@ -22,6 +22,82 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap"
         rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --terminal-bg: #121212;
+            /* Deep Charcoal */
+            --terminal-green: #00FF41;
+            /* Matrix Green */
+            --terminal-dim: #666666;
+            /* Dimmed Prompt Color */
+        }
+
+        /* Navigation Container (Optional - positions the logo) */
+        .nav-container {
+            padding: 1rem 2rem;
+            background-color: var(--terminal-bg);
+            display: flex;
+            align-items: center;
+        }
+
+        /* The Logo Itself */
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.5rem;
+            /* Adjust size as needed */
+            text-decoration: none;
+            color: #ed2788;
+            background: linear-gradient(to right, #3CA2C8, #ed2788);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.05em;
+            /* Tighter tracking for code look */
+            display: inline-flex;
+            align-items: center;
+            user-select: none;
+            /* Prevents selecting text like a doc */
+        }
+
+        /* The ">" Prompt */
+        .prompt {
+            color: var(--terminal-dim);
+            margin-right: 0.5rem;
+        }
+
+        /* The Blinking Cursor */
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2rem;
+            background-color: #ed2788;
+            margin-left: 2px;
+            animation: blink 1s step-end infinite;
+        }
+
+        /* Hard Blink Animation */
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Mobile adjustment */
+        @media (max-width: 600px) {
+            .logo {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -61,17 +137,12 @@
         class="fixed top-0 left-0 right-0 z-50 h-20 bg-glass backdrop-blur-glass border-b border-glass-border">
         <div class="flex items-center h-full px-4 gap-3">
             <!-- Logo -->
-            <div id="studio-logo"
-                class="flex items-center gap-2 pr-4 border-r border-glass-border cursor-pointer select-none">
-                <div
-                    class="w-8 h-8 rounded-lg bg-gradient-to-br from-hot-pink to-moonstone flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <span class="text-lg font-bold tracking-tight hidden sm:block">Untitled Studio</span>
-            </div>
+            <!-- Logo -->
+            <nav class="nav-container" style="background: transparent; padding-left: 0;">
+                <a href="/" class="logo">
+                    <span class="prompt">&gt;</span>untitled studio<span class="cursor"></span>
+                </a>
+            </nav>
 
             <!-- Thumbnail Queue -->
             <div id="thumbnail-queue" class="flex-1 flex items-center gap-2 overflow-x-auto scrollbar-hide py-2">
@@ -2044,6 +2115,145 @@
                     .catch(err => console.error('✗ SW registration failed:', err));
             });
         }
+    </script>
+    <!-- ========== MANIFESTO MODAL ========== -->
+    <div id="manifesto-modal" class="fixed inset-0 z-[100] hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-xl transition-opacity opacity-0" id="manifesto-backdrop">
+        </div>
+
+        <!-- Content -->
+        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none opacity-0 scale-95 transition-all duration-300"
+            id="manifesto-content-wrapper">
+            <div
+                class="bg-[#121212] border border-[#3CA2C8]/30 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-none pointer-events-auto shadow-[0_0_50px_rgba(60,162,200,0.1)] relative">
+
+                <!-- Terminal Header -->
+                <div
+                    class="sticky top-0 bg-[#121212] border-b border-[#3CA2C8]/30 p-2 flex justify-between items-center z-10">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-[#ed2788]"></div>
+                        <span class="font-mono text-xs text-[#3CA2C8] tracking-widest">MANIFESTO.MD</span>
+                    </div>
+                    <button id="close-manifesto-btn"
+                        class="text-[#3CA2C8] hover:text-white font-mono text-xl leading-none px-2">&times;</button>
+                </div>
+
+                <!-- Text Content -->
+                <div
+                    class="p-8 font-mono text-gray-300 space-y-6 text-sm leading-relaxed selection:bg-[#ed2788] selection:text-white">
+                    <h1 class="text-xl font-bold text-white mb-8 tracking-tighter border-b border-gray-800 pb-4">
+                        THE MANIFESTO OF THE UNMASKED<br>
+                        <span class="text-xs font-normal text-[#ed2788] opacity-80">"Global Adjustments Only. No Hiding.
+                            No Lies."</span>
+                    </h1>
+
+                    <div class="space-y-2">
+                        <h2 class="text-[#3CA2C8] font-bold">I. THE ATTEMPT</h2>
+                        <p>We sought to implement gl_StencilFunc. We tried to bind Framebuffers for "Subject Selection."
+                            We wrote 400 lines of shader code to calculate a "Gaussian Blur" for a soft-feathered brush.
+                            And what did we get?</p>
+                        <ul class="list-disc list-inside text-[#ed2788]/80 text-xs ml-4">
+                            <li>CONTEXT_LOST_WEBGL</li>
+                            <li>FPS dropped to 4</li>
+                            <li>The fan on the Acer Aspire sounded like a jet engine taking off from Halim
+                                Perdanakusuma.</li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h2 class="text-[#3CA2C8] font-bold">II. THE REALIZATION</h2>
+                        <p>Why did we want masking? To fix mistakes? To brighten a face? To darken a sky? THIS IS
+                            DIGICHUD THINKING.</p>
+                        <p>When you shoot a roll of Svema traffic surveillance film, do you get to "mask out" the grain?
+                            No. You accept the grain. You breathe the grain.</p>
+                        <p>When you shoot Kodak Aerochrome, do you get to say "I only want the trees to be pink, not the
+                            grass"? No. The chemistry does not care about your feelings. The chemistry converts the
+                            entire spectrum.</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h2 class="text-[#3CA2C8] font-bold">III. THE PHILOSOPHY OF THE GLOBAL</h2>
+                        <p>Masking is a digital perversion. It creates a lie. It creates an image that never existed.
+                        </p>
+                        <p class="italic text-white">"Oh, let me just lift the shadows on my face." <span
+                                class="text-[#ed2788] not-italic font-bold">COWARDICE.</span></p>
+                        <p class="italic text-white">"Let me saturate just the sunset." <span
+                                class="text-[#ed2788] not-italic font-bold">WEAKNESS.</span></p>
+                        <p>True Film Simulation is holistic. It is a chemical bath that drowns the entire image equally.
+                            If the shadows are green, they are green everywhere. If the highlights are blown, they are
+                            blown forever.</p>
+                        <p>We do not "paint" light. We capture it, we process it, and we suffer the consequences.</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h2 class="text-[#3CA2C8] font-bold">IV. THE TECHNICAL LIMITATION AS ART</h2>
+                        <p>The Digichuds will say: "Your app sucks, I can't even brush adjustments."</p>
+                        <p>We will say: "The Nvidia 820m prevents us from sinning."</p>
+                        <p>We are not limited by hardware. We are protected by it. The 1GB of VRAM is a guardrail
+                            against bad taste.</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h2 class="text-[#3CA2C8] font-bold">V. THE DECLARATION</h2>
+                        <p>From this day forth, the "Masking Tool" is deprecated. Deleted from the repo. Wiped from the
+                            history.</p>
+                        <p class="py-2">
+                            You want to fix your exposure? Shoot better.<br>
+                            You want to change the color of just one object? Buy a paintbrush.<br>
+                            You want "Smart Selection"? Go back to Adobe.
+                        </p>
+                    </div>
+
+                    <div class="border-t border-gray-800 pt-6 mt-8 text-center bg-[#121212]">
+                        <p class="text-[#ed2788] font-bold tracking-widest text-lg uppercase">Here, we die like
+                            men.<br>We die with Global Saturation -100.<br>We die with the whole frame.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const logo = document.querySelector('.logo');
+            const modal = document.getElementById('manifesto-modal');
+            const backdrop = document.getElementById('manifesto-backdrop');
+            const content = document.getElementById('manifesto-content-wrapper');
+            const closeBtn = document.getElementById('close-manifesto-btn');
+
+            function openModal(e) {
+                if (e) e.preventDefault();
+                modal.classList.remove('hidden');
+                // Trigger animation
+                setTimeout(() => {
+                    backdrop.classList.remove('opacity-0');
+                    content.classList.remove('opacity-0', 'scale-95');
+                }, 10);
+            }
+
+            function closeModal() {
+                backdrop.classList.add('opacity-0');
+                content.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+
+            if (logo) {
+                logo.addEventListener('click', openModal);
+            }
+
+            if (closeBtn) closeBtn.addEventListener('click', closeModal);
+            if (backdrop) backdrop.addEventListener('click', closeModal);
+
+            // Close on ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            });
+        });
     </script>
 </body>
 
