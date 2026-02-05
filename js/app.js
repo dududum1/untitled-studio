@@ -439,6 +439,7 @@ class UntitledStudio {
             this.initVibePack();  // Retro Vibe Pack
             this.initPresetAccordion(); // New: Collapsible Menu
             this.initCRT();         // CRT Visualization Mode
+            this.initManifestoMode(); // Brutalist Theme
 
             await this.loadSavedSessions().catch(err => console.warn('Failed to load saved sessions:', err));
             await this.loadCustomPresets().catch(err => console.warn('Failed to load presets:', err));
@@ -510,6 +511,35 @@ class UntitledStudio {
             watermarkPreview.textContent = this.vibeSettings.watermarkText;
         } else {
             watermarkPreview.classList.add('hidden');
+        }
+    }
+
+    initManifestoMode() {
+        const toggle = document.getElementById('manifesto-mode-toggle');
+        const grain = document.getElementById('manifesto-grain');
+
+        const isManifesto = localStorage.getItem('manifestoMode') === 'true';
+
+        const applyMode = (active) => {
+            document.body.classList.toggle('manifesto-mode', active);
+            if (grain) grain.style.opacity = active ? '0.1' : '0';
+            if (toggle) toggle.checked = active;
+            localStorage.setItem('manifestoMode', active);
+        };
+
+        if (isManifesto) {
+            applyMode(true);
+        }
+
+        if (toggle) {
+            toggle.addEventListener('change', (e) => {
+                applyMode(e.target.checked);
+                this.hapticFeedback(e.target.checked ? 'heavy' : 'light');
+                if (e.target.checked) {
+                    this.audio.playGlitch();
+                    console.log('⚖️ MANIFESTO MODE: GLOBAL ADJUSTMENTS ONLY. NO HIDING. NO LIES.');
+                }
+            });
         }
     }
 

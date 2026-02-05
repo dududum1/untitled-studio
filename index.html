@@ -162,6 +162,9 @@
 </head>
 
 <body class="bg-midnight text-white font-sans overflow-hidden select-none">
+    <!-- Manifesto Mode Grain -->
+    <div id="manifesto-grain"
+        class="fixed inset-0 pointer-events-none opacity-0 z-[100] transition-opacity duration-1000"></div>
 
     <!-- ========== BATCH BAR (Top) ========== -->
     <header id="batch-bar"
@@ -1729,6 +1732,21 @@
         <!-- MASK Tab -->
         <div id="mask-panel" class="panel hidden">
             <div class="flex flex-col gap-4">
+                <!-- Manifesto Mode Toggle -->
+                <div
+                    class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-glass-border mb-2 group hover:border-hot-pink transition-all">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-hot-pink tracking-widest uppercase">Manifesto Mode</span>
+                        <span class="text-[10px] text-gray-500 uppercase">Unmask the interface</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input id="manifesto-mode-toggle" type="checkbox" class="sr-only peer">
+                        <div
+                            class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-none border border-white/20 peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-none after:h-5 after:w-5 after:transition-all peer-checked:bg-hot-pink shadow-[4px_4px_0px_rgba(60,162,200,0.3)] peer-checked:shadow-[4px_4px_0px_rgba(255,255,255,0.2)]">
+                        </div>
+                    </label>
+                </div>
+
                 <!-- Add Mask Button -->
                 <button id="add-mask-btn"
                     class="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors">
