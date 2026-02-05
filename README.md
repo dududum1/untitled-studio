@@ -4,9 +4,15 @@
 
 **Untitled Studio** is a high-performance, privacy-first web image editor built for the aesthetic era. It leverages **WebGL 2.0** to perform cinema-grade color grading, film emulation, and creative effects entirely in the browser—your photos never leave your device.
 
-## Key Features
+## ⚖️ The Manifesto of the Unmasked
+Untitled Studio is governed by a strict philosophy of **unmasked global adjustments**. We reject the digital perversion of "Selective Editing" in favor of holistic, chemical-simulated processing. 
+> "If you can’t fix the whole frame, you haven't earned the shot."
 
-### The Film Archive (150+ Stocks)
+Read the full 7-chapter [Manifesto](manifesto.html) to understand the "Unmasked" identity.
+
+## 🚀 Key Features
+
+### 🎞️ The Film Roll Archive (150+ Stocks)
 A physics-based analog engine simulating grain, halation, and chemical shifts. The library includes:
 
 **The Classics**
@@ -14,46 +20,30 @@ A physics-based analog engine simulating grain, halation, and chemical shifts. T
 *   **Fuji**: Pro 400H, Superia 400/800/1600, Velvia 50, Provia 100F, Classic Chrome, Neopan Acros.
 *   **Ilford**: HP5 Plus, FP4, Delta 3200, Ortho Plus, SFX 200 (Infrared).
 
-**Cinema & Broadcast**
-*   **Hollywood**: Kodak Vision 2383 Print Film (Dune/Joker Looks), Fuji 3513, Cineon Log.
-*   **Broadcast**: Technicolor Process 4, Bleach Bypass, 16mm Newsreel.
-
-**Boutique & Experimental (New)**
-*   **Mr. Negative House Specials**: *Bat Country* (Fear & Loathing), *Zombie 400* (Green Skin), *Silver Screen* (Home-made).
-*   **Glitch & Sci-Fi**: **Hanalogital** (Bokeh/Prism/Veins), **Yodica** (Cosmic Gradients), **Revolog** (Lightning/Fireflies).
-*   **Hand-Rolled**: **Kono!** (Moonstruck/Donau), **Dubblefilm** (Apollo/Bubblegum), **Reflx Lab** (Cinema Re-spools).
-*   **Dead Stock & Rare**: **Aerochrome** (Infrared Pink), **Lomo Metropolis**, **Agfa Scala**, **Peel-Apart Polaroid**.
-
-**Monsters & Oddities**
+**Monsters & Obscure**
 *   **Eastern Bloc**: **Svema** (Ukraine), **Orwo** (GDR), **Fomapan** (Czech), **Lucky** (China).
-*   **FPP**: Dracula 64, Frankenstein 200, Wolfman 100, Infrared Color.
-*   **Washi**: "Z" (Near IR), "S" (Sound Recording), "X" (Surveillance).
-*   **Berlin Specials**: Analogheld, Optik Oldschool, King Film.
+*   **Washi**: Hand-made Japanese paper films (Z, S, X).
+*   **Boutique**: **Kono!**, **Dubblefilm**, **Reflx Lab**, and **Aerochrome** IR simulations.
 
-### Professional Grading Suite
-- **Tone Curves**: 4-channel RGB+Luma curves with spline interpolation.
-- **HSL Mixer**: 8-channel precise color grading (Hue, Saturation, Luminance).
-- **Split Toning**: Balance shadows and highlights with custom hues.
-- **Creative Effects**: Tilt-Shift (Miniature), Selective Color masking, Posterize, Diffusion.
+### 🧪 Advanced Darkroom Workflow
+- **Sync All (Film Roll)**: Edit a "roll" of up to 36 exposures simultaneously.
+- **Batch Processing**: "Develop" your roll and export as a high-quality ZIP archive.
+- **Tone Curves & HSL**: 4-channel spline curves and 8-channel precise color grading.
+- **Creative Scars**: Physics-aware Bloom and Halation simulations.
 
-### Digital FX & Simulation
-- **ASCII 2.0 Engine**: Matrix Green, Amber Terminal, and Full Color text rendering with CRT scanlines.
-- **Glitch Art**: Real-time RGB splitting, displacement, and signal noise.
-- **Texture Overlays**: Dust, Light Leaks, Scratches, and Crumpled Paper blend modes.
-- **CRT Monitor Mode**: Global scanline overlay, sub-pixel separation, and curved screen vignette.
+### 🔌 The Offline Citadel
+- **100% Client-Side**: No servers. No tracking. No cloud. The image remains in your RAM.
+- **PWA Ready**: Install as a native app for a zero-latency, offline darkroom experience.
+- **Universal URL**: Works on everything from $3,000 "Pro" phones to discarded 2015 laptops.
 
-### High-Performance Core
-- **Wasm Grain Engine**: Rust-powered noise generation for zero-latency slider performance.
-- **Native 4K Export**: High-resolution rendering independent of screen size (up to 4K).
-- **Batch Editing**: Apply looks to multiple photos instantly.
-- **Local Privacy**: 100% Client-side editing. Your photos never leave your device.
-- **PWA Support**: Installable native app experience with offline capability.
-
-## Technology Stack
-- **Core**: Vanilla JavaScript (ES6+), HTML5.
-- **Rendering**: WebGL 2.0 (Custom Shader Engine) + WebAssembly (Rust).
+## 🛠️ Technology Stack
+- **Core**: Vanilla JavaScript (ES6+), WebGL 2.0 (Custom Shaders).
+- **Performance**: Rust-powered WebAssembly Grain Engine.
 - **Styling**: Tailwind CSS + Glassmorphism UI.
-- **Architecture**: Zero-dependency, offline-capable client-side app.
+- **Arch**: 100% Offline-first Progressive Web App.
+
+## 📖 Documentation
+For a deep dive into the controls and workflow, view the [How-To Guide](how-to.html).
 
 ## Getting Started
 

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Edit - Untitled Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'midnight': '#121212',
+                        'glass': 'rgba(30, 30, 30, 0.6)',
+                        'glass-border': 'rgba(255, 255, 255, 0.08)',
+                        'hot-pink': '#ed2788',
+                        'moonstone': '#3ca2c8',
+                    },
+                    fontFamily: {
+                        'sans': ['Outfit', 'system-ui', 'sans-serif'],
+                        'mono': ['JetBrains Mono', 'monospace'],
+                    },
+                    backdropBlur: {
+                        'glass': '12px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+        }
+
+        .pro-tip {
+            border-left: 4px solid #ed2788;
+            background: rgba(237, 39, 136, 0.05);
+        }
+
+        .step-number {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(to right, #3ca2c8, #ed2788);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+
+<body class="font-sans min-h-screen selection:bg-hot-pink selection:text-white pb-20">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 h-20 bg-midnight/80 backdrop-blur-xl border-b border-glass-border">
+        <div class="max-w-4xl mx-auto h-full px-6 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <svg class="w-5 h-5 text-hot-pink group-hover:-translate-x-1 transition-transform" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span
+                    class="font-mono font-bold tracking-tighter text-lg bg-gradient-to-r from-moonstone to-hot-pink bg-clip-text text-transparent">UNTITLED
+                    STUDIO</span>
+            </a>
+            <div class="text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase">Documentation v1.0</div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto pt-32 px-6">
+        <div class="mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Mastering the <span
+                    class="text-hot-pink">Edit</span></h1>
+            <p class="text-lg text-white/60 max-w-2xl">A quick breakdown of how to get the most out of Untitled Studio's
+                professional film emulation engine.</p>
+        </div>
+
+        <section class="space-y-12">
+            <!-- 1. The Preset Engine -->
+            <div class="glass-card p-8 group hover:border-hot-pink/30 transition-colors">
+                <div class="flex items-start gap-4">
+                    <span class="step-number text-3xl font-bold">01</span>
+                    <div>
+                        <h2 class="text-2xl font-bold mb-4">The Preset Engine <span
+                                class="text-white/40 font-normal text-lg">(Film Simulations)</span></h2>
+                        <p class="mb-4 text-white/70">This is where you start. Untitled isn’t just about "filters"; it’s
+                            about Emulation Packs.</p>
+                        <ul class="space-y-4 text-white/80">
+                            <li><strong class="text-moonstone">The Library:</strong> Organized by brands (Kodak, Fuji,
+                                Ilford) and boutique creators (Yodica, JCH).</li>
+                            <li><strong class="text-moonstone">The Strength Slider:</strong> Found at the bottom when a
+                                preset is selected.
+                                <div class="pro-tip p-4 mt-2 rounded-r-xl">
+                                    <span class="text-hot-pink font-bold">PRO TIP:</span> Rarely stay at 100%. For a
+                                    "natural" film look, drop it to 70-80%. This lets original digital detail peek
+                                    through.
+                                </div>
+                            </li>
+                            <li><strong class="text-moonstone">Custom Recipes:</strong> Save your own tweaks. Hit the
+                                <span class="bg-white/10 px-1.5 py-0.5 rounded text-xs">+</span> icon to save a combo of
+                                Grain + Contrast + Color for next time.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. The Tone Tab -->
+            <div class="glass-card p-8 group hover:border-hot-pink/30 transition-colors">
+                <div class="flex items-start gap-4">
+                    <span class="step-number text-3xl font-bold">02</span>
+                    <div>
+                        <h2 class="text-2xl font-bold mb-4">The "Tone" Tab <span
+                                class="text-white/40 font-normal text-lg">(Light & Exposure)</span></h2>
+                        <ul class="space-y-4 text-white/80">
+                            <li><strong class="text-moonstone">Exposure:</strong> Global brightness. Watch the
+                                Histogram; if the "mountain" hits the right wall, you're "blowing out" your whites.</li>
+                            <li><strong class="text-moonstone">Contrast:</strong> Film typically has a "rolled-off"
+                                contrast. Increase for drama, or decrease slightly for a "vintage" look while using the
+                                Shadows tool.</li>
+                            <li><strong class="text-moonstone">Highlights & Shadows:</strong> Recovery tools. Lift
+                                Shadows for dark faces, drop Highlights for white blob skies.</li>
+                            <li><strong class="text-moonstone">Whites & Blacks:</strong> Your anchor points. Sliding
+                                Blacks to the right creates that "faded/matte" look common in indie photography.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. The Color Tab -->
+            <div class="glass-card p-8 group hover:border-hot-pink/30 transition-colors">
+                <div class="flex items-start gap-4">
+                    <span class="step-number text-3xl font-bold">03</span>
+                    <div>
+                        <h2 class="text-2xl font-bold mb-4">The "Color" Tab <span
+                                class="text-white/40 font-normal text-lg">(Temperature & HSL)</span></h2>
+                        <ul class="space-y-4 text-white/80">
+                            <li><strong class="text-moonstone">Temp & Tint:</strong> Warm it up (Yellow) for Golden Hour
+                                or cool it down (Blue) for a night vibe.</li>
+                            <li><strong class="text-moonstone">Vibrance vs Saturation:</strong> Vibrance is smarter—it
+                                boosts dull colors while protecting skin tones from looking sunburned.</li>
+                            <li><strong class="text-moonstone">HSL Engine:</strong> Pick just the greens to turn them
+                                yellow/brown for a fall look, or desaturate blues for a moody ocean.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. The FX Tab -->
+            <div class="glass-card p-8 group hover:border-hot-pink/30 transition-colors">
+                <div class="flex items-start gap-4">
+                    <span class="step-number text-3xl font-bold">04</span>
+                    <div>
+                        <h2 class="text-2xl font-bold mb-4">The "FX" Tab <span
+                                class="text-white/40 font-normal text-lg">(Atmosphere)</span></h2>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-moonstone font-bold mb-2">Film Grain</h3>
+                                <p class="text-sm text-white/60 mb-2">Small grain = 35mm pro film. Large grain = 1600
+                                    ISO speed.</p>
+                                <p class="text-sm text-white/60">High Roughness makes grain jagged and organic; low
+                                    looks like digital "sand."</p>
+                            </div>
+                            <div>
+                                <h3 class="text-moonstone font-bold mb-2">Physical Defects</h3>
+                                <p class="text-sm text-white/60 mb-2"><strong>Halation:</strong> Mimics the red glow
+                                    around bright lights (Cinestill style).</p>
+                                <p class="text-sm text-white/60"><strong>Dust:</strong> Adds physical damage. Use
+                                    sparingly to avoid that "fake 2012 app" look.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Curves Tool -->
+            <div class="glass-card p-8 group hover:border-hot-pink/30 transition-colors">
+                <div class="flex items-start gap-4">
+                    <span class="step-number text-3xl font-bold">05</span>
+                    <div>
+                        <h2 class="text-2xl font-bold mb-4">The "Curves" Tool <span
+                                class="text-white/40 font-normal text-lg">(Advanced)</span></h2>
+                        <ul class="space-y-4 text-white/80">
+                            <li><strong class="text-moonstone">The S-Curve:</strong> Pull the top-right up and
+                                bottom-left down slightly for classic film "pop."</li>
+                            <li><strong class="text-moonstone">The Lifted Black:</strong> Pull the very bottom-left
+                                point straight up. This turns pure blacks into dark grey for a matte effect.</li>
+                            <li><strong class="text-moonstone">RGB Grading:</strong> Adjust channels individually (e.g.,
+                                adding blue to shadows and yellow to highlights).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow -->
+            <div class="bg-hot-pink rounded-[32px] p-8 md:p-12 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-3xl rounded-full -mr-20 -mt-20"></div>
+                <h2 class="text-3xl font-bold mb-8 relative z-10 text-white">The Essential Workflow</h2>
+                <div class="grid md:grid-cols-2 gap-8 relative z-10">
+                    <ol class="space-y-4 list-decimal list-inside text-white/90">
+                        <li><strong>Crop & Straighten:</strong> Fix framing first.</li>
+                        <li><strong>Pick a Base:</strong> Choose a film preset.</li>
+                        <li><strong>Adjust Strength:</strong> Move the slider until it looks "integrated."</li>
+                    </ol>
+                    <ol start="4" class="space-y-4 list-decimal list-inside text-white/90">
+                        <li><strong>Fix Exposure:</strong> Check histogram—don't let it "clip."</li>
+                        <li><strong>Add Character:</strong> Add Grain and Halation.</li>
+                        <li><strong>Export:</strong> Save as High-Quality JPEG or PNG.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <footer class="mt-20 text-center border-t border-glass-border pt-10">
+            <p class="text-white/40 text-sm mb-6">Untitled Studio // Professional Analog Emulation Suite</p>
+            <a href="index.html"
+                class="inline-flex items-center gap-2 px-8 py-4 bg-white text-midnight font-bold rounded-full hover:scale-105 transition-transform">
+                Back to Studio
+            </a>
+        </footer>
+    </main>
+
+</body>
+
+</html>

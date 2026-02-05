@@ -2329,6 +2329,117 @@ class WebGLEngine {
         this.canvas.height = height;
         this.gl.viewport(0, 0, width, height);
     }
+
+    /**
+     * Generate ASCII text representation of the current image
+     * Renders a downscaled version to an offscreen FBO and maps luminance to characters
+     */
+    generateAsciiText() {
+        if (!this.adjustments.asciiSize || this.adjustments.asciiSize <= 0.01) {
+            return null; // ASCII effect not active
+        }
+
+        const gl = this.gl;
+        const width = this.canvas.width;
+        const height = this.canvas.height;
+
+        // Calculate grid dimensions matching shader logic
+        // Shader: density = (u_asciiSize * 400.0)
+        // We clip min density to 10.0
+        let density = this.adjustments.asciiSize * 400.0;
+        if (density < 10.0) density = 10.0;
+
+        // Aspect adjustment matching shader: 
+        // vec2 charGrid = vec2(density, density * (u_resolution.y / u_resolution.x) * 1.5);
+        const cols = Math.floor(density);
+        const rows = Math.floor(density * (height / width) * 1.5); // 1.5 corrects for font aspect ratio (tall chars)
+
+        if (cols <= 0 || rows <= 0) return null;
+
+        // Create temporary FBO for downsampled render
+        const fbo = gl.createFramebuffer();
+        const tex = gl.createTexture();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, cols, rows, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); // Nearest neighbor for crisp pixels
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+
+        if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
+            console.error('ASCII FBO incomplete');
+            gl.deleteFramebuffer(fbo);
+            gl.deleteTexture(tex);
+            return null;
+        }
+
+        // Save state
+        const savedAsciiSize = this.adjustments.asciiSize;
+        const savedViewport = gl.getParameter(gl.VIEWPORT);
+
+        // Disable ASCII in shader so we render the "source" colors
+        this.adjustments.asciiSize = 0;
+
+        // Render to small FBO
+        gl.viewport(0, 0, cols, rows);
+        this.render(); // Renders the image with all FX (except ASCII) to current bound FBO
+
+        // Read pixels
+        const pixels = new Uint8Array(cols * rows * 4);
+        gl.readPixels(0, 0, cols, rows, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+        // Restore state
+        this.adjustments.asciiSize = savedAsciiSize;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(savedViewport[0], savedViewport[1], savedViewport[2], savedViewport[3]);
+        gl.deleteFramebuffer(fbo);
+        gl.deleteTexture(tex);
+
+        // Convert pixels to text
+        // Charset (Dark to Light): " .:-=+*#%@" (Standard approximation)
+        // Shader uses a 16-level map, we'll try to match visual density
+
+        // Shader chars roughly: Space, ., :, -, +, =, *, #, %, &, 8, @, W, Block
+        const chars = " .,:;i1tfLCG08@"; // 15 chars ~ matching our 16 shader levels (0 is space)
+        // Let's use a simpler 10-char ramp for better clipboard readability usually?
+        // Actually, let's try to match the shader's specialized 3x5 look roughly
+        // The shader has 16 levels.
+        const charMap = [
+            ' ', '.', ',', '-', '~', ':', ';', '=', '!', '*', '%', '$', '&', '8', 'W', '@'
+        ]; // 16 levels
+
+        let asciiStr = "";
+
+        // WebGL coordinate system is Upside Down relative to text
+        // Row 0 is bottom. Text needs Row 0 to be top.
+        // We iterate rows from (rows-1) down to 0
+        for (let y = rows - 1; y >= 0; y--) {
+            for (let x = 0; x < cols; x++) {
+                const i = (y * cols + x) * 4;
+                const r = pixels[i];
+                const g = pixels[i + 1];
+                const b = pixels[i + 2];
+
+                // Calculate luminance (Rec 709)
+                const lum = (r * 0.2126 + g * 0.7152 + b * 0.0722) / 255.0;
+
+                // Map to char index (0-15)
+                let charIdx = Math.floor(lum * 15.99);
+                if (charIdx < 0) charIdx = 0;
+                if (charIdx > 15) charIdx = 15;
+
+                asciiStr += charMap[charIdx];
+            }
+            asciiStr += "\n";
+        }
+
+        // Restore the main canvas view (render again to put image back on screen)
+        this.render();
+
+        return asciiStr;
+    }
 }
 
 if (typeof module !== 'undefined' && module.exports) {

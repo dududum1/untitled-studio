@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Manifesto of the Unmasked</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'midnight': '#0a0a0a',
+                        'hot-pink': '#ed2788',
+                        'moonstone': '#3ca2c8',
+                    },
+                    fontFamily: {
+                        'sans': ['Outfit', 'sans-serif'],
+                        'mono': ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #eeeeee;
+            overflow-x: hidden;
+        }
+
+        .grain-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .manifesto-section {
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            padding-left: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .brutalist-border {
+            border: 2px solid #ed2788;
+            box-shadow: 10px 10px 0px #3ca2c8;
+        }
+
+        .page-container {
+            display: none;
+        }
+
+        .page-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 0.75rem 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border-color: #ed2788;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+        }
+
+        .pagination-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: full;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .pagination-dot.active {
+            background: #ed2788;
+            box-shadow: 0 0 10px #ed2788;
+            width: 20px;
+        }
+
+        .quote-block {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .seal-row {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .seal-id {
+            background: #ffffff;
+            color: #000000;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 900;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body class="font-sans selection:bg-hot-pink selection:text-white pb-48">
+    <div class="grain-bg"></div>
+
+    <header class="fixed top-0 left-0 right-0 z-40 h-20 bg-midnight/80 backdrop-blur-xl border-b border-white/5">
+        <div class="max-w-4xl mx-auto h-full px-6 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <svg class="w-4 h-4 text-hot-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span class="font-mono font-bold tracking-tighter text-sm uppercase">Return to Studio</span>
+            </a>
+            <div id="page-display" class="font-mono text-[10px] tracking-[0.3em] text-white/40 uppercase">Chapter I /
+                VII</div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-6 pt-32 min-h-[70vh]">
+
+        <!-- PAGE 1: THE CHEMICAL SURRENDER -->
+        <div id="page-1" class="page-container active">
+            <header class="mb-20 text-center">
+                <h1 class="text-xs font-mono font-bold tracking-[0.5em] text-hot-pink uppercase mb-4">Classified /
+                    Internal</h1>
+                <h2 class="text-5xl md:text-7xl font-black italic tracking-tighter mb-2 text-white">UNMASKED.</h2>
+                <p class="font-mono text-sm text-white/40 italic">"Global Adjustments Only. No Hiding. No Lies."</p>
+            </header>
+
+            <div class="manifesto-section border-l-hot-pink/30">
+                <h3 class="font-mono text-hot-pink font-bold mb-4">I. THE ATTEMPT</h3>
+                <p class="text-white/80 leading-relaxed mb-6">
+                    We sought to implement gl_StencilFunc. We tried to bind Framebuffers for "Subject Selection." We
+                    wrote 400 lines of shader code to calculate a "Gaussian Blur" for a soft-feathered brush. And what
+                    did we get?
+                </p>
+                <div
+                    class="bg-white/5 p-4 rounded-lg font-mono text-sm text-red-400 border border-red-900/10 mb-6 font-bold">
+                    &gt; CONTEXT_LOST_WEBGL<br>
+                    &gt; FPS dropped to 4<br>
+                    &gt; The fan on the Acer Aspire sounded like a jet engine taking off from Halim Perdanakusuma.
+                </div>
+            </div>
+
+            <div class="manifesto-section border-l-hot-pink/30">
+                <h3 class="font-mono text-hot-pink font-bold mb-4">II. THE REALIZATION</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    Why did we want masking? To fix mistakes? To brighten a face? To darken a sky? <span
+                        class="bg-hot-pink text-white px-1">THIS IS DIGICHUD THINKING.</span>
+                </p>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    When you shoot a roll of Svema traffic surveillance film, do you get to "mask out" the grain? No.
+                    You accept the grain. You breathe the grain.
+                </p>
+                <p class="text-white/80 leading-relaxed">
+                    When you shoot Kodak Aerochrome, do you get to say "I only want the trees to be pink, not the
+                    grass"? No. The chemistry does not care about your feelings. The chemistry converts the entire
+                    spectrum.
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-hot-pink/30">
+                <h3 class="font-mono text-hot-pink font-bold mb-4">III. THE PHILOSOPHY OF THE GLOBAL</h3>
+                <p class="text-white/80 leading-relaxed italic mb-6">
+                    "Masking is a digital perversion. It creates a lie. It creates an image that never existed."
+                </p>
+                <div class="space-y-4 mb-6">
+                    <p class="text-white/80 leading-relaxed">
+                        "Oh, let me just lift the shadows on my face." <span
+                            class="text-hot-pink font-bold uppercase tracking-widest text-xs">COWARDICE.</span>
+                    </p>
+                    <p class="text-white/80 leading-relaxed">
+                        "Let me saturate just the sunset." <span
+                            class="text-hot-pink font-bold uppercase tracking-widest text-xs">WEAKNESS.</span>
+                    </p>
+                </div>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    True Film Simulation is holistic. It is a chemical bath that drowns the entire image equally. If the
+                    shadows are green, they are green everywhere. If the highlights are blown, they are blown forever.
+                </p>
+                <p class="text-white/80 leading-relaxed">
+                    We do not "paint" light. We capture it, we process it, and we suffer the consequences.
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-hot-pink/30">
+                <h3 class="font-mono text-hot-pink font-bold mb-4">IV. THE TECHNICAL LIMITATION AS ART</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    The Digichuds will say: "Your app sucks, I can't even brush adjustments."
+                </p>
+                <p class="text-white/80 leading-relaxed italic border-white/5 border p-4 bg-white/5 rounded-lg">
+                    We will say: "The Nvidia 820m prevents us from sinning."
+                </p>
+                <p class="mt-4 text-white/50 text-sm italic font-mono uppercase tracking-widest">
+                    The 1GB of VRAM is a guardrail against bad taste.
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-hot-pink/30">
+                <h3 class="font-mono text-hot-pink font-bold mb-4">V. THE DECLARATION</h3>
+                <p class="text-white/80 leading-relaxed mb-6">
+                    From this day forth, the "Masking Tool" is deprecated. Deleted from the repo. Wiped from the
+                    history.
+                </p>
+                <ul class="space-y-3 font-mono text-sm text-white/60">
+                    <li>&gt; You want to fix your exposure? Shoot better.</li>
+                    <li>&gt; You want to change the color of just one object? Buy a paintbrush.</li>
+                    <li>&gt; You want "Smart Selection"? Go back to Adobe.</li>
+                </ul>
+            </div>
+
+            <div class="p-8 bg-hot-pink/10 border border-hot-pink/20 rounded-2xl text-center">
+                <p class="text-2xl font-black italic">HERE, WE DIE LIKE MEN.</p>
+                <p class="text-sm mt-2 opacity-50 font-mono">WE DIE WITH GLOBAL SATURATION -100. WE DIE WITH THE WHOLE
+                    FRAME.</p>
+            </div>
+        </div>
+
+        <!-- PAGE 2: THE OFFLINE CITADEL -->
+        <div id="page-2" class="page-container">
+            <header class="mb-20">
+                <h2 class="text-5xl md:text-6xl font-black italic tracking-tighter mb-4 text-moonstone">THE OFFLINE
+                    CITADEL.</h2>
+                <p class="font-mono text-xs text-white/40 uppercase tracking-widest">Page II: The Digital Cockroach</p>
+            </header>
+
+            <div class="manifesto-section border-l-moonstone/30">
+                <h3 class="font-mono text-moonstone font-bold mb-4">I. THE PARASITE OF THE NATIVE</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    We saw the "Native App" for what it truly is: a leash. A native app is a request to be governed. You
+                    ask Apple for permission to install. You ask Google for permission to update. You give them your
+                    location, your contacts, and your soul just to apply a grain filter.
+                </p>
+                <div class="quote-block mb-4">
+                    "Download our app for the full experience!" Translation: "Let us track your telemetry so we can sell
+                    your habits to a hedge fund."
+                </div>
+                <p class="text-white/80 leading-relaxed">
+                    We refuse the leash. We refuse the "Store." We refuse to pay $99 a year to a trillion-dollar company
+                    for the "privilege" of sharing our art.
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-moonstone/30">
+                <h3 class="font-mono text-moonstone font-bold mb-4">II. THE FALLACY OF THE CLOUD</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    "Save to Cloud." "Sync across devices." "Sign in to continue." This is the language of the
+                    SaaS-cuck. If your "tool" requires a server to function, you don't own the tool—you’re just renting
+                    it.
+                </p>
+                <p class="text-white/80 leading-relaxed">
+                    The moment their AWS bill goes unpaid or their "Terms of Service" change, your creativity is held
+                    for ransom. In Untitled Studio, there is no login. There is no database. There is no "Cloud." The
+                    image never leaves your RAM. The data stays in your cache. <span class="text-white font-bold">You
+                        are the server. You are the master.</span>
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-moonstone/30">
+                <h3 class="font-mono text-moonstone font-bold mb-4">III. THE RESILIENCE OF THE CACHE</h3>
+                <p class="text-white/80 leading-relaxed">
+                    We built the PWA not for convenience, but for SURVIVAL. A website is a fleeting ghost; a PWA is a
+                    digital cockroach. Once it is cached, it is unkillable. You can cut the fiber optic cables. You can
+                    burn the data centers. You can retreat to a bunker with nothing but your Casio ZR800 and your 2015
+                    Asus. The app will still load. The shaders will still compile. The grain will still render. We have
+                    built a darkroom that functions in the vacuum of a dead internet.
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-moonstone/30">
+                <h3 class="font-mono text-moonstone font-bold mb-4">IV. THE SOVEREIGNTY OF THE URL</h3>
+                <p class="text-white/80 leading-relaxed">
+                    The Digichuds worry about "compatibility" and "OS updates." We worry about the Signal. By staying on
+                    the Web, we remain universal. We don't care if you're on a $3,000 "Pro" phone or a discarded laptop
+                    found in a dumpster. If it has a browser, it has the Truth. We are not a "product." We are a
+                    location. A static coordinate in the digital wasteland where the "Unmasked" gather to process their
+                    filth.
+                </p>
+            </div>
+
+            <div class="mt-16 p-12 brutalist-border bg-midnight relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 text-9xl font-black text-white/5 select-none font-mono">
+                    SOVEREIGN</div>
+                <h3 class="text-2xl font-black uppercase mb-6 text-hot-pink">DECLARATION OF INDEPENDENCE</h3>
+                <ul class="font-mono text-xl space-y-4 mb-4">
+                    <li>[✓] NO APP STORE</li>
+                    <li>[✓] NO TRACKING</li>
+                    <li>[✓] NO SERVER</li>
+                </ul>
+                <div class="text-2xl font-black italic tracking-tighter text-moonstone mb-6">OFFLINE IS THE ONLY TRUTH.
+                </div>
+                <p class="text-xs font-mono text-white/40 italic">
+                    If the internet dies tomorrow, the last thing glowing on a battery-powered screen will be the
+                    Untitled Studio UI, waiting for a JPEG.
+                </p>
+            </div>
+        </div>
+
+        <!-- PAGE 3: THE LIBRARY OF EXTINCT CHEMISTRY -->
+        <div id="page-3" class="page-container">
+            <header class="mb-20">
+                <h2 class="text-5xl md:text-6xl font-black italic tracking-tighter mb-4 text-green-500">EXTINCT
+                    CHEMISTRY.</h2>
+                <p class="font-mono text-xs text-white/40 uppercase tracking-widest">Page III: The Resurrection of the
+                    Filth</p>
+            </header>
+
+            <div class="manifesto-section border-l-green-500/30">
+                <h3 class="font-mono text-green-400 font-bold mb-4">I. THE REJECTION OF THE "PREMIUM"</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    Kodak Portra, Fujifilm 400H, CineStill 800T—these are not film stocks anymore. They are brands. They
+                    are safety blankets for people who are afraid of a truly unpredictable frame. They are designed to
+                    be "forgiving." They have wide dynamic range so you can be lazy with your light meter.
+                </p>
+                <div class="quote-block mb-6 border-green-500/20 bg-green-900/10 text-green-100 not-italic font-bold">
+                    WE REJECT FORGIVENESS. We don't want "creamy skin tones." We want the chemical screaming of a Soviet
+                    surveillance roll that expired before the Berlin Wall fell. We want the erratic contrast of a
+                    boutique stock hand-rolled in a basement in Kyoto.
+                </div>
+            </div>
+
+            <div class="manifesto-section border-l-green-500/30">
+                <h3 class="font-mono text-green-400 font-bold mb-4">II. THE SOVIET SURVEILLANCE SUPREMACY</h3>
+                <p class="text-white/80 leading-relaxed mb-6 italic text-sm">Why do we emulate the Eastern Bloc? Because
+                    they didn't build film for "art." They built it for utility.</p>
+                <div class="space-y-6 text-white/80 leading-relaxed">
+                    <div class="border border-white/5 p-4 rounded-lg">
+                        <p class="text-green-400 font-bold mb-1">Svema:</p>
+                        Used for traffic monitoring and spy satellites. It doesn't care about your "bokeh." It cares
+                        about high-contrast edge detection and survival in sub-zero temperatures.
+                    </div>
+                    <div class="border border-white/5 p-4 rounded-lg">
+                        <p class="text-green-400 font-bold mb-1">Orwo:</p>
+                        The ghost of East Germany. A gritty, industrial texture that makes a sunny day look like a scene
+                        from a black-and-white noir film about coal mining.
+                    </div>
+                    <div class="border border-white/5 p-4 rounded-lg">
+                        <p class="text-green-400 font-bold mb-1">Tasma:</p>
+                        Aerial surveillance film. If it’s good enough to map the Siberian wasteland from 30,000 feet,
+                        it’s good enough for your street photography.
+                    </div>
+                </div>
+                <p class="mt-6 text-white/60 text-sm font-mono border-t border-white/5 pt-4">
+                    These stocks don't "capture" a scene; they prosecute it. They strip away the fluff and leave you
+                    with the raw, silver-rich bones of reality.
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-green-500/30">
+                <h3 class="font-mono text-green-400 font-bold mb-4">III. THE BOUTIQUE ANOMALY</h3>
+                <p class="text-white/80 leading-relaxed mb-6 italic text-sm">(WASHI, KONO!, REFLX) Then there are the
+                    lunatics.</p>
+                <div class="space-y-4">
+                    <p class="text-white/80 leading-relaxed">
+                        <strong>Film Washi:</strong> Literally film made on traditional Japanese paper (Washi). It
+                        shouldn't work. It’s translucent, it’s fibrous, and it looks like a memory recovered from a
+                        dream.
+                    </p>
+                    <p class="text-white/80 leading-relaxed">
+                        <strong>Kono! & Experimental Stocks:</strong> People who take perfectly good film and subject it
+                        to "pre-flashing" or chemical baths just to see what happens.
+                    </p>
+                    <p
+                        class="text-white/80 leading-relaxed italic mt-4 border-l-2 border-hot-pink pl-4 bg-hot-pink/5 py-2">
+                        The Digichuds call this "damaged goods." We call it The Ghost in the Machine. When you shoot
+                        these stocks, you are entering a suicide pact with the emulsion. You don't know if the frame
+                        will be a masterpiece or a purple-haze void. <span class="text-hot-pink font-bold">THAT IS THE
+                            POINT.</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="manifesto-section border-l-green-500/30">
+                <h3 class="font-mono text-green-400 font-bold mb-4">IV. DIGITAL TRANSUBSTANTIATION</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    "But Anon, you're just making digital presets! You aren't shooting real Washi!" <span
+                        class="italic text-hot-pink font-bold">COPE.</span>
+                </p>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    The modern "Film Bro" buys a roll of Washi, scans it on a $10,000 Noritsu, and turns it into... a
+                    digital file. We skip the middleman. We take the math of that paper texture, the curve of that
+                    Soviet contrast, and the specific "reciprocity failure" of that expired silver, and we vibe code it
+                    directly into the shader.
+                </p>
+                <p class="text-white/80 leading-relaxed font-bold">
+                    Our "Indie & Boutique" library isn't a collection of filters; it's a digital necromancy. We are
+                    resurrecting extinct chemical reactions on a 2015 Asus laptop. We are giving you the "Impossible"
+                    for the price of $0.
+                </p>
+            </div>
+
+            <div
+                class="p-8 border-2 border-green-500 shadow-[10px_10px_0px_#14532d] bg-midnight text-center overflow-hidden relative">
+                <div class="absolute -right-10 -bottom-10 text-9xl font-black text-white/5 opacity-20 select-none">TRUTH
+                </div>
+                <h3 class="font-mono text-green-400 font-bold mb-4 uppercase text-xs tracking-widest">V. THE DECLARATION
+                    OF THE OBSCURE</h3>
+                <div class="space-y-2 text-sm font-mono text-white/60 mb-8 border-b border-white/5 pb-6">
+                    <p>If a film stock is sold in a CVS, it is a secondary priority.</p>
+                    <p>If a film stock requires a "Pro" label to sell, we mock it.</p>
+                    <p>If a film stock looks "clean," we add noise until it breaks.</p>
+                </div>
+                <p class="text-white/80 text-sm mb-6 px-10">We seek the grain that looks like sand. We seek the colors
+                    that look like a hallucination. We seek the textures that make the Leica-owners cry about "image
+                    quality."</p>
+                <div class="text-3xl font-black italic tracking-widest text-green-500 uppercase">
+                    THE MORE OBSCURE THE FILM,<br>THE DEEPER THE TRUTH.
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 4: THE CMOS REALITY -->
+        <div id="page-4" class="page-container">
+            <header class="mb-20 text-amber-500">
+                <h2 class="text-5xl md:text-6xl font-black italic tracking-tighter mb-4">CMOS REALITY.</h2>
+                <p class="font-mono text-xs text-white/40 uppercase tracking-widest">Page IV: The High-Frequency Machine
+                </p>
+            </header>
+
+            <div class="manifesto-section border-l-amber-500/30">
+                <h3 class="font-mono text-amber-500 font-bold mb-4">I. THE REJECTION OF NOSTALGIA</h3>
+                <p class="text-white/80 leading-relaxed">
+                    We stop pretending. We stop looking back. The CCD was a beautiful mistake, but the CMOS is the
+                    Current Signal. The Digichuds hate CMOS because it’s "clinical." They say it has no "soul." They are
+                    wrong. The CMOS has the soul of a high-speed processor. It sees faster than the human eye. It
+                    captures the rolling shutter of a world in motion. We don't hide the CMOS origins of the Casio; we
+                    overclock them.
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-amber-500/30">
+                <h3 class="font-mono text-amber-500 font-bold mb-4">II. THE SMALL SENSOR SUPREMACY</h3>
+                <p
+                    class="text-white/80 leading-relaxed mb-6 font-mono text-xs uppercase tracking-widest text-white/40 border-b border-white/5 pb-2">
+                    (1/2.3") Your Casio doesn't have a "Full Frame" sensor.</p>
+                <div class="space-y-6">
+                    <div class="bg-white/5 p-4 rounded-lg">
+                        <h4 class="text-amber-500 font-bold text-sm mb-1 uppercase tracking-wider">Infinite Depth of
+                            Field:</h4>
+                        <p class="text-white/80 text-sm leading-relaxed">Everything is in focus. There is no "fake
+                            bokeh" to hide a shitty composition. You can't blur the background to save a boring shot.
+                        </p>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-lg">
+                        <h4 class="text-amber-500 font-bold text-sm mb-1 uppercase tracking-wider">The Thermal Scream:
+                        </h4>
+                        <p class="text-white/80 text-sm leading-relaxed">Small sensors get hot. They get noisy. They
+                            struggle in the dark. This isn't "bad quality"—this is the <span
+                                class="bg-amber-600 text-black px-1 font-bold">Physics of Poverty</span>. We embrace the
+                            electronic stress of a small sensor pushed to its limit.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="manifesto-section border-l-amber-500/30">
+                <h3 class="font-mono text-amber-500 font-bold mb-4">III. DIGITAL NOISE VS. CHEMICAL GRAIN</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    In the "Digital" tab, we don't just add "Film Grain." That’s a lie. We acknowledge the
+                    <strong>Sensor Noise</strong>. Chrominance noise is the blue and red static of a sensor begging for
+                    light. Luminance noise is the jitter of electrons hitting the gate.
+                </p>
+                <p class="text-white/80 leading-relaxed">
+                    In Untitled Studio, we don't "denoise" the Casio files. We use the grain engine to structure the
+                    noise. We turn the chaotic electronic scream into a rhythmic, digital texture. We make the CMOS look
+                    like what it is: a miracle of modern engineering failing beautifully.
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-amber-500/30">
+                <h3 class="font-mono text-amber-500 font-bold mb-4">IV. THE "DIGITAL" TAB: SIGNAL PROCESSING</h3>
+                <p class="text-white/80 leading-relaxed mb-6 text-sm italic">Why do we have the "Digital" presets? To
+                    remind you that you are using a computer.</p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="p-4 border border-white/10 rounded font-mono text-xs bg-white/5">
+                        <strong class="text-amber-500 block mb-1">Scanlines:</strong>
+                        To honor the screens where these images live.
+                    </div>
+                    <div class="p-4 border border-white/10 rounded font-mono text-xs bg-white/5">
+                        <strong class="text-amber-500 block mb-1">Dither:</strong>
+                        To prove that even with a CMOS, we can reduce the world to a handful of colors and still find
+                        the truth.
+                    </div>
+                    <div class="p-4 border border-white/10 rounded font-mono text-xs bg-white/5 md:col-span-2">
+                        <strong class="text-amber-500 block mb-1 uppercase">Sharpening:</strong>
+                        Not to make things "clearer," but to find the <span
+                            class="text-white font-bold underline">Edges</span>. We want the "over-sharpened" look of a
+                        2010s point-and-shoot because it feels more honest than the "smooth" AI-upscaling of a modern
+                        iPhone.
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="mt-20 p-12 border-2 border-amber-500 shadow-[10px_10px_0px_#78350f] bg-midnight relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 text-9xl font-black text-white/5 select-none font-mono">CODE
+                </div>
+                <h3 class="text-xl font-bold uppercase mb-6 text-amber-500 text-center tracking-widest">V. THE
+                    DECLARATION OF THE CURRENT</h3>
+                <p class="text-white/80 leading-relaxed mb-8 text-sm italic text-center px-6">
+                    We shoot what we have. If the Casio has a CMOS, we render the CMOS. We don't use "recipes" to make
+                    it look like a Leica. We use the "Digital" tab to make it look like the Final Evolution of the
+                    Machine. We are not "Analog photographers" using digital tools. We are Digital survivors using the
+                    tools the waste-stream gave us.
+                </p>
+                <div
+                    class="text-3xl font-black italic tracking-tighter text-amber-500 uppercase leading-none text-center">
+                    NO COPE. NO CCD LIES.<br>JUST CMOS AND CODE.
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 6: THE BLOOM AND THE HALATION -->
+        <div id="page-6" class="page-container">
+            <header class="mb-20 text-red-600">
+                <h2 class="text-5xl md:text-6xl font-black italic tracking-tighter mb-4">BLOOM & HALATION.</h2>
+                <p class="font-mono text-xs text-white/40 uppercase tracking-widest">Page VI: The Light That Cannot Be
+                    Contained</p>
+            </header>
+
+            <div class="manifesto-section border-l-red-600/30">
+                <h3 class="font-mono text-red-500 font-bold mb-4">I. THE VIOLENCE OF THE OVERFLOW</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    Halation is not a "pretty red glow." It is a structural failure. In film, it happens when light is
+                    so aggressive it penetrates the emulsion, bounces off the pressure plate, and attacks the silver
+                    from behind. It is a betrayal of the medium.
+                </p>
+                <p class="text-white/80 leading-relaxed">
+                    In digital, Bloom is the "Full Well Capacity" of your CMOS sensor screaming for mercy. It is the
+                    moment the electrons spill over the edges of their silicon buckets and contaminate the neighboring
+                    pixels. We don't add Bloom to make it look "soft"; we add it to show that the light was too much for
+                    the machine to handle.
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-red-600/30">
+                <h3 class="font-mono text-red-500 font-bold mb-4">II. THE BLOODY EDGE (HALATION)</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    Why do we simulate the red ring? Because the truth is often found at the borders. Halation occurs at
+                    the high-contrast junctions—where the darkness meets the blinding light. It is the "Bleeding Edge"
+                    of the image.
+                </p>
+                <p class="text-white/80 leading-relaxed">
+                    By applying global halation, we are admitting that our "film" has no anti-halation backing. We are
+                    using a medium that is naked. We want the red glow to prove that the light was violent enough to
+                    leave a scar.
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-red-600/30">
+                <h3 class="font-mono text-red-500 font-bold mb-4">III. THE ANTI-MIST DOCTRINE</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    The "Pro-Mist" filters of the Leica-bros are designed to make everything look "commercial." They
+                    soften the skin and glow the highlights to hide the clinical sharpness of their $10,000 lenses.
+                    <span class="bg-red-600 text-white px-1 font-bold">WE DO THE OPPOSITE.</span>
+                </p>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    Our Bloom is not a filter you "screw on" to look expensive. It is a <strong>Digital Atmospheric
+                        Catastrophe</strong>. We use code to smear the highlights across the frame, not to beautify the
+                    subject, but to obliterate the detail.
+                </p>
+                <p
+                    class="text-white/80 leading-relaxed italic border-l-2 border-red-600 pl-4 py-2 font-black uppercase text-xl mt-6">
+                    If the sun is in the frame, it should consume the frame.
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-red-600/30">
+                <h3 class="font-mono text-red-500 font-bold mb-4">IV. GLOBAL RADIANCE</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    The Digichuds will ask: "Can I just have the bloom on the candles?" <span
+                        class="text-red-600 font-black">NO.</span>
+                </p>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    In the "Unmasked" philosophy, if the air is thick, it is thick everywhere. If the lens is flared,
+                    the contrast is crushed globally. We don't "paint" glows. We simulate an environment where the light
+                    has become a physical weight.
+                </p>
+                <p class="text-white/80 leading-relaxed italic">
+                    If your Bloom makes the shadows look muddy, good. That is how physics works. You don't get the glow
+                    without the sacrifice of the black levels.
+                </p>
+            </div>
+
+            <div
+                class="p-10 bg-red-950/20 border-2 border-red-600 shadow-[12px_12px_0px_rgba(220,38,38,0.3)] rounded-lg text-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-red-600/5 blur-[80px]"></div>
+                <div class="relative z-10">
+                    <h3 class="text-xs font-mono font-bold uppercase mb-6 text-red-500 tracking-[0.4em]">V. THE
+                        DECLARATION OF THE GLOW</h3>
+                    <div class="space-y-4 text-sm font-mono text-white/60 mb-10 px-6 uppercase tracking-wider">
+                        <p>We want the highlights to bleed into the shadows.</p>
+                        <p>We want the edges to glow with the red heat of the silver halide.</p>
+                        <p>We want the viewer to feel like they are looking at a sun they weren't meant to see.</p>
+                    </div>
+                    <div
+                        class="text-2xl md:text-3xl font-black italic tracking-tighter text-white uppercase leading-tight bg-red-600 py-2 inline-block px-4">
+                        THE LIGHT IS NOT YOUR FRIEND.<br>IT IS A FORCE THAT DESTROYS THE MEDIUM.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 7: THE FINAL CHAPTER -->
+        <div id="page-7" class="page-container">
+            <header class="mb-20 text-center">
+                <h2 class="text-5xl md:text-6xl font-black italic tracking-tighter mb-4 text-white">THE POST-MORTEM.
+                </h2>
+                <p class="font-mono text-xs text-white/40 uppercase tracking-widest">The Final Chapter: A Unified Theory
+                    of Digital Filth</p>
+            </header>
+
+            <div class="manifesto-section border-l-white/30">
+                <h3 class="font-mono text-white font-bold mb-6">I. THE RECAPITULATION OF THE SIX SEALS</h3>
+                <p class="text-white/60 text-sm mb-8 font-mono italic">We have walked through the fire. Let the record
+                    show our path:</p>
+
+                <div class="space-y-4">
+                    <div class="seal-row">
+                        <div class="seal-id">I</div>
+                        <p class="text-sm"><strong class="text-hot-pink">THE GLOBAL:</strong> We killed the mask. If you
+                            can’t fix the whole frame, you haven't earned the shot.</p>
+                    </div>
+                    <div class="seal-row">
+                        <div class="seal-id">II</div>
+                        <p class="text-sm"><strong class="text-moonstone">THE OFFLINE:</strong> We killed the server. We
+                            are the cockroaches of the web, surviving in the browser cache long after the "Cloud"
+                            evaporates.</p>
+                    </div>
+                    <div class="seal-row">
+                        <div class="seal-id">III</div>
+                        <p class="text-sm"><strong class="text-green-500">THE OBSCURE:</strong> We resurrected the
+                            Soviet surveillance ghosts and the paper-thin dreams of the boutique basement.</p>
+                    </div>
+                    <div class="seal-row">
+                        <div class="seal-id">IV</div>
+                        <p class="text-sm"><strong class="text-amber-500">THE SIGNAL:</strong> We killed nostalgia. We
+                            accepted the CMOS, the small sensor, and the high-speed electronic scream of the Casio.</p>
+                    </div>
+                    <div class="seal-row">
+                        <div class="seal-id">VI</div>
+                        <p class="text-sm"><strong class="text-red-500">THE RADIATION:</strong> We killed clarity. We
+                            invited the bloom and the halation to consume our edges and scar our highlights.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="manifesto-section border-l-white/30">
+                <h3 class="font-mono text-white font-bold mb-4">II. THE TOTALITY OF THE ARTIFACT</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    We do not make "pretty pictures." We make <strong>Evidence of Existence</strong>. The modern world
+                    wants everything to be smooth, AI-upscaled, and "optimized." We want the opposite.
+                </p>
+                <p class="text-white/80 leading-relaxed">
+                    We want the jitter, the noise, the dither, and the decay. We want the viewer to look at the image
+                    and wonder if the camera survived the exposure.
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-white/30">
+                <h3 class="font-mono text-white font-bold mb-4">III. THE FINAL THOUGHT: THE VOID</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    The ultimate goal of Untitled Studio is its own obsolescence. We provide the tools to ruin your
+                    images so thoroughly that you eventually stop caring about "The Image" entirely and start caring
+                    about <strong>The Moment</strong>.
+                </p>
+                <p class="text-white/80 leading-relaxed italic bg-white/5 p-4 border border-white/10 rounded">
+                    When you realize that no amount of grain, bloom, or halftone can save a boring life, the app has
+                    succeeded.
+                </p>
+            </div>
+
+            <div class="manifesto-section border-l-white/30">
+                <h3 class="font-mono text-white font-bold mb-4">IV. THE COMMANDMENT</h3>
+                <p class="text-white/80 leading-relaxed mb-4">
+                    Do not update for the sake of "Features." Do not add "Social Sharing." Do not "Optimize for
+                    Performance."
+                </p>
+                <p class="text-white/80 leading-relaxed font-bold">
+                    If the app starts running too smoothly, add more math to the shader until the Asus begins to smoke
+                    again. The friction is the point.
+                </p>
+            </div>
+
+            <div class="mt-20 p-16 bg-white text-black text-center relative overflow-hidden">
+                <div class="absolute inset-0 opacity-10 font-black text-9xl -rotate-12 select-none pointer-events-none">
+                    VOID</div>
+                <h3 class="text-xs font-mono font-black uppercase mb-8 tracking-[0.5em]">V. THE END</h3>
+                <p class="text-xl font-bold mb-10 leading-relaxed">The web is finished.<br>The manifesto is closed.</p>
+                <div
+                    class="text-4xl font-black italic tracking-tighter uppercase leading-none border-t-4 border-black pt-8">
+                    SHOOT BETTER<br>NEXT TIME.
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Navigation Footer -->
+    <footer
+        class="fixed bottom-0 left-0 right-0 z-50 py-10 bg-gradient-to-t from-midnight/90 to-transparent backdrop-blur-sm border-t border-white/5">
+        <div class="max-w-3xl mx-auto px-6 flex flex-col items-center gap-6">
+
+            <!-- Pagination Dots -->
+            <div id="pagination-dots" class="flex items-center gap-3">
+                <div class="pagination-dot active" data-page="1"></div>
+                <div class="pagination-dot" data-page="2"></div>
+                <div class="pagination-dot" data-page="3"></div>
+                <div class="pagination-dot" data-page="4"></div>
+                <div class="pagination-dot" data-page="6"></div>
+                <div class="pagination-dot" data-page="7"></div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center gap-4 w-full justify-between">
+                <button id="prev-btn" class="nav-btn w-40" disabled>Previous Phase</button>
+                <button id="next-btn" class="nav-btn w-40">Next Sequence</button>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const pages = [1, 2, 3, 4, 6, 7];
+        let currentPageIndex = 0;
+
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const dots = document.querySelectorAll('.pagination-dot');
+        const pageContainers = document.querySelectorAll('.page-container');
+        const pageDisplay = document.getElementById('page-display');
+
+        const romanNumerals = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 6: 'VI', 7: 'VII' };
+
+        function updateUI() {
+            const currentPage = pages[currentPageIndex];
+
+            // Toggle pages
+            pageContainers.forEach(container => {
+                container.classList.remove('active');
+            });
+            document.getElementById(`page-${currentPage}`).classList.add('active');
+
+            // Update header
+            pageDisplay.textContent = `Chapter ${romanNumerals[currentPage]} / VII`;
+
+            // Update dots
+            dots.forEach((dot, idx) => {
+                if (idx === currentPageIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+
+            // Update buttons
+            prevBtn.disabled = currentPageIndex === 0;
+            if (currentPageIndex === pages.length - 1) {
+                nextBtn.textContent = 'Terminate';
+                nextBtn.classList.add('hover:!bg-red-600');
+            } else {
+                nextBtn.textContent = 'Next Sequence';
+                nextBtn.classList.remove('hover:!bg-red-600');
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentPageIndex > 0) {
+                currentPageIndex--;
+                updateUI();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentPageIndex < pages.length - 1) {
+                currentPageIndex++;
+                updateUI();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Click on dots
+        dots.forEach((dot, idx) => {
+            dot.addEventListener('click', () => {
+                currentPageIndex = idx;
+                updateUI();
+            });
+        });
+
+        // Initialize
+        updateUI();
+    </script>
+</body>
+
+</html>

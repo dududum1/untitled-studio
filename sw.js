@@ -4,7 +4,7 @@
  * v2: Added Phase 2 modules and placeholder assets
  */
 
-const CACHE_NAME = 'untitled-studio-v16';
+const CACHE_NAME = 'untitled-studio-v18';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -16,10 +16,10 @@ const STATIC_ASSETS = [
     '/js/histogram.js',
     '/js/tone-curve.js',
     '/js/history.js',
-    '/js/history.js',
     '/js/crop-tool.js',
     '/js/state-manager.js',
     '/js/ui-manager.js',
+    '/js/audio-engine.js',
     '/js/app.js',
     '/manifest.json'
 ];

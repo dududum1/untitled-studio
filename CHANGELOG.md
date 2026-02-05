@@ -2,6 +2,28 @@
 
 All notable changes to Untitled Studio will be documented in this file.
 
+## [2.4.0] - 2026-02-05
+
+### 📜 The "Unmasked" Manifesto Expansion
+- **7-Phase Manifesto**: Completely expanded the "Manifesto of the Unmasked" to 7 chapters, detailing the rejection of masking, the philosophy of offline-first, and the embrace of digital filth.
+- **Cinematic UI**: Refactored `manifesto.html` into a paginated Single-Page App (SPA) experience with unique thematic color grading (Hot Pink, Moonstone, Industrial Green, Amber Monitor, Blood Red, and Terminal B&W).
+- **Archive Integrity**: Updated `MANIFESTO.md` with 100% of the philosophical text, preserving the project's soul without compression or summarization.
+
+### 🎞️ Film Roll & Workflow
+- **Roll-Based Editing**: Implemented "Film Roll" logic for batch operations. 
+- **Sync All**: Added a "Sync All" feature to apply adjustments across an entire roll of up to 36 exposures instantly.
+- **Contextual Export**: Redesigned the batch export modal with thematic "DEVELOP ROLL" nomenclature and zip-based archiving.
+
+### 📖 User Guidance & Integration
+- **How-To Guide**: Created a professional [how-to.html](how-to.html) guide with sleek typography and glassmorphic design.
+- **Direct Access**: Added a dedicated "Info" icon to the main toolbar for instant access to the documentation.
+- **Thematic Linking**: Repurposed the legacy "Mask" tab as a thematic gateway to the manifesto ("THERES NOTHING HERE").
+
+### 📱 UI/UX & Mobile
+- **Mobile Polish**: Fixed layout padding issues on small screens to ensure full 4K export buttons remain accessible.
+- **Icon Update**: Refreshed the PWA icon and favicon with a modern, high-contrast "U" logo.
+-  **Performance**: Optimized shader compilation for the paginated manifesto to ensure smooth transitions on legacy hardware.
+
 ## [2.3.0] - 2026-02-02
 
 ### 🎨 Creative Effects Expansion

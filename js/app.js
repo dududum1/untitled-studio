@@ -23,6 +23,8 @@ class UntitledStudio {
 
         // State
         this.images = [];
+        this.rolls = []; // Multi-roll support
+        this.activeRollId = null;
         this.activeIndex = -1;
         this.currentAdjustments = null;
         this.currentPreset = null;
@@ -36,6 +38,13 @@ class UntitledStudio {
             quality: 95,
             preserveExif: true
         };
+
+
+
+
+        // PWA Install State
+        this.deferredPrompt = null;
+        this.initPWA();
 
         // Initialize Startup Toast (Random)
         const toastContainer = document.getElementById('startup-toast');
@@ -226,6 +235,51 @@ class UntitledStudio {
                 this.audio.playClick();
             }
         });
+    }
+
+
+
+    initPWA() {
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            this.deferredPrompt = e;
+
+            // Show the install button
+            const installBtn = document.getElementById('install-btn');
+            if (installBtn) {
+                installBtn.classList.remove('hidden');
+                installBtn.addEventListener('click', () => {
+                    this.installPWA();
+                });
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            this.deferredPrompt = null;
+            const installBtn = document.getElementById('install-btn');
+            if (installBtn) installBtn.classList.add('hidden');
+            this.showToast('App installed successfully! 🎉');
+        });
+    }
+
+    async installPWA() {
+        if (!this.deferredPrompt) return;
+
+        // Show the prompt
+        this.deferredPrompt.prompt();
+
+        // Wait for the user to respond to the prompt
+        const { outcome } = await this.deferredPrompt.userChoice;
+        console.log(`User response to the install prompt: ${outcome}`);
+
+        // We've used the prompt, and can't use it again, throw it away
+        this.deferredPrompt = null;
+
+        // Hide button regardless of outcome
+        const installBtn = document.getElementById('install-btn');
+        if (installBtn) installBtn.classList.add('hidden');
     }
 
     hapticFeedback(type = 'light') {
@@ -608,6 +662,7 @@ class UntitledStudio {
             importBtn: document.getElementById('import-btn'),
             importHeroBtn: document.getElementById('import-hero-btn'),
             syncAllBtn: document.getElementById('sync-all-btn'),
+            newRollBtn: document.getElementById('new-roll-btn'),
             batchCount: document.getElementById('batch-count'),
             fileInput: document.getElementById('file-input'),
 
@@ -1099,6 +1154,7 @@ class UntitledStudio {
         // File import
         on(this.elements.importBtn, 'click', () => this.openFilePicker());
         on(this.elements.importHeroBtn, 'click', () => this.openFilePicker());
+        on(this.elements.newRollBtn, 'click', () => this.createNewRoll());
         on(this.elements.fileInput, 'change', (e) => this.handleFileSelect(e));
 
         // LUT Import
@@ -1396,6 +1452,38 @@ class UntitledStudio {
 
         on(document.getElementById('batch-mode-zip'), 'click', () => this.processBatch('zip'));
         on(document.getElementById('batch-mode-waterfall'), 'click', () => this.processBatch('waterfall'));
+
+        // --- ASCII COPY ---
+        const copyAsciiBtn = document.getElementById('copy-ascii-btn');
+        if (copyAsciiBtn) {
+            on(copyAsciiBtn, 'click', async () => {
+                if (!this.engine) return;
+
+                // Visual Feedback
+                const originalText = copyAsciiBtn.innerHTML;
+
+                try {
+                    const text = this.engine.generateAsciiText();
+                    if (!text) {
+                        this.showToast('Enable ASCII effect first! 👾');
+                        return;
+                    }
+
+                    await navigator.clipboard.writeText(text);
+                    this.showToast('ASCII Copied to Clipboard! 📋');
+
+                    // Success animation
+                    copyAsciiBtn.innerHTML = `<svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+                    setTimeout(() => {
+                        copyAsciiBtn.innerHTML = originalText;
+                    }, 2000);
+
+                } catch (err) {
+                    console.error('Clipboard failed', err);
+                    this.showToast('Failed to copy ❌');
+                }
+            });
+        }
 
         // --- VIBE ---
 
@@ -1712,6 +1800,47 @@ class UntitledStudio {
         }
     }
 
+    createNewRoll() {
+        const rollId = 'roll_' + Date.now();
+        const roll = {
+            id: rollId,
+            name: `ROLL ${this.rolls.length + 1}`,
+            imageIds: [],
+            maxExposures: 36,
+            isDeveloped: false,
+            createdAt: Date.now()
+        };
+
+        this.rolls.push(roll);
+        this.activeRollId = rollId;
+
+        // Visual Feedback
+        this.showToast(`🎞️ ${roll.name} LOADED (36 exp)`);
+        if (this.audio) this.audio.playShutter(); // Winding sound (reuse shutter for now)
+
+        // UI Update: Add a roll separator to the queue
+        const rollDivider = document.createElement('div');
+        rollDivider.className = 'roll-divider group flex-shrink-0 flex flex-col items-center justify-center px-4 border-l border-white/10 ml-2';
+        rollDivider.dataset.rollId = rollId;
+        rollDivider.innerHTML = `
+            <div class="text-[10px] font-bold text-moonstone/40 group-hover:text-moonstone mb-1 uppercase tracking-tighter">${roll.name}</div>
+            <button class="develop-roll-btn hidden group-hover:flex items-center gap-1 px-2 py-0.5 rounded bg-moonstone/20 text-moonstone text-[8px] font-bold border border-moonstone/30 transition-all active:scale-95" data-roll-id="${rollId}">
+                DEVELOP
+            </button>
+        `;
+
+        // Insert before import button
+        this.elements.thumbnailQueue.insertBefore(rollDivider, this.elements.importBtn);
+
+        // Attach listener
+        rollDivider.querySelector('.develop-roll-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.showBatchExportModal(rollId);
+        });
+
+        return roll;
+    }
+
     async addImage(file) {
         const id = Date.now() + Math.random().toString(36).substr(2, 9);
 
@@ -1751,8 +1880,23 @@ class UntitledStudio {
             isRaw,
             thumbnailUrl,
             adjustments: { ...this.currentAdjustments },
+            rollId: this.activeRollId, // Track which roll this belongs to
             createdAt: Date.now()
         };
+
+        // If we have an active roll, add to it
+        if (this.activeRollId) {
+            const roll = this.rolls.find(r => r.id === this.activeRollId);
+            if (roll) {
+                if (roll.imageIds.length >= roll.maxExposures) {
+                    this.showToast(`⚠️ ${roll.name} is FULL (36/36). Start a new roll?`, 'warning');
+                    // Stop or keep as loose? Let's keep as loose for now.
+                    imageData.rollId = null;
+                } else {
+                    roll.imageIds.push(id);
+                }
+            }
+        }
 
         this.images.push(imageData);
         this.addThumbnailToQueue(imageData);
@@ -1942,6 +2086,23 @@ class UntitledStudio {
             this.removeImage(imageData.id);
         });
 
+        // Smart placement: if it has a roll, place it after that roll's divider
+        if (imageData.rollId) {
+            const divider = document.querySelector(`.roll-divider[data-roll-id="${imageData.rollId}"]`);
+            if (divider) {
+                // Find last member of this roll
+                const rollMembers = document.querySelectorAll(`.thumbnail[data-roll-id="${imageData.rollId}"]`);
+                if (rollMembers.length > 0) {
+                    const lastMember = rollMembers[rollMembers.length - 1];
+                    lastMember.after(thumb);
+                } else {
+                    divider.after(thumb);
+                }
+                thumb.dataset.rollId = imageData.rollId;
+                return;
+            }
+        }
+
         this.elements.thumbnailQueue.insertBefore(thumb, this.elements.importBtn);
     }
 
@@ -2006,6 +2167,11 @@ class UntitledStudio {
         if (index === -1) return;
 
         this.images.splice(index, 1);
+
+        // Update rolls
+        this.rolls.forEach(roll => {
+            roll.imageIds = roll.imageIds.filter(imgId => imgId !== id);
+        });
 
         const thumb = this.elements.thumbnailQueue.querySelector(`[data-id="${id}"]`);
         if (thumb) thumb.remove();
@@ -3070,11 +3236,20 @@ class UntitledStudio {
         }
     }
     updateExportProgress(percent) {
-        const circumference = 2 * Math.PI * 56;
-        const offset = circumference - (percent / 100) * circumference;
+        // Linear Progress Bar (New Film Strip)
+        const bar = document.getElementById('export-overall-bar');
+        if (bar) bar.style.width = `${percent}%`;
 
-        this.elements.progressRingFill.style.strokeDashoffset = offset;
-        this.elements.progressText.textContent = `${Math.round(percent)}%`;
+        // Circular Progress Ring (Legacy/Mobile)
+        if (this.elements.progressRingFill) {
+            const circumference = 2 * Math.PI * 56;
+            const offset = circumference - (percent / 100) * circumference;
+            this.elements.progressRingFill.style.strokeDashoffset = offset;
+        }
+
+        if (this.elements.progressText) {
+            this.elements.progressText.textContent = `${Math.round(percent)}%`;
+        }
     }
 
     /**
@@ -3546,6 +3721,13 @@ class UntitledStudio {
             this.resetAdjustments();
         }
 
+        // S - Sync All
+        if (e.key === 's' || e.key === 'S') {
+            if (e.type === 'keydown' && !e.metaKey && !e.ctrlKey) {
+                this.syncAllImages();
+            }
+        }
+
         // B - Before/After toggle
         if (e.key === 'b' || e.key === 'B') {
             if (e.type === 'keydown') {
@@ -3778,22 +3960,45 @@ class UntitledStudio {
 
     // --- BATCH EXPORT ---
 
-    showBatchExportModal() {
+    showBatchExportModal(targetRollId = null) {
+        this.targetRollId = targetRollId;
         const modal = document.getElementById('batch-export-modal');
-        if (modal) modal.classList.remove('hidden');
+        if (modal) {
+            modal.classList.remove('hidden');
+            // Update UI context
+            const title = modal.querySelector('h3');
+            const desc = modal.querySelector('p');
+            if (targetRollId) {
+                const roll = this.rolls.find(r => r.id === targetRollId);
+                if (title) title.textContent = roll ? `DEVELOP ${roll.name}` : 'DEVELOP ROLL';
+                if (desc) desc.textContent = 'Agitating chemicals... How do you want to save this roll?';
+            } else {
+                if (title) title.textContent = 'Batch Export';
+                if (desc) desc.textContent = 'How do you want to save your edited photos?';
+            }
+        }
     }
 
     hideBatchExportModal() {
         const modal = document.getElementById('batch-export-modal');
         if (modal) modal.classList.add('hidden');
+        this.targetRollId = null;
     }
 
     async processBatch(mode) {
         this.hideBatchExportModal();
-        if (this.images.length === 0) return;
+
+        const imagesToProcess = this.targetRollId
+            ? this.images.filter(img => img.rollId === this.targetRollId)
+            : this.images;
+
+        if (imagesToProcess.length === 0) return;
 
         this.elements.exportModal.classList.remove('hidden');
         this.updateExportProgress(0);
+
+        const progressText = document.getElementById('export-overall-text');
+        if (progressText) progressText.textContent = `0 / ${imagesToProcess.length}`;
 
         try {
             const blobs = [];
@@ -3805,10 +4010,11 @@ class UntitledStudio {
                 this.images[this.activeIndex].adjustments = this.engine.getAdjustments();
             }
 
-            for (let i = 0; i < this.images.length; i++) {
-                const imgData = this.images[i];
-                const progress = (i / this.images.length) * 50;
+            for (let i = 0; i < imagesToProcess.length; i++) {
+                const imgData = imagesToProcess[i];
+                const progress = (i / imagesToProcess.length) * 50;
                 this.updateExportProgress(progress);
+                if (progressText) progressText.textContent = `${i + 1} / ${imagesToProcess.length}`;
 
                 // Load original
                 await this.engine.loadImage(imgData.file);
@@ -3839,7 +4045,8 @@ class UntitledStudio {
                 });
 
                 blobs.push(blob);
-                filenames.push(`untitled-studio-batch-${i + 1}.${format}`);
+                const prefix = this.targetRollId ? 'roll-dev' : 'batch';
+                filenames.push(`untitled-studio-${prefix}-${i + 1}.${format}`);
             }
 
             this.updateExportProgress(60);
@@ -3856,7 +4063,8 @@ class UntitledStudio {
                     const content = await zip.generateAsync({ type: 'blob' });
 
                     const link = document.createElement('a');
-                    link.download = `Untitled_Studio_Batch_${Date.now()}.zip`;
+                    const rollName = this.targetRollId ? this.rolls.find(r => r.id === this.targetRollId)?.name : 'Batch';
+                    link.download = `Untitled_Studio_${rollName.replace(/\s+/g, '_')}_${Date.now()}.zip`;
                     link.href = URL.createObjectURL(content);
                     link.click();
                 } else {
