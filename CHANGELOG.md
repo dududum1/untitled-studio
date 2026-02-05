@@ -2,6 +2,19 @@
 
 All notable changes to Untitled Studio will be documented in this file.
 
+## [2.5.0] - 2026-02-05
+
+### ⚖️ Manifesto Mode v1.0
+- **Brutalist Theme**: Introduced "Manifesto Mode," a high-contrast theme featuring thick 2px solid borders, offset shadows, and a raw, sharpened aesthetic.
+- **Global Grain Texture**: Added an offline-safe SVG fractal noise overlay that covers the entire interface when active, mimicking the chemical stress of film.
+- **Persistent State**: Integrated localStorage logic to ensure the theme preference persists across browser sessions.
+- **Thematic Integration**: Added a dedicated toggle inside the "THERES NOTHING HERE" tab with unique haptic and audio feedback.
+- **Imaginary Tech**: Updated toggling logic with a cinematic "Purple" technique console signature.
+
+### 🛠️ Fixes & Reliability
+- **Offline Reliability**: Replaced paywalled external grain textures with local data URIs, ensuring 100% offline functionality.
+- **CSS Cache Busting**: Implemented versioned style links in `index.html` (bumped to v=20) to ensure immediate updates for all users.
+
 ## [2.4.0] - 2026-02-05
 
 ### 📜 The "Unmasked" Manifesto Expansion
