@@ -26,6 +26,8 @@ class Histogram {
         // Display settings
         this.showRGB = true;
         this.showLuminance = true;
+        this.mode = 'histogram'; // 'histogram' or 'waveform'
+        this.waveformData = null;
 
         // RAF-based throttling (ensures max 1 update per frame)
         this.rafId = null;
@@ -106,7 +108,47 @@ class Histogram {
         }
 
         gl.readPixels(0, 0, sampledWidth, sampledHeight, gl.RGBA, gl.UNSIGNED_BYTE, this.pixelBuffer);
-        this.processPixelData(this.pixelBuffer, sampledWidth * sampledHeight * 4);
+
+        if (this.mode === 'waveform') {
+            this.processWaveformData(this.pixelBuffer, sampledWidth, sampledHeight);
+        } else {
+            this.processPixelData(this.pixelBuffer, sampledWidth * sampledHeight * 4);
+        }
+    }
+
+    /**
+     * Process pixel data for Waveform (Oscilloscope) view
+     * Intensity vs Horizontal Position
+     */
+    processWaveformData(pixels, width, height) {
+        // Initialize waveform map [x][intensity]
+        // Normalize to 128 or 256 columns for display
+        const cols = 256;
+        if (!this.waveformData || this.waveformData.length !== cols * 256) {
+            this.waveformData = new Uint32Array(cols * 256);
+        } else {
+            this.waveformData.fill(0);
+        }
+
+        const data = this.waveformData;
+        const xStep = width / cols;
+
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < cols; x++) {
+                const srcX = Math.floor(x * xStep);
+                const i = (y * width + srcX) * 4;
+
+                const r = pixels[i];
+                const g = pixels[i + 1];
+                const b = pixels[i + 2];
+                const l = Math.round(0.2126 * r + 0.7152 * g + 0.0722 * b);
+
+                // Map to 256 vertical bins
+                data[x * 256 + l]++;
+            }
+        }
+
+        this.draw();
     }
 
     /**
@@ -175,9 +217,17 @@ class Histogram {
     }
 
     /**
-     * Draw histogram to canvas
+     * Draw to canvas
      */
     draw() {
+        if (this.mode === 'waveform') {
+            this.drawWaveform();
+        } else {
+            this.drawHistogram();
+        }
+    }
+
+    drawHistogram() {
         const ctx = this.ctx;
         const w = this.width;
         const h = this.height;
@@ -267,6 +317,71 @@ class Histogram {
         ctx.strokeRect(0, 0, w, h);
     }
 
+    drawWaveform() {
+        const ctx = this.ctx;
+        const w = this.width;
+        const h = this.height;
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(10, 15, 12, 0.9)'; // Darker, techier bg
+        ctx.fillRect(0, 0, w, h);
+
+        if (!this.waveformData) return;
+
+        // Draw grid
+        ctx.strokeStyle = 'rgba(74, 222, 128, 0.05)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const y = (i / 4) * h;
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+        }
+
+        const imageData = ctx.createImageData(w, h);
+        const pixels = imageData.data;
+        const data = this.waveformData;
+
+        // Find max density for normalized brightness
+        let maxD = 1;
+        for (let i = 0; i < data.length; i++) if (data[i] > maxD) maxD = data[i];
+
+        const xFactor = 256 / w;
+        const yFactor = 256 / h;
+
+        for (let x = 0; x < w; x++) {
+            const dataX = Math.floor(x * xFactor);
+            for (let y = 0; y < h; y++) {
+                const intensity = 255 - Math.floor(y * yFactor);
+                const density = data[dataX * 256 + intensity];
+
+                if (density > 0) {
+                    const idx = (y * w + x) * 4;
+                    const b = Math.min(255, (density / maxD) * 512); // Brightness boost
+                    pixels[idx] = 74;     // R
+                    pixels[idx + 1] = 222; // G
+                    pixels[idx + 2] = 128; // B
+                    pixels[idx + 3] = b;   // A
+                }
+            }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        // Scanline effect
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        for (let y = 0; y < h; y += 2) ctx.fillRect(0, y, w, 1);
+
+        // Glow
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = 'rgba(74, 222, 128, 0.5)';
+
+        // Border
+        ctx.strokeStyle = '#4ADE80';
+        ctx.globalAlpha = 0.2;
+        ctx.strokeRect(0, 0, w, h);
+        ctx.globalAlpha = 1.0;
+        ctx.shadowBlur = 0;
+    }
+
     /**
      * Toggle RGB display
      */
@@ -280,6 +395,11 @@ class Histogram {
      */
     toggleLuminance() {
         this.showLuminance = !this.showLuminance;
+        this.draw();
+    }
+
+    setMode(mode) {
+        this.mode = mode; // 'histogram' or 'waveform'
         this.draw();
     }
 

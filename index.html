@@ -128,6 +128,44 @@
         .developing-glow {
             animation: develop-ping 2s infinite;
         }
+
+        /* Terminal Viewer Styles */
+        #terminal-viewer-overlay {
+            background: linear-gradient(to bottom, rgba(18, 20, 18, 0.95), rgba(10, 15, 12, 0.98));
+            backdrop-filter: blur(20px);
+            pointer-events: auto;
+        }
+
+        #terminal-viewer-overlay::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        .typing-active::after {
+            content: '█';
+            animation: terminalCursor 1s infinite;
+        }
+
+        @keyframes terminalCursor {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
     </style>
 
     <!-- Tailwind CSS CDN -->
@@ -891,41 +929,11 @@
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
-                            <label>Bloom Strength</label>
-                            <span class="slider-value" data-for="bloomStrength">0</span>
-                        </div>
-                        <input type="range" id="bloomStrength" class="studio-slider" min="0" max="100" step="1"
-                            value="0">
-                    </div>
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Bloom Threshold</label>
-                            <span class="slider-value" data-for="bloomThreshold">70</span>
-                        </div>
-                        <input type="range" id="bloomThreshold" class="studio-slider" min="0" max="100" step="1"
-                            value="70">
-                    </div>
-                    <div class="slider-group">
-                        <div class="slider-header">
                             <label>Lens Fringing</label>
                             <span class="slider-value" data-for="chromaticAberration">0</span>
                         </div>
                         <input type="range" id="chromaticAberration" class="studio-slider" min="0" max="100" step="1"
                             value="0">
-                    </div>
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Halation</label>
-                            <span class="slider-value" data-for="halation">0</span>
-                        </div>
-                        <input type="range" id="halation" class="studio-slider" min="0" max="100" step="1" value="0">
-                    </div>
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Mist Diffusion</label>
-                            <span class="slider-value" data-for="diffusion">0</span>
-                        </div>
-                        <input type="range" id="diffusion" class="studio-slider" min="0" max="100" step="1" value="0">
                     </div>
                     <div class="slider-group">
                         <div class="slider-header">
@@ -1050,14 +1058,84 @@
                 <!-- 3. VIBE SUB-PANEL -->
                 <div id="fx-vibe" class="fx-subpanel hidden">
 
+                    <div id="atmosphere-controls" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Bloom Strength</label>
+                                <span class="slider-value" data-for="bloomStrength">0</span>
+                            </div>
+                            <input type="range" id="bloomStrength" class="studio-slider" min="0" max="100" step="1"
+                                value="0">
+                        </div>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Bloom Threshold</label>
+                                <span class="slider-value" data-for="bloomThreshold">70</span>
+                            </div>
+                            <input type="range" id="bloomThreshold" class="studio-slider" min="0" max="100" step="1"
+                                value="70">
+                        </div>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Halation</label>
+                                <span class="slider-value" data-for="halation">0</span>
+                            </div>
+                            <input type="range" id="halation" class="studio-slider" min="0" max="100" step="1"
+                                value="0">
+                        </div>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Mist Diffusion</label>
+                                <span class="slider-value" data-for="diffusion">0</span>
+                            </div>
+                            <input type="range" id="diffusion" class="studio-slider" min="0" max="100" step="1"
+                                value="0">
+                        </div>
+
+                        <!-- Glow Tint -->
+                        <div class="bg-glass border border-glass-border rounded-lg p-3 sm:col-span-2">
+                            <label class="text-xs text-gray-400 mb-2 block uppercase tracking-tighter font-bold">Glow
+                                Tint</label>
+                            <div class="flex gap-2">
+                                <input type="color" id="glowColor" value="#ff6699"
+                                    class="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent p-0">
+                                <div class="flex-1 grid grid-cols-5 gap-1">
+                                    <button
+                                        class="h-10 rounded bg-white border border-gray-600 glow-color-preset hover:scale-105 transition-transform"
+                                        data-color="#ffffff" title="Neutral Bloom"></button>
+                                    <button
+                                        class="h-10 rounded bg-[#ff6699] border border-gray-600 glow-color-preset hover:scale-105 transition-transform"
+                                        data-color="#ff6699" title="Classic Halation"></button>
+                                    <button
+                                        class="h-10 rounded bg-[#ffa500] border border-gray-600 glow-color-preset hover:scale-105 transition-transform"
+                                        data-color="#ffa500" title="Warm Glow"></button>
+                                    <button
+                                        class="h-10 rounded bg-[#00ffff] border border-gray-600 glow-color-preset hover:scale-105 transition-transform"
+                                        data-color="#00ffff" title="Cool Mist"></button>
+                                    <button
+                                        class="h-10 rounded bg-[#7cfc00] border border-gray-600 glow-color-preset hover:scale-105 transition-transform"
+                                        data-color="#7cfc00" title="Nuclear"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="slider-group mb-4">
-                        <label class="text-xs text-gray-500 mb-2 block">Border</label>
+                        <label class="text-xs text-gray-500 mb-2 block">Border Overlays</label>
                         <select id="vibe-border-select"
                             class="w-full bg-glass border border-glass-border rounded text-xs text-gray-300 p-2 focus:ring-hot-pink focus:border-hot-pink">
                             <option value="">None</option>
                             <option value="assets/border.svg">Torn Paper</option>
                             <option value="assets/film.svg">Film Frame</option>
                         </select>
+                    </div>
+
+                    <div class="space-y-3 pt-2">
+                        <button id="toggle-terminal-btn"
+                            class="w-full bg-moonstone/10 border border-moonstone/30 hover:bg-moonstone/20 text-moonstone py-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95 group">
+                            <span class="opacity-70 group-hover:scale-110 transition-transform">📟</span>
+                            <span>TERMINAL_ANALYSIS [RAW]</span>
+                        </button>
                     </div>
 
                     <!-- Texture Overlay Pack -->
@@ -2165,7 +2243,9 @@
     <script src="js/tone-curve.js"></script>
     <script src="js/color-wheels.js"></script>
     <script src="js/vectorscope.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exifreader/dist/exif-reader.min.js"></script>
     <script src="js/webgl-engine.js"></script>
+    <script src="js/terminal-viewer.js"></script>
     <script src="js/export-manager.js"></script>
     <script src="js/crop-tool.js?v=14"></script>
     <script src="js/gesture-handler.js?v=14"></script>
@@ -2178,6 +2258,11 @@
     <!-- Global CRT Overlay -->
     <div id="crt-overlay"
         class="pointer-events-none fixed inset-0 z-[999] opacity-0 transition-opacity duration-500 hidden"></div>
+
+    <!-- Terminal Metadata Viewer Overlay -->
+    <div id="terminal-viewer-overlay" class="fixed inset-0 z-[101] hidden bg-black/20 pointer-events-none">
+        <!-- Content will be injected by TerminalViewer.js -->
+    </div>
 
     <!-- Service Worker Registration -->
     <script>

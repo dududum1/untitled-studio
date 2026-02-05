@@ -2,6 +2,25 @@
 
 All notable changes to Untitled Studio will be documented in this file.
 
+## [2.7.0] - 2026-02-05
+
+### 📟 Phase VII: The Terminal Update
+- **Terminal Metadata Viewer**: A cinematic retro-terminal overlay that extracts and displays EXIF metadata with professional typing and scanning animations.
+- **Oscilloscope Histogram**: A new "Waveform" mode for the histogram that visualizes light signal intensity across the X-axis, inspired by professional color grading monitors.
+- **Back Button**: Added a `< RETURN` button to the terminal header for easy exit.
+- **Diagnostics**: Live simulated VRAM and latency tracking for the "Unmasked" aesthetic.
+
+### ☀️ Atmosphere & Optics
+- **Bloom & Halation Controls**: Exposed hidden engine parameters to the UI.
+    - **Bloom Strength**: Controls the intensity of the light bleed.
+    - **Bloom Threshold**: Sets the luminance level where bloom begins.
+    - **Halation Strength**: Controls the red-orange fringe around bright highlights.
+- **Glow Tint**: Added a custom color picker for the bloom/halation glow, with presets (Halation Pink, Nuclear, Cool Mist, Warm Glow).
+- **UI Reorganization**: Moved Halation and Bloom controls to the "Atmosphere" panel for better logical grouping.
+
+### 📷 format Support
+- **Robust DNG/TIFF Parsing**: Upgraded `RawDecoder` to intelligently parse TIFF structures (IFDs) to find embedded JPEG previews in `.DNG` files, fixing the "Unable to decode" error for Adobe Digital Negatives.
+
 ## [2.5.0] - 2026-02-05
 
 ### ⚖️ Manifesto Mode v1.0

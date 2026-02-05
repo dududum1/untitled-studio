@@ -118,7 +118,10 @@ class WebGLEngine {
             tiltShiftBlur: 0,       // 0-50
             tiltShiftPos: 0.5,      // 0-1
             tiltShiftFocusWidth: 0.4, // 0-1
-            tiltShiftGradient: 0.2 // 0-1
+            tiltShiftGradient: 0.2, // 0-1
+
+            // Advanced Atmosphere
+            glowColor: [1.0, 0.4, 0.6] // Default Halation Pink
         };
 
         // Tone curve state
@@ -880,26 +883,27 @@ class WebGLEngine {
         // Determine Glow settings (Bloom vs Halation priority)
         let glowStrength = 0;
         let glowThreshold = 0.7; // Default
-        let glowTint = [1.0, 0.4, 0.6]; // Default Halation Pink
+        let glowTint = this.adjustments.glowColor || [1.0, 0.4, 0.6];
 
         const bloomStr = this.adjustments.bloomStrength || 0;
         const halationStr = this.adjustments.halation || 0;
 
         if (bloomStr > 0) {
-            // Bloom takes priority or mixes
+            // Bloom takes priority/mixes
             glowStrength = bloomStr;
             glowThreshold = (this.adjustments.bloomThreshold || 70) / 100.0;
-            glowTint = [1.0, 1.0, 1.0]; // Pure white for standard bloom
 
-            // If both present, maybe we sum strength?
+            // If user has not changed default halation pink, and we are in bloom, use white
+            if (halationStr === 0 && glowTint[0] === 1.0 && glowTint[1] === 0.4 && glowTint[2] === 0.6) {
+                glowTint = [1.0, 1.0, 1.0];
+            }
+
             if (halationStr > 0) {
-                // Mix pinkish?
                 glowStrength = Math.max(bloomStr, halationStr);
             }
         } else if (halationStr > 0) {
             glowStrength = halationStr;
-            glowThreshold = 0.7; // Fixed threshold for halation usually
-            glowTint = [1.0, 0.4, 0.6];
+            glowThreshold = 0.7;
         }
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.ping);

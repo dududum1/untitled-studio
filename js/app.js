@@ -17,6 +17,7 @@ class UntitledStudio {
         this.toneCurve = null;
         this.history = null;
         this.cropTool = null;
+        this.terminalViewer = null;
 
         // Audio Engine (Initialize EARLY so startup toast can use it)
         this.audio = new AudioEngine();
@@ -431,6 +432,7 @@ class UntitledStudio {
             this.initColorWheels(); // Color Grading
             this.initVectorscope(); // Analysis
             this.initHistory();
+            this.initAtmosphereControls();
             this.initDigitalControls();
             this.initCropTool();
             this.initGestures();
@@ -440,6 +442,7 @@ class UntitledStudio {
             this.initPresetAccordion(); // New: Collapsible Menu
             this.initCRT();         // CRT Visualization Mode
             this.initManifestoMode(); // Brutalist Theme
+            this.initTerminalViewer(); // Phase VII
 
             await this.loadSavedSessions().catch(err => console.warn('Failed to load saved sessions:', err));
             await this.loadCustomPresets().catch(err => console.warn('Failed to load presets:', err));
@@ -1091,6 +1094,48 @@ class UntitledStudio {
         if (asciiColor) {
             asciiColor.addEventListener('input', (e) => {
                 this.engine.setAdjustment('asciiColor', this.hexToRgb(e.target.value));
+            });
+        }
+    }
+
+    initAtmosphereControls() {
+        const glowColorEl = document.getElementById('glowColor');
+        if (glowColorEl) {
+            glowColorEl.addEventListener('input', (e) => {
+                const rgb = this.hexToRgb(e.target.value);
+                this.engine.setAdjustment('glowColor', rgb);
+                this.updateHistogram();
+                if (this.history) {
+                    this.history.push(this.engine.getAdjustments(), 'Glow Tint');
+                }
+            });
+        }
+
+        document.querySelectorAll('.glow-color-preset').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const hex = btn.dataset.color;
+                if (glowColorEl) glowColorEl.value = hex;
+                const rgb = this.hexToRgb(hex);
+                this.engine.setAdjustment('glowColor', rgb);
+                this.updateHistogram();
+                if (this.history) {
+                    this.history.push(this.engine.getAdjustments(), 'Glow Tint');
+                }
+                this.hapticFeedback('light');
+            });
+        });
+
+        // Other Atmosphere controls (Border select)
+        const borderSelect = document.getElementById('vibe-border-select');
+        if (borderSelect) {
+            borderSelect.addEventListener('change', (e) => {
+                const url = e.target.value;
+                if (url) {
+                    this.engine.setAdjustment('borderEnabled', true);
+                    this.engine.loadOverlay(url);
+                } else {
+                    this.engine.setAdjustment('borderEnabled', false);
+                }
             });
         }
     }
@@ -2193,8 +2238,83 @@ class UntitledStudio {
 
         // Update Ambience
         this.updateAmbience(imageData.file);
-
         this.updateUIState();
+
+        // Terminal Update
+        if (this.terminalViewer && this.terminalViewer.isActive) {
+            this.refreshTerminal();
+        }
+    }
+
+    async refreshTerminal() {
+        if (!this.terminalViewer || this.activeIndex < 0) return;
+        const img = this.images[this.activeIndex];
+
+        // Extract EXIF if not already done
+        if (!img.exif) {
+            await this.extractExif(img);
+        }
+
+        this.terminalViewer.setExif({
+            ...img.exif,
+            name: img.name,
+            format: img.file.type.split('/')[1].toUpperCase()
+        });
+
+        // Set live metrics (simulated for now, could be real WebGL timing)
+        this.terminalViewer.setMetrics({
+            processingTime: Math.floor(Math.random() * 50 + 10),
+            vramUsage: '1.2GB/8GB',
+            clipping: '0.4%'
+        });
+    }
+
+    async extractExif(imageData) {
+        if (typeof ExifReader === 'undefined') return;
+        try {
+            const tags = await ExifReader.load(imageData.file);
+            // Flatten for easier use
+            const exif = {};
+            const keys = ['Make', 'Model', 'FNumber', 'ExposureTime', 'ISO', 'FocalLength', 'LensModel'];
+            keys.forEach(key => {
+                if (tags[key]) {
+                    exif[key] = tags[key].description || tags[key].value;
+                }
+            });
+            imageData.exif = exif;
+        } catch (e) {
+            console.warn('EXIF extraction failed:', e);
+            imageData.exif = { status: 'NO_METADATA_FOUND' };
+        }
+    }
+
+    initTerminalViewer() {
+        const container = document.getElementById('terminal-viewer-overlay');
+        if (!container) return;
+
+        this.terminalViewer = new TerminalViewer(container);
+
+        const toggleBtn = document.getElementById('toggle-terminal-btn');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                this.terminalViewer.toggle();
+
+                // Toggle Histogram mode if terminal is active
+                if (this.terminalViewer.isActive) {
+                    if (this.histogram) this.histogram.setMode('waveform');
+                } else {
+                    if (this.histogram) this.histogram.setMode('histogram');
+                }
+
+                this.hapticFeedback('medium');
+            });
+        }
+
+        // Listen for close from internal back button
+        window.addEventListener('terminal-closed', () => {
+            if (this.histogram) this.histogram.setMode('histogram');
+            this.hapticFeedback('light');
+        });
     }
 
     async removeImage(id) {
@@ -2556,6 +2676,12 @@ class UntitledStudio {
         if (pixels) {
             // New method name: calculateFromBuffer
             this.histogram.calculateFromBuffer(pixels, size, size);
+
+            // Sync Terminal Waveform if active
+            if (this.terminalViewer && this.terminalViewer.isActive) {
+                this.terminalViewer.updateWaveform(this.histogram);
+                this.refreshTerminal(); // Refresh metrics too
+            }
         }
     }
 
@@ -3164,6 +3290,12 @@ class UntitledStudio {
                     asciiColor.value = this.rgbToHex(adjustments.asciiColor);
                 }
             }
+        }
+
+        // 7. Glow Color
+        const glowColorEl = document.getElementById('glowColor');
+        if (glowColorEl && adjustments.glowColor) {
+            glowColorEl.value = this.rgbToHex(adjustments.glowColor);
         }
     }
 
