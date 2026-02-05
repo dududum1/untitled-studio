@@ -522,7 +522,10 @@ class UntitledStudio {
 
         const applyMode = (active) => {
             document.body.classList.toggle('manifesto-mode', active);
-            if (grain) grain.style.opacity = active ? '0.1' : '0';
+            if (grain) {
+                grain.style.opacity = active ? '0.1' : '0';
+                grain.style.display = active ? 'block' : 'none';
+            }
             if (toggle) toggle.checked = active;
             localStorage.setItem('manifestoMode', active);
         };
@@ -533,11 +536,13 @@ class UntitledStudio {
 
         if (toggle) {
             toggle.addEventListener('change', (e) => {
-                applyMode(e.target.checked);
-                this.hapticFeedback(e.target.checked ? 'heavy' : 'light');
-                if (e.target.checked) {
+                const active = e.target.checked;
+                applyMode(active);
+                this.hapticFeedback(active ? 'heavy' : 'light');
+                if (active) {
                     this.audio.playGlitch();
-                    console.log('⚖️ MANIFESTO MODE: GLOBAL ADJUSTMENTS ONLY. NO HIDING. NO LIES.');
+                    console.log('Take the amplified and the reversal, then smash together those two different expressions of infinity to create and push out imaginary mass.');
+                    console.log('Imaginary Technique: Purple.');
                 }
             });
         }

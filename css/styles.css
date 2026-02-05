@@ -1784,4 +1784,82 @@ body.crt-active canvas {
     60% {
         transform: translate3d(4px, 0, 0);
     }
-}$manifestoModeCss
+}
+
+/* ========== MANIFESTO MODE (BRUTALIST THEME) ========== */
+body.manifesto-mode {
+    --midnight: #0a0a0a;
+    --adaptive-bg: #0a0a0a;
+    --glass: rgba(10, 10, 10, 0.95);
+    --glass-solid: #050505;
+    --glass-border: #ffffff;
+    --hot-pink: #ed2788;
+    --moonstone: #3ca2c8;
+    background-color: #0a0a0a !important;
+    border: 4px solid var(--hot-pink) !important;
+}
+
+body.manifesto-mode * {
+    border-radius: 0 !important;
+    /* Kill the softness */
+}
+
+body.manifesto-mode .bg-glass,
+body.manifesto-mode .bg-glass-panel,
+body.manifesto-mode header,
+body.manifesto-mode #studio-dock,
+body.manifesto-mode .panel,
+body.manifesto-mode .preset-card {
+    background: #0a0a0a !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 8px 8px 0px var(--hot-pink) !important;
+    backdrop-filter: none !important;
+}
+
+body.manifesto-mode .tab-btn.active {
+    background: var(--hot-pink) !important;
+    color: white !important;
+    box-shadow: 4px 4px 0px var(--moonstone) !important;
+}
+
+body.manifesto-mode .studio-slider::-webkit-slider-thumb {
+    border-radius: 0 !important;
+    width: 20px;
+    height: 20px;
+    background: #ffffff !important;
+    border: 2px solid var(--hot-pink) !important;
+    box-shadow: 4px 4px 0px var(--moonstone) !important;
+}
+
+body.manifesto-mode .slider-value {
+    color: var(--hot-pink) !important;
+    font-weight: 900 !important;
+    font-family: 'Share Tech Mono', monospace !important;
+}
+
+body.manifesto-mode #manifesto-grain {
+    opacity: 0.15 !important;
+    background: url('https://grainy-gradients.vercel.app/noise.svg') !important;
+    z-index: 9999 !important;
+    /* ULTRA HIGH */
+    display: block !important;
+}
+
+body.manifesto-mode .logo {
+    background: none !important;
+    -webkit-text-fill-color: var(--hot-pink) !important;
+    text-shadow: 4px 4px 0px var(--moonstone);
+}
+
+body.manifesto-mode .nav-btn,
+body.manifesto-mode .preset-category {
+    border: 2px solid #ffffff !important;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+body.manifesto-mode .preset-category.active {
+    background: var(--moonstone) !important;
+    color: black !important;
+    border-color: #ffffff !important;
+}
