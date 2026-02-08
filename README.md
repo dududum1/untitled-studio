@@ -1,6 +1,6 @@
 # Untitled Studio
 
-![Untitled Studio Banner](https://via.placeholder.com/1200x600/000000/ff0080?text=UNTITLED+STUDIO)
+![Untitled Studio Banner](https://ibb.co.com/mFHkY8gR)
 
 **Untitled Studio** is a high-performance, privacy-first web image editor built for the aesthetic era. It leverages **WebGL 2.0** to perform cinema-grade color grading, film emulation, and creative effects entirely in the browser—your photos never leave your device.
 
