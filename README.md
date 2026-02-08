@@ -4,15 +4,15 @@
 
 **Untitled Studio** is a high-performance, privacy-first web image editor built for the aesthetic era. It leverages **WebGL 2.0** to perform cinema-grade color grading, film emulation, and creative effects entirely in the browser—your photos never leave your device.
 
-## ⚖️ The Manifesto of the Unmasked
+##  The Manifesto of the Unmasked
 Untitled Studio is governed by a strict philosophy of **unmasked global adjustments**. We reject the digital perversion of "Selective Editing" in favor of holistic, chemical-simulated processing. 
 > "If you can’t fix the whole frame, you haven't earned the shot."
 
 Read the full 7-chapter [Manifesto](manifesto.html) to understand the "Unmasked" identity.
 
-## 🚀 Key Features
+##  Key Features
 
-### 🎞️ The Film Roll Archive (150+ Stocks)
+### The Film Roll Archive (150+ Stocks)
 A physics-based analog engine simulating grain, halation, and chemical shifts. The library includes:
 
 **The Classics**
@@ -25,7 +25,7 @@ A physics-based analog engine simulating grain, halation, and chemical shifts. T
 *   **Washi**: Hand-made Japanese paper films (Z, S, X).
 *   **Boutique**: **Kono!**, **Dubblefilm**, **Reflx Lab**, and **Aerochrome** IR simulations.
 
-### 🧪 Advanced Darkroom Workflow
+###  Advanced Darkroom Workflow
 - **Sync All (Film Roll)**: Edit a "roll" of up to 36 exposures simultaneously.
 - **Batch Processing**: "Develop" your roll and export as a high-quality ZIP archive.
 - **Tone Curves & HSL**: 4-channel spline curves and 8-channel precise color grading.
@@ -36,13 +36,13 @@ A physics-based analog engine simulating grain, halation, and chemical shifts. T
 - **PWA Ready**: Install as a native app for a zero-latency, offline darkroom experience.
 - **Universal URL**: Works on everything from $3,000 "Pro" phones to discarded 2015 laptops.
 
-## 🛠️ Technology Stack
+##  Technology Stack
 - **Core**: Vanilla JavaScript (ES6+), WebGL 2.0 (Custom Shaders).
 - **Performance**: Rust-powered WebAssembly Grain Engine.
 - **Styling**: Tailwind CSS + Glassmorphism UI.
 - **Arch**: 100% Offline-first Progressive Web App.
 
-## 📖 Documentation
+##  Documentation
 For a deep dive into the controls and workflow, view the [How-To Guide](how-to.html).
 
 ## Getting Started
