@@ -443,6 +443,7 @@ class UntitledStudio {
             this.initCRT();         // CRT Visualization Mode
             this.initManifestoMode(); // Brutalist Theme
             this.initTerminalViewer(); // Phase VII
+            this.initSpectral();       // Phase VIII
 
             await this.loadSavedSessions().catch(err => console.warn('Failed to load saved sessions:', err));
             await this.loadCustomPresets().catch(err => console.warn('Failed to load presets:', err));
@@ -480,6 +481,48 @@ class UntitledStudio {
         if (dateColor) dateColor.addEventListener('input', update);
         if (watermarkToggle) watermarkToggle.addEventListener('change', update);
         if (watermarkText) watermarkText.addEventListener('input', update);
+    }
+
+    initSpectral() {
+        // Mode buttons
+        const modeButtons = document.querySelectorAll('.spectral-mode-btn');
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modeButtons.forEach(b => {
+                    b.classList.remove('active', 'bg-hot-pink/20', 'text-hot-pink', 'font-semibold');
+                    b.classList.add('text-gray-400');
+                });
+                btn.classList.add('active', 'bg-hot-pink/20', 'text-hot-pink', 'font-semibold');
+                btn.classList.remove('text-gray-400');
+
+                const mode = parseInt(btn.dataset.mode);
+                this.engine.setAdjustment('thermalMode', mode);
+
+                // Auto-enable intensity if mode > 0
+                if (mode > 0) {
+                    const slider = document.getElementById('thermalIntensity');
+                    if (slider && parseFloat(slider.value) === 0) {
+                        slider.value = 80;
+                        this.engine.setAdjustment('thermalIntensity', 80);
+                        const label = document.querySelector('.slider-value[data-for="thermalIntensity"]');
+                        if (label) label.textContent = '80';
+                    }
+                }
+
+                this.hapticFeedback('medium');
+            });
+        });
+
+        // Intensity slider
+        const intensitySlider = document.getElementById('thermalIntensity');
+        if (intensitySlider) {
+            intensitySlider.addEventListener('input', () => {
+                const val = parseFloat(intensitySlider.value);
+                this.engine.setAdjustment('thermalIntensity', val);
+                const label = document.querySelector('.slider-value[data-for="thermalIntensity"]');
+                if (label) label.textContent = val.toFixed(0);
+            });
+        }
     }
 
     updateVibePreview() {

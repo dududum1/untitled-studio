@@ -1117,934 +1117,990 @@
                                         data-color="#7cfc00" title="Nuclear"></button>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="slider-group mb-4">
-                        <label class="text-xs text-gray-500 mb-2 block">Border Overlays</label>
-                        <select id="vibe-border-select"
-                            class="w-full bg-glass border border-glass-border rounded text-xs text-gray-300 p-2 focus:ring-hot-pink focus:border-hot-pink">
-                            <option value="">None</option>
-                            <option value="assets/border.svg">Torn Paper</option>
-                            <option value="assets/film.svg">Film Frame</option>
-                        </select>
-                    </div>
+                            <!-- SPECTRAL IMAGING (Phase VIII) -->
+                            <div class="mb-4 pt-4 border-t border-glass-border">
+                                <label
+                                    class="text-xs text-gray-400 font-bold mb-2 block uppercase tracking-wider">Spectral
+                                    Vision</label>
+                                <div class="flex bg-glass rounded-lg p-1 border border-glass-border mb-3">
+                                    <button
+                                        class="flex-1 py-1.5 text-xs rounded hover:bg-white/10 transition-all spectral-mode-btn active bg-hot-pink/20 text-hot-pink font-semibold"
+                                        data-mode="0">OFF</button>
+                                    <button
+                                        class="flex-1 py-1.5 text-xs rounded hover:bg-white/10 transition-all spectral-mode-btn text-gray-400"
+                                        data-mode="1">Ironbow</button>
+                                    <button
+                                        class="flex-1 py-1.5 text-xs rounded hover:bg-white/10 transition-all spectral-mode-btn text-gray-400"
+                                        data-mode="2">Rainbow</button>
+                                    <button
+                                        class="flex-1 py-1.5 text-xs rounded hover:bg-white/10 transition-all spectral-mode-btn text-gray-400"
+                                        data-mode="3">Aerochrome</button>
+                                </div>
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label>Intensity</label>
+                                        <span class="slider-value" data-for="thermalIntensity">0</span>
+                                    </div>
+                                    <input type="range" id="thermalIntensity" class="studio-slider" min="0" max="100"
+                                        step="1" value="0">
+                                </div>
+                            </div>
 
-                    <div class="space-y-3 pt-2">
-                        <button id="toggle-terminal-btn"
-                            class="w-full bg-moonstone/10 border border-moonstone/30 hover:bg-moonstone/20 text-moonstone py-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95 group">
-                            <span class="opacity-70 group-hover:scale-110 transition-transform">📟</span>
-                            <span>TERMINAL_ANALYSIS [RAW]</span>
-                        </button>
-                    </div>
+                            <div class="slider-group mb-4">
+                                <label class="text-xs text-gray-500 mb-2 block">Border Overlays</label>
+                                <select id="vibe-border-select"
+                                    class="w-full bg-glass border border-glass-border rounded text-xs text-gray-300 p-2 focus:ring-hot-pink focus:border-hot-pink">
+                                    <option value="">None</option>
+                                    <option value="assets/border.svg">Torn Paper</option>
+                                    <option value="assets/film.svg">Film Frame</option>
+                                </select>
+                            </div>
 
-                    <!-- Texture Overlay Pack -->
-                    <div class="mb-4 border-t border-glass-border pt-4">
-                        <label class="text-xs text-gray-400 font-bold mb-2 block uppercase tracking-wider">Texture
-                            Overlays</label>
+                            <div class="space-y-3 pt-2">
+                                <button id="toggle-terminal-btn"
+                                    class="w-full bg-moonstone/10 border border-moonstone/30 hover:bg-moonstone/20 text-moonstone py-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95 group">
+                                    <span class="opacity-70 group-hover:scale-110 transition-transform">📟</span>
+                                    <span>TERMINAL_ANALYSIS [RAW]</span>
+                                </button>
+                            </div>
 
-                        <!-- Built-in Textures -->
-                        <div class="grid grid-cols-4 gap-2 mb-3">
-                            <button
-                                class="texture-btn h-14 bg-gray-800 rounded-lg border border-glass-border hover:border-hot-pink bg-cover bg-center transition-all focus:ring-2 focus:ring-hot-pink"
-                                style="background-image: url('assets/textures/dust_scratches.png')" data-texture="dust"
-                                data-mode="2" title="Dust & Scratches"></button>
-                            <button
-                                class="texture-btn h-14 bg-gray-800 rounded-lg border border-glass-border hover:border-hot-pink bg-cover bg-center transition-all focus:ring-2 focus:ring-hot-pink"
-                                style="background-image: url('assets/textures/leak_warm.png')" data-texture="leakWarm"
-                                data-mode="2" title="Warm Leak"></button>
-                            <button
-                                class="texture-btn h-14 bg-gray-800 rounded-lg border border-glass-border hover:border-hot-pink bg-cover bg-center transition-all focus:ring-2 focus:ring-hot-pink"
-                                style="background-image: url('assets/textures/leak_cool.png')" data-texture="leakCool"
-                                data-mode="2" title="Cool Leak"></button>
-                            <button
-                                class="texture-btn h-14 bg-gray-800 rounded-lg border border-glass-border hover:border-hot-pink bg-cover bg-center transition-all focus:ring-2 focus:ring-hot-pink"
-                                style="background-image: url('assets/textures/paper.png')" data-texture="paper"
-                                data-mode="1" title="Paper"></button>
-                        </div>
+                            <!-- Texture Overlay Pack -->
+                            <div class="mb-4 border-t border-glass-border pt-4">
+                                <label
+                                    class="text-xs text-gray-400 font-bold mb-2 block uppercase tracking-wider">Texture
+                                    Overlays</label>
 
-                        <!-- Custom Import -->
-                        <div class="flex gap-2 mb-3">
-                            <button id="import-texture-btn"
-                                class="flex-1 bg-glass border border-glass-border rounded p-2 text-xs text-gray-300 hover:bg-white/5 flex items-center justify-center gap-2">
+                                <!-- Built-in Textures -->
+                                <div class="grid grid-cols-4 gap-2 mb-3">
+                                    <button
+                                        class="texture-btn h-14 bg-gray-800 rounded-lg border border-glass-border hover:border-hot-pink bg-cover bg-center transition-all focus:ring-2 focus:ring-hot-pink"
+                                        style="background-image: url('assets/textures/dust_scratches.png')"
+                                        data-texture="dust" data-mode="2" title="Dust & Scratches"></button>
+                                    <button
+                                        class="texture-btn h-14 bg-gray-800 rounded-lg border border-glass-border hover:border-hot-pink bg-cover bg-center transition-all focus:ring-2 focus:ring-hot-pink"
+                                        style="background-image: url('assets/textures/leak_warm.png')"
+                                        data-texture="leakWarm" data-mode="2" title="Warm Leak"></button>
+                                    <button
+                                        class="texture-btn h-14 bg-gray-800 rounded-lg border border-glass-border hover:border-hot-pink bg-cover bg-center transition-all focus:ring-2 focus:ring-hot-pink"
+                                        style="background-image: url('assets/textures/leak_cool.png')"
+                                        data-texture="leakCool" data-mode="2" title="Cool Leak"></button>
+                                    <button
+                                        class="texture-btn h-14 bg-gray-800 rounded-lg border border-glass-border hover:border-hot-pink bg-cover bg-center transition-all focus:ring-2 focus:ring-hot-pink"
+                                        style="background-image: url('assets/textures/paper.png')" data-texture="paper"
+                                        data-mode="1" title="Paper"></button>
+                                </div>
+
+                                <!-- Custom Import -->
+                                <div class="flex gap-2 mb-3">
+                                    <button id="import-texture-btn"
+                                        class="flex-1 bg-glass border border-glass-border rounded p-2 text-xs text-gray-300 hover:bg-white/5 flex items-center justify-center gap-2">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                        </svg>
+                                        Custom...
+                                    </button>
+                                    <button id="remove-texture-btn"
+                                        class="px-3 bg-glass border border-glass-border rounded text-gray-400 hover:text-red-400 font-bold">
+                                        ×
+                                    </button>
+                                    <input type="file" id="texture-input" accept="image/*" class="hidden">
+                                </div>
+
+                                <!-- Controls -->
+                                <div class="slider-group mb-2">
+                                    <div class="slider-header">
+                                        <label>Opacity</label>
+                                        <span class="slider-value" data-for="overlayOpacity">0</span>
+                                    </div>
+                                    <input type="range" id="overlayOpacity" class="studio-slider" min="0" max="100"
+                                        value="0">
+                                </div>
+
+                                <!-- Blend Modes -->
+                                <div class="flex gap-1" id="blend-mode-btns">
+                                    <button
+                                        class="blend-mode-btn flex-1 py-1 text-[10px] rounded border border-glass-border text-gray-400 hover:bg-white/10"
+                                        data-mode="2">Screen</button>
+                                    <button
+                                        class="blend-mode-btn flex-1 py-1 text-[10px] rounded border border-glass-border text-gray-400 hover:bg-white/10"
+                                        data-mode="3">Overlay</button>
+                                    <button
+                                        class="blend-mode-btn flex-1 py-1 text-[10px] rounded border border-glass-border text-gray-400 hover:bg-white/10"
+                                        data-mode="1">Multiply</button>
+                                </div>
+                            </div>
+
+                            <!-- Date Stamp & Watermark -->
+                            <div class="flex gap-2 mb-4">
+                                <div class="flex-1 bg-glass border border-glass-border rounded p-2">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <label class="text-xs text-gray-400">Date Stamp</label>
+                                        <input type="checkbox" id="date-toggle" class="accent-hot-pink">
+                                    </div>
+                                    <input type="color" id="date-color" value="#ff9900"
+                                        class="w-full h-6 bg-transparent cursor-pointer rounded">
+                                </div>
+                                <div class="flex-1 bg-glass border border-glass-border rounded p-2">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <label class="text-xs text-gray-400">Watermark</label>
+                                        <input type="checkbox" id="watermark-toggle" class="accent-hot-pink">
+                                    </div>
+                                    <input type="text" id="watermark-text" value="Untitled Studio"
+                                        class="w-full bg-black/50 border border-glass-border rounded text-[10px] px-1 py-1 text-white focus:border-hot-pink outline-none">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label>Film Scratches</label>
+                                        <span class="slider-value" data-for="scratches">0</span>
+                                    </div>
+                                    <input type="range" id="scratches" class="studio-slider" min="0" max="100" step="1"
+                                        value="0">
+                                </div>
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label>Film Gate Weave</label>
+                                        <span class="slider-value" data-for="filmGateWeave">0</span>
+                                    </div>
+                                    <input type="range" id="filmGateWeave" class="studio-slider" min="0" max="100"
+                                        step="1" value="0">
+                                </div>
+                            </div>
+
+                            <button id="randomize-seed-btn"
+                                class="w-full mt-3 py-1.5 rounded-lg bg-glass hover:bg-glass-border text-xs text-moonstone flex items-center justify-center gap-2 transition-all">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
-                                Custom...
+                                Shuffle Defects
                             </button>
-                            <button id="remove-texture-btn"
-                                class="px-3 bg-glass border border-glass-border rounded text-gray-400 hover:text-red-400 font-bold">
-                                ×
-                            </button>
-                            <input type="file" id="texture-input" accept="image/*" class="hidden">
-                        </div>
 
-                        <!-- Controls -->
-                        <div class="slider-group mb-2">
-                            <div class="slider-header">
-                                <label>Opacity</label>
-                                <span class="slider-value" data-for="overlayOpacity">0</span>
+                            <div class="slider-group mt-4">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-xs text-gray-500 block">Gallery Frame</label>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="gallery-frame-toggle" class="sr-only peer">
+                                        <div
+                                            class="w-9 h-5 bg-glass-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-white">
+                                        </div>
+                                    </label>
+                                </div>
+                                <div id="gallery-options" class="hidden mt-2 pl-2 border-l-2 border-white/20">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-[10px] text-gray-400">Theme</span>
+                                        <button id="gallery-theme-btn"
+                                            class="text-[10px] px-2 py-0.5 rounded bg-white text-black font-bold">White</button>
+                                    </div>
+                                </div>
                             </div>
-                            <input type="range" id="overlayOpacity" class="studio-slider" min="0" max="100" value="0">
                         </div>
 
-                        <!-- Blend Modes -->
-                        <div class="flex gap-1" id="blend-mode-btns">
-                            <button
-                                class="blend-mode-btn flex-1 py-1 text-[10px] rounded border border-glass-border text-gray-400 hover:bg-white/10"
-                                data-mode="2">Screen</button>
-                            <button
-                                class="blend-mode-btn flex-1 py-1 text-[10px] rounded border border-glass-border text-gray-400 hover:bg-white/10"
-                                data-mode="3">Overlay</button>
-                            <button
-                                class="blend-mode-btn flex-1 py-1 text-[10px] rounded border border-glass-border text-gray-400 hover:bg-white/10"
-                                data-mode="1">Multiply</button>
+                        <!-- 4. DIGITAL SUB-PANEL -->
+                        <div id="fx-digital" class="fx-subpanel hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label>Glitch</label>
+                                    <span class="slider-value" data-for="glitchStrength">0</span>
+                                </div>
+                                <input type="range" id="glitchStrength" class="studio-slider" min="0" max="100" step="1"
+                                    value="0">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label>Pixelate</label>
+                                    <span class="slider-value" data-for="pixelateSize">0</span>
+                                </div>
+                                <input type="range" id="pixelateSize" class="studio-slider" min="0" max="20" step="1"
+                                    value="0">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label>Dither</label>
+                                    <span class="slider-value" data-for="ditherStrength">0</span>
+                                </div>
+                                <input type="range" id="ditherStrength" class="studio-slider" min="0" max="100" step="1"
+                                    value="0">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label>Scanlines</label>
+                                    <span class="slider-value" data-for="scanlineIntensity">0</span>
+                                </div>
+                                <input type="range" id="scanlineIntensity" class="studio-slider" min="0" max="100"
+                                    step="1" value="0">
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label>ASCII</label>
+                                    <span class="slider-value" data-for="asciiSize">0</span>
+                                </div>
+                                <input type="range" id="asciiSize" class="studio-slider" min="0" max="2" step="0.01"
+                                    value="0">
+
+                                <div class="flex gap-2 mt-2">
+                                    <button id="copy-ascii-btn"
+                                        class="px-2 rounded bg-glass border border-glass-border hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                                        title="Copy ASCII to Clipboard">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                    <select id="asciiMode"
+                                        class="flex-1 bg-glass border border-glass-border rounded text-[10px] text-gray-300 p-1 focus:ring-hot-pink outline-none">
+                                        <option value="0">Full Color</option>
+                                        <option value="1">Matrix Green</option>
+                                        <option value="2">Amber Terminal</option>
+                                        <option value="3">Black & White</option>
+                                        <option value="4">Custom Tint</option>
+                                    </select>
+                                    <input type="color" id="asciiColor" value="#00ff66"
+                                        class="w-8 h-6 bg-transparent cursor-pointer rounded hidden"
+                                        title="Custom ASCII Color">
+                                </div>
+                            </div>
+
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label>Posterize</label>
+                                    <span class="slider-value" data-for="posterize">0</span>
+                                </div>
+                                <input type="range" id="posterize" class="studio-slider" min="0" max="100" step="1"
+                                    value="0">
+                            </div>
+                        </div>
+
+                        <!-- 5. TEXTURE SUB-PANEL -->
+                        <div id="fx-texture" class="fx-subpanel hidden">
+                            <div class="flex items-center justify-between mb-3 border-b border-glass-border pb-2">
+                                <label class="text-sm font-semibold text-gray-300">Texture Overlay</label>
+                                <input type="file" id="texture-input" accept="image/png,image/jpeg" hidden>
+                                <div class="flex gap-2">
+                                    <button id="remove-texture-btn"
+                                        class="text-xs text-red-400 hover:text-red-300 hidden">Remove</button>
+                                    <button id="import-texture-btn"
+                                        class="text-xs bg-glass hover:bg-glass-border px-2 py-1 rounded text-moonstone">+
+                                        Import</button>
+                                </div>
+                            </div>
+
+                            <div id="texture-controls"
+                                class="space-y-4 opacity-50 pointer-events-none transition-opacity">
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label>Opacity</label>
+                                        <span class="slider-value" data-for="overlayOpacity">0</span>
+                                    </div>
+                                    <input type="range" id="overlayOpacity" class="studio-slider" min="0" max="100"
+                                        step="1" value="0">
+                                </div>
+
+                                <div class="slider-group">
+                                    <label class="text-xs text-gray-500 mb-1 block">Blend Mode</label>
+                                    <div class="flex bg-glass rounded-lg p-1">
+                                        <button
+                                            class="flex-1 py-1 text-xs rounded hover:bg-white/10 transition-colors blend-mode-btn"
+                                            data-mode="1">Multiply</button>
+                                        <button
+                                            class="flex-1 py-1 text-xs rounded hover:bg-white/10 transition-colors blend-mode-btn active bg-moonstone/20 text-moonstone"
+                                            data-mode="2">Screen</button>
+                                        <button
+                                            class="flex-1 py-1 text-xs rounded hover:bg-white/10 transition-colors blend-mode-btn"
+                                            data-mode="3">Overlay</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4.5. CREATIVE SUB-PANEL (New) -->
+                        <div id="fx-creative" class="fx-subpanel hidden">
+
+                            <!-- Selective Color -->
+                            <div class="mb-4">
+                                <label
+                                    class="text-xs text-hot-pink font-bold mb-3 block uppercase tracking-wider border-b border-white/10 pb-1">Selective
+                                    Color</label>
+
+                                <div class="slider-group mb-4">
+                                    <div class="slider-header">
+                                        <label>Target Hue</label>
+                                        <div class="flex items-center gap-2">
+                                            <div id="sel-color-preview"
+                                                class="w-3 h-3 rounded-full bg-red-500 border border-white/20"></div>
+                                            <span class="slider-value" data-for="selColorHue">0°</span>
+                                        </div>
+                                    </div>
+                                    <!-- Rainbow gradient background for context -->
+                                    <input type="range" id="selColorHue" class="studio-slider" min="0" max="360"
+                                        step="1" value="0"
+                                        style="background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);">
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="slider-group">
+                                        <div class="slider-header">
+                                            <label>Range</label>
+                                            <span class="slider-value" data-for="selColorRange">0</span>
+                                        </div>
+                                        <input type="range" id="selColorRange" class="studio-slider" min="0" max="180"
+                                            step="1" value="45">
+                                    </div>
+
+                                    <div class="slider-group">
+                                        <div class="slider-header">
+                                            <label>Feather</label>
+                                            <span class="slider-value" data-for="selColorFeather">0.5</span>
+                                        </div>
+                                        <input type="range" id="selColorFeather" class="studio-slider" min="0" max="1"
+                                            step="0.01" value="0.5">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4 mt-2">
+                                    <div class="slider-group">
+                                        <div class="slider-header">
+                                            <label>Saturation</label>
+                                            <span class="slider-value" data-for="selColorSat">0</span>
+                                        </div>
+                                        <input type="range" id="selColorSat" class="studio-slider" min="-100" max="100"
+                                            step="1" value="0">
+                                    </div>
+
+                                    <div class="slider-group">
+                                        <div class="slider-header">
+                                            <label>Luminance</label>
+                                            <span class="slider-value" data-for="selColorLum">0</span>
+                                        </div>
+                                        <input type="range" id="selColorLum" class="studio-slider" min="-100" max="100"
+                                            step="1" value="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Separator -->
+                        <div class="h-px bg-white/10 my-6"></div>
+
+                        <!-- TILT SHIFT -->
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Tilt-Shift</h3>
+
+                        <div class="space-y-4">
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label>Blur Strength</label>
+                                    <span class="slider-value" data-for="tiltShiftBlur">0</span>
+                                </div>
+                                <input type="range" id="tiltShiftBlur" class="studio-slider" min="0" max="50" step="1"
+                                    value="0">
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label class="text-[0.6rem]">Position</label>
+                                        <span class="slider-value" data-for="tiltShiftPos">0.5</span>
+                                    </div>
+                                    <input type="range" id="tiltShiftPos" class="studio-slider" min="0" max="1"
+                                        step="0.01" value="0.5">
+                                </div>
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label class="text-[0.6rem]">Width</label>
+                                        <span class="slider-value" data-for="tiltShiftFocusWidth">0.4</span>
+                                    </div>
+                                    <input type="range" id="tiltShiftFocusWidth" class="studio-slider" min="0" max="1"
+                                        step="0.01" value="0.4">
+                                </div>
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label class="text-[0.6rem]">Fade</label>
+                                        <span class="slider-value" data-for="tiltShiftGradient">0.2</span>
+                                    </div>
+                                    <input type="range" id="tiltShiftGradient" class="studio-slider" min="0" max="1"
+                                        step="0.01" value="0.2">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- 6. FRAME SUB-PANEL (New) -->
+                    <div id="fx-frame" class="fx-subpanel hidden">
+                        <div class="flex items-center justify-between mb-4 border-b border-glass-border pb-2">
+                            <label class="text-sm font-semibold text-gray-300">Frame Border</label>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-500">Enable</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="border-toggle" class="sr-only peer">
+                                    <div
+                                        class="w-9 h-5 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-hot-pink rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-hot-pink">
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="border-controls"
+                            class="space-y-4 transition-opacity duration-300 opacity-50 pointer-events-none">
+                            <!-- Border Width -->
+                            <div class="slider-group">
+                                <div class="slider-header">
+                                    <label>Thickness</label>
+                                    <span class="slider-value" id="border-width-val">0%</span>
+                                </div>
+                                <input type="range" id="border-width" class="studio-slider" min="0" max="20" step="0.1"
+                                    value="0">
+                            </div>
+
+                            <!-- Border Color -->
+                            <div class="space-y-2">
+                                <label class="text-xs text-gray-500">Color</label>
+                                <div class="flex gap-2 mb-2">
+                                    <input type="color" id="border-color-picker"
+                                        class="h-8 w-1/3 bg-transparent border-0 cursor-pointer" value="#ffffff">
+                                    <input type="text" id="border-color-hex"
+                                        class="flex-1 bg-white/5 border border-white/10 rounded px-2 text-xs font-mono text-white"
+                                        value="#FFFFFF">
+                                </div>
+                                <!-- Preset Colors -->
+                                <div class="flex flex-wrap gap-2">
+                                    <button
+                                        class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
+                                        style="background: #ffffff" data-color="#ffffff"></button>
+                                    <button
+                                        class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
+                                        style="background: #000000" data-color="#000000"></button>
+                                    <button
+                                        class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
+                                        style="background: #ff0000" data-color="#ff0000"></button>
+                                    <button
+                                        class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
+                                        style="background: #00ff00" data-color="#00ff00"></button>
+                                    <button
+                                        class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
+                                        style="background: #0000ff" data-color="#0000ff"></button>
+                                    <button
+                                        class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
+                                        style="background: #ffff00" data-color="#ffff00"></button>
+                                    <button
+                                        class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
+                                        style="background: #ff00ff" data-color="#ff00ff"></button>
+                                    <button
+                                        class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
+                                        style="background: #00ffff" data-color="#00ffff"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CROP Tab -->
+                <div id="crop-panel" class="panel hidden">
+                    <div class="flex flex-wrap gap-4">
+                        <div>
+                            <label class="text-xs text-gray-500 mb-2 block">Aspect Ratio</label>
+                            <div class="flex flex-wrap gap-1">
+                                <button class="aspect-btn active" data-aspect="free">Free</button>
+                                <button class="aspect-btn" data-aspect="original">Original</button>
+                                <button class="aspect-btn" data-aspect="1:1">1:1</button>
+                                <button class="aspect-btn" data-aspect="4:3">4:3</button>
+                                <button class="aspect-btn" data-aspect="16:9">16:9</button>
+                                <button class="aspect-btn" data-aspect="3:2">3:2</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 mb-2 block">Rotate</label>
+                            <div class="flex gap-2">
+                                <button id="rotate-ccw-btn" class="p-2 rounded-lg bg-glass hover:bg-glass-border"
+                                    title="Rotate Left">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                </button>
+                                <input type="range" id="rotation" class="studio-slider w-32" min="-45" max="45"
+                                    step="0.5" value="0">
+                                <button id="rotate-cw-btn" class="p-2 rounded-lg bg-glass hover:bg-glass-border"
+                                    title="Rotate Right">
+                                    <svg class="w-5 h-5 transform scale-x-[-1]" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 mb-2 block">Flip</label>
+                            <div class="flex gap-2">
+                                <button id="flip-h-btn" class="p-2 rounded-lg bg-glass hover:bg-glass-border"
+                                    title="Flip Horizontal">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                    </svg>
+                                </button>
+                                <button id="flip-v-btn" class="p-2 rounded-lg bg-glass hover:bg-glass-border"
+                                    title="Flip Vertical">
+                                    <svg class="w-5 h-5 transform rotate-90" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 ml-auto">
+                            <button id="crop-reset-btn"
+                                class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass">Reset</button>
+                            <button id="crop-apply-btn"
+                                class="px-4 py-2 rounded-lg bg-hot-pink text-white font-semibold hover:bg-hot-pink/80">Apply
+                                Crop</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRESETS Tab -->
+                <div id="presets-panel" class="panel hidden h-full flex flex-col overflow-hidden">
+                    <!-- Categorized Browser -->
+                    <div id="preset-browser" class="flex-1 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+
+                        <!-- Essential / User -->
+                        <div class="preset-group expanded" data-group="essentials">
+                            <div
+                                class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
+                                <span
+                                    class="text-xs font-bold tracking-widest text-hot-pink uppercase">Essentials</span>
+                                <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                            <div class="group-content p-2 grid grid-cols-2 gap-2">
+                                <button class="preset-category active" data-category="all">All Films</button>
+                                <button class="preset-category" data-category="favorites">⭐ Favorites</button>
+                                <button class="preset-category" data-category="custom">My Presets</button>
+                                <a href="preset_catalog.html" target="_blank"
+                                    class="px-3 py-1 rounded-lg bg-white/5 text-gray-400 text-xs font-semibold hover:bg-white/10 hover:text-white flex items-center justify-center gap-1 transition-all decoration-0"
+                                    title="Open PDF Catalog">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                        </path>
+                                    </svg>
+                                    Catalog
+                                </a>
+                                <button id="save-preset-btn"
+                                    class="px-3 py-1 rounded-lg bg-hot-pink/20 text-hot-pink text-xs font-semibold hover:bg-hot-pink/30">+
+                                    Save New</button>
+                            </div>
+                        </div>
+
+                        <!-- Major Brands -->
+                        <div class="preset-group" data-group="brands">
+                            <div
+                                class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
+                                <span class="text-xs font-bold tracking-widest text-moonstone uppercase">Major
+                                    Brands</span>
+                                <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                            <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
+                                <button class="preset-category" data-category="kodak">Kodak</button>
+                                <button class="preset-category" data-category="fuji">Fuji</button>
+                                <button class="preset-category" data-category="ilford">Ilford</button>
+                                <button class="preset-category" data-category="cinestill">Cinestill</button>
+                                <button class="preset-category" data-category="agfa">Agfa</button>
+                                <button class="preset-category" data-category="polaroid">Polaroid</button>
+                                <button class="preset-category" data-category="rollei">Rollei</button>
+                                <button class="preset-category" data-category="lomography">Lomo</button>
+                                <button class="preset-category" data-category="konica">Konica</button>
+                                <button class="preset-category" data-category="yashica">Yashica</button>
+                                <button class="preset-category" data-category="adox">Adox</button>
+                                <button class="preset-category" data-category="harman">Harman</button>
+                            </div>
+                        </div>
+
+                        <!-- Indie & Boutique -->
+                        <div class="preset-group" data-group="indie">
+                            <div
+                                class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
+                                <span class="text-xs font-bold tracking-widest text-moonstone uppercase">Indie &
+                                    Boutique</span>
+                                <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                            <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
+                                <button class="preset-category" data-category="orwo">Orwo</button>
+                                <button class="preset-category" data-category="svema">Svema</button>
+                                <button class="preset-category" data-category="fomapan">Fomapan</button>
+                                <button class="preset-category" data-category="lucky">Lucky</button>
+                                <button class="preset-category" data-category="revolog">Revolog</button>
+                                <button class="preset-category" data-category="fpp">FPP</button>
+                                <button class="preset-category" data-category="yodica">Yodica</button>
+                                <button class="preset-category" data-category="dubblefilm">Dubble</button>
+                                <button class="preset-category" data-category="washi">Washi</button>
+                                <button class="preset-category" data-category="kono">Kono!</button>
+                                <button class="preset-category" data-category="reflx">Reflx</button>
+                                <button class="preset-category" data-category="flicfilm">FlicFilm</button>
+                                <button class="preset-category" data-category="karmir">Karmir</button>
+                                <button class="preset-category" data-category="hanalogital">Hanalogital</button>
+                            </div>
+                        </div>
+
+                        <!-- Special Collections -->
+                        <div class="preset-group" data-group="specials">
+                            <div
+                                class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
+                                <span class="text-xs font-bold tracking-widest text-moonstone uppercase">Curated</span>
+                                <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                            <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
+                                <button class="preset-category" data-category="mrnegative">Mr. Negative</button>
+                                <button class="preset-category" data-category="berlin">Berlin</button>
+                                <button class="preset-category" data-category="handsonfilm">HandsOnFilm</button>
+                                <button class="preset-category" data-category="cinemot">CineMot</button>
+                                <button class="preset-category" data-category="candido">Candido</button>
+                                <button class="preset-category" data-category="analogue">Analogue</button>
+                            </div>
+                        </div>
+
+                        <!-- Collections -->
+                        <div class="preset-group" data-group="collections">
+                            <div
+                                class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
+                                <span
+                                    class="text-xs font-bold tracking-widest text-emerald-400 uppercase">Archives</span>
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                            <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
+                                <button class="preset-category" data-category="vintage">Vintage</button>
+                                <button class="preset-category" data-category="obscure">Obscure</button>
+                            </div>
+                        </div>
+
+                        <!-- Creative Styles -->
+                        <div class="preset-group" data-group="styles">
+                            <div
+                                class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
+                                <span
+                                    class="text-xs font-bold tracking-widest text-purple-400 uppercase">Creative</span>
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                            <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
+                                <button class="preset-category" data-category="modern">Modern</button>
+                                <button class="preset-category" data-category="moody">Moody</button>
+                                <button class="preset-category" data-category="dreamy">Dreamy</button>
+                                <button class="preset-category" data-category="cinema">Cinema</button>
+                                <button class="preset-category" data-category="monochrome">Monochrome</button>
+                                <button class="preset-category" data-category="experimental">Experimental</button>
+                                <button class="preset-category" data-category="muse">Muse</button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Date Stamp & Watermark -->
-                    <div class="flex gap-2 mb-4">
-                        <div class="flex-1 bg-glass border border-glass-border rounded p-2">
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="text-xs text-gray-400">Date Stamp</label>
-                                <input type="checkbox" id="date-toggle" class="accent-hot-pink">
-                            </div>
-                            <input type="color" id="date-color" value="#ff9900"
-                                class="w-full h-6 bg-transparent cursor-pointer rounded">
+                    <!-- 3D Preset Wheel -->
+                    <div id="preset-wheel-container" class="relative flex-1 perspective-1000 overflow-hidden my-2">
+                        <!-- Center Marker Line -->
+                        <div
+                            class="absolute top-4 bottom-4 left-1/2 w-0.5 bg-gradient-to-b from-transparent via-hot-pink/50 to-transparent z-20 transform -translate-x-1/2 pointer-events-none">
                         </div>
-                        <div class="flex-1 bg-glass border border-glass-border rounded p-2">
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="text-xs text-gray-400">Watermark</label>
-                                <input type="checkbox" id="watermark-toggle" class="accent-hot-pink">
-                            </div>
-                            <input type="text" id="watermark-text" value="Untitled Studio"
-                                class="w-full bg-black/50 border border-glass-border rounded text-[10px] px-1 py-1 text-white focus:border-hot-pink outline-none">
+
+                        <div id="preset-wheel"
+                            class="wheel-scroll-area flex items-center px-[50%] gap-4 h-full overflow-x-auto scroll-snap-x snap-mandatory scrollbar-hide py-4">
+                            <!-- Presets injected here -->
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label>Film Scratches</label>
-                                <span class="slider-value" data-for="scratches">0</span>
-                            </div>
-                            <input type="range" id="scratches" class="studio-slider" min="0" max="100" step="1"
-                                value="0">
-                        </div>
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label>Film Gate Weave</label>
-                                <span class="slider-value" data-for="filmGateWeave">0</span>
-                            </div>
-                            <input type="range" id="filmGateWeave" class="studio-slider" min="0" max="100" step="1"
-                                value="0">
-                        </div>
+                    <!-- Active Preset Name Overlay -->
+                    <div id="active-preset-name"
+                        class="text-center text-moonstone font-bold text-lg h-8 flex-shrink-0 transition-all opacity-0">
                     </div>
 
-                    <button id="randomize-seed-btn"
-                        class="w-full mt-3 py-1.5 rounded-lg bg-glass hover:bg-glass-border text-xs text-moonstone flex items-center justify-center gap-2 transition-all">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Shuffle Defects
-                    </button>
+                    <!-- Preset Strength Slider -->
+                    <div id="preset-strength-container"
+                        class="mt-2 pt-2 border-t border-glass-border hidden flex-shrink-0 bg-glass-panel">
+                        <div class="flex items-center gap-4">
+                            <span class="text-xs text-gray-400 uppercase tracking-wider">Strength</span>
+                            <input type="range" id="preset-strength" class="studio-slider flex-1" min="0" max="100"
+                                value="100">
+                            <span id="preset-strength-value"
+                                class="text-sm text-moonstone font-semibold w-12 text-right">100%</span>
+                        </div>
+                    </div>
+                </div>
 
-                    <div class="slider-group mt-4">
-                        <div class="flex items-center justify-between">
-                            <label class="text-xs text-gray-500 block">Gallery Frame</label>
+                <!-- MASK Tab -->
+                <div id="mask-panel" class="panel hidden">
+                    <div class="flex flex-col gap-4">
+                        <!-- Manifesto Mode Toggle -->
+                        <div
+                            class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-glass-border mb-2 group hover:border-hot-pink transition-all">
+                            <div class="flex flex-col">
+                                <span class="text-xs font-bold text-hot-pink tracking-widest uppercase">Manifesto
+                                    Mode</span>
+                                <span class="text-[10px] text-gray-500 uppercase">Unmask the interface</span>
+                            </div>
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="gallery-frame-toggle" class="sr-only peer">
+                                <input id="manifesto-mode-toggle" type="checkbox" class="sr-only peer">
                                 <div
-                                    class="w-9 h-5 bg-glass-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-white">
+                                    class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-none border border-white/20 peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-none after:h-5 after:w-5 after:transition-all peer-checked:bg-hot-pink shadow-[4px_4px_0px_rgba(60,162,200,0.3)] peer-checked:shadow-[4px_4px_0px_rgba(255,255,255,0.2)]">
                                 </div>
                             </label>
                         </div>
-                        <div id="gallery-options" class="hidden mt-2 pl-2 border-l-2 border-white/20">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-[10px] text-gray-400">Theme</span>
-                                <button id="gallery-theme-btn"
-                                    class="text-[10px] px-2 py-0.5 rounded bg-white text-black font-bold">White</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- 4. DIGITAL SUB-PANEL -->
-                <div id="fx-digital" class="fx-subpanel hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Glitch</label>
-                            <span class="slider-value" data-for="glitchStrength">0</span>
-                        </div>
-                        <input type="range" id="glitchStrength" class="studio-slider" min="0" max="100" step="1"
-                            value="0">
-                    </div>
+                        <!-- Add Mask Button -->
+                        <button id="add-mask-btn"
+                            class="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4" />
+                            </svg>
+                            Shoot better next time
+                        </button>
 
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Pixelate</label>
-                            <span class="slider-value" data-for="pixelateSize">0</span>
-                        </div>
-                        <input type="range" id="pixelateSize" class="studio-slider" min="0" max="20" step="1" value="0">
-                    </div>
-
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Dither</label>
-                            <span class="slider-value" data-for="ditherStrength">0</span>
-                        </div>
-                        <input type="range" id="ditherStrength" class="studio-slider" min="0" max="100" step="1"
-                            value="0">
-                    </div>
-
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Scanlines</label>
-                            <span class="slider-value" data-for="scanlineIntensity">0</span>
-                        </div>
-                        <input type="range" id="scanlineIntensity" class="studio-slider" min="0" max="100" step="1"
-                            value="0">
-                    </div>
-
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>ASCII</label>
-                            <span class="slider-value" data-for="asciiSize">0</span>
-                        </div>
-                        <input type="range" id="asciiSize" class="studio-slider" min="0" max="2" step="0.01" value="0">
-
-                        <div class="flex gap-2 mt-2">
-                            <button id="copy-ascii-btn"
-                                class="px-2 rounded bg-glass border border-glass-border hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-                                title="Copy ASCII to Clipboard">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3">
-                                    </path>
-                                </svg>
-                            </button>
-                            <select id="asciiMode"
-                                class="flex-1 bg-glass border border-glass-border rounded text-[10px] text-gray-300 p-1 focus:ring-hot-pink outline-none">
-                                <option value="0">Full Color</option>
-                                <option value="1">Matrix Green</option>
-                                <option value="2">Amber Terminal</option>
-                                <option value="3">Black & White</option>
-                                <option value="4">Custom Tint</option>
-                            </select>
-                            <input type="color" id="asciiColor" value="#00ff66"
-                                class="w-8 h-6 bg-transparent cursor-pointer rounded hidden" title="Custom ASCII Color">
-                        </div>
-                    </div>
-
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Posterize</label>
-                            <span class="slider-value" data-for="posterize">0</span>
-                        </div>
-                        <input type="range" id="posterize" class="studio-slider" min="0" max="100" step="1" value="0">
-                    </div>
-                </div>
-
-                <!-- 5. TEXTURE SUB-PANEL -->
-                <div id="fx-texture" class="fx-subpanel hidden">
-                    <div class="flex items-center justify-between mb-3 border-b border-glass-border pb-2">
-                        <label class="text-sm font-semibold text-gray-300">Texture Overlay</label>
-                        <input type="file" id="texture-input" accept="image/png,image/jpeg" hidden>
-                        <div class="flex gap-2">
-                            <button id="remove-texture-btn"
-                                class="text-xs text-red-400 hover:text-red-300 hidden">Remove</button>
-                            <button id="import-texture-btn"
-                                class="text-xs bg-glass hover:bg-glass-border px-2 py-1 rounded text-moonstone">+
-                                Import</button>
-                        </div>
-                    </div>
-
-                    <div id="texture-controls" class="space-y-4 opacity-50 pointer-events-none transition-opacity">
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label>Opacity</label>
-                                <span class="slider-value" data-for="overlayOpacity">0</span>
-                            </div>
-                            <input type="range" id="overlayOpacity" class="studio-slider" min="0" max="100" step="1"
-                                value="0">
-                        </div>
-
-                        <div class="slider-group">
-                            <label class="text-xs text-gray-500 mb-1 block">Blend Mode</label>
-                            <div class="flex bg-glass rounded-lg p-1">
-                                <button
-                                    class="flex-1 py-1 text-xs rounded hover:bg-white/10 transition-colors blend-mode-btn"
-                                    data-mode="1">Multiply</button>
-                                <button
-                                    class="flex-1 py-1 text-xs rounded hover:bg-white/10 transition-colors blend-mode-btn active bg-moonstone/20 text-moonstone"
-                                    data-mode="2">Screen</button>
-                                <button
-                                    class="flex-1 py-1 text-xs rounded hover:bg-white/10 transition-colors blend-mode-btn"
-                                    data-mode="3">Overlay</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 4.5. CREATIVE SUB-PANEL (New) -->
-                <div id="fx-creative" class="fx-subpanel hidden">
-
-                    <!-- Selective Color -->
-                    <div class="mb-4">
-                        <label
-                            class="text-xs text-hot-pink font-bold mb-3 block uppercase tracking-wider border-b border-white/10 pb-1">Selective
-                            Color</label>
-
-                        <div class="slider-group mb-4">
-                            <div class="slider-header">
-                                <label>Target Hue</label>
-                                <div class="flex items-center gap-2">
-                                    <div id="sel-color-preview"
-                                        class="w-3 h-3 rounded-full bg-red-500 border border-white/20"></div>
-                                    <span class="slider-value" data-for="selColorHue">0°</span>
+                        <!-- Mask List -->
+                        <div id="mask-list" class="space-y-2 max-h-40 overflow-y-auto">
+                            <!-- Mask items injected by JS -->
+                            <div class="text-center py-8">
+                                <div class="text-xs text-hot-pink/40 uppercase tracking-[0.3em] font-bold mb-4">The
+                                    Unmasked Era
                                 </div>
+                                <p class="text-sm text-gray-500 mb-6 italic px-8">"We do not paint light. We capture it,
+                                    we
+                                    process it, and we suffer the consequences."</p>
+                                <a href="manifesto.html"
+                                    class="inline-block px-6 py-2 border border-hot-pink/20 text-hot-pink text-[10px] font-bold uppercase tracking-widest hover:bg-hot-pink/10 transition-all rounded">
+                                    Read the Manifesto
+                                </a>
                             </div>
-                            <!-- Rainbow gradient background for context -->
-                            <input type="range" id="selColorHue" class="studio-slider" min="0" max="360" step="1"
-                                value="0"
-                                style="background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);">
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="slider-group">
-                                <div class="slider-header">
-                                    <label>Range</label>
-                                    <span class="slider-value" data-for="selColorRange">0</span>
+                        <!-- Active Mask Controls (Initially Hidden) -->
+                        <div id="mask-controls" class="hidden border-t border-glass-border pt-4 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-400">Settings</span>
+                                <button id="delete-mask-btn"
+                                    class="text-xs text-red-400 hover:text-red-300">Delete</button>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs text-gray-300">Show Overlay</label>
+                                <input type="checkbox" id="mask-overlay-toggle"
+                                    class="form-checkbox h-4 w-4 text-hot-pink rounded border-gray-600 bg-white/10 focus:ring-0 focus:ring-offset-0">
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs text-gray-300">Invert</label>
+                                <input type="checkbox" id="mask-invert"
+                                    class="w-4 h-4 rounded bg-white/10 border-white/20 text-hot-pink focus:ring-hot-pink">
+                            </div>
+
+                            <div class="space-y-3 pt-2 border-t border-glass-border">
+                                <div class="text-xs font-semibold text-gray-400">Transform</div>
+
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label>X</label>
+                                        <span class="slider-value" data-for="mask-x">0.5</span>
+                                    </div>
+                                    <input type="range" id="mask-x" class="studio-slider" min="0" max="1" step="0.01"
+                                        value="0.5">
                                 </div>
-                                <input type="range" id="selColorRange" class="studio-slider" min="0" max="180" step="1"
-                                    value="45">
+
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label>Y</label>
+                                        <span class="slider-value" data-for="mask-y">0.5</span>
+                                    </div>
+                                    <input type="range" id="mask-y" class="studio-slider" min="0" max="1" step="0.01"
+                                        value="0.5">
+                                </div>
+
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label>Radius</label>
+                                        <span class="slider-value" data-for="mask-radius">0.3</span>
+                                    </div>
+                                    <input type="range" id="mask-radius" class="studio-slider" min="0" max="1"
+                                        step="0.01" value="0.3">
+                                </div>
+
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label>Rotation</label>
+                                        <span class="slider-value" data-for="mask-rotation">0</span>
+                                    </div>
+                                    <input type="range" id="mask-rotation" class="studio-slider" min="0" max="360"
+                                        step="1" value="0">
+                                </div>
                             </div>
 
                             <div class="slider-group">
                                 <div class="slider-header">
                                     <label>Feather</label>
-                                    <span class="slider-value" data-for="selColorFeather">0.5</span>
+                                    <span class="slider-value" data-for="mask-feather">0.2</span>
                                 </div>
-                                <input type="range" id="selColorFeather" class="studio-slider" min="0" max="1"
-                                    step="0.01" value="0.5">
+                                <input type="range" id="mask-feather" class="studio-slider" min="0" max="1" step="0.01"
+                                    value="0.2">
                             </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mt-2">
-                            <div class="slider-group">
-                                <div class="slider-header">
-                                    <label>Saturation</label>
-                                    <span class="slider-value" data-for="selColorSat">0</span>
-                                </div>
-                                <input type="range" id="selColorSat" class="studio-slider" min="-100" max="100" step="1"
-                                    value="0">
-                            </div>
-
-                            <div class="slider-group">
-                                <div class="slider-header">
-                                    <label>Luminance</label>
-                                    <span class="slider-value" data-for="selColorLum">0</span>
-                                </div>
-                                <input type="range" id="selColorLum" class="studio-slider" min="-100" max="100" step="1"
-                                    value="0">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Separator -->
-                <div class="h-px bg-white/10 my-6"></div>
-
-                <!-- TILT SHIFT -->
-                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Tilt-Shift</h3>
-
-                <div class="space-y-4">
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Blur Strength</label>
-                            <span class="slider-value" data-for="tiltShiftBlur">0</span>
-                        </div>
-                        <input type="range" id="tiltShiftBlur" class="studio-slider" min="0" max="50" step="1"
-                            value="0">
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2">
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label class="text-[0.6rem]">Position</label>
-                                <span class="slider-value" data-for="tiltShiftPos">0.5</span>
-                            </div>
-                            <input type="range" id="tiltShiftPos" class="studio-slider" min="0" max="1" step="0.01"
-                                value="0.5">
-                        </div>
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label class="text-[0.6rem]">Width</label>
-                                <span class="slider-value" data-for="tiltShiftFocusWidth">0.4</span>
-                            </div>
-                            <input type="range" id="tiltShiftFocusWidth" class="studio-slider" min="0" max="1"
-                                step="0.01" value="0.4">
-                        </div>
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label class="text-[0.6rem]">Fade</label>
-                                <span class="slider-value" data-for="tiltShiftGradient">0.2</span>
-                            </div>
-                            <input type="range" id="tiltShiftGradient" class="studio-slider" min="0" max="1" step="0.01"
-                                value="0.2">
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- 6. FRAME SUB-PANEL (New) -->
-            <div id="fx-frame" class="fx-subpanel hidden">
-                <div class="flex items-center justify-between mb-4 border-b border-glass-border pb-2">
-                    <label class="text-sm font-semibold text-gray-300">Frame Border</label>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs text-gray-500">Enable</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="border-toggle" class="sr-only peer">
-                            <div
-                                class="w-9 h-5 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-hot-pink rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-hot-pink">
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <div id="border-controls"
-                    class="space-y-4 transition-opacity duration-300 opacity-50 pointer-events-none">
-                    <!-- Border Width -->
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Thickness</label>
-                            <span class="slider-value" id="border-width-val">0%</span>
-                        </div>
-                        <input type="range" id="border-width" class="studio-slider" min="0" max="20" step="0.1"
-                            value="0">
-                    </div>
-
-                    <!-- Border Color -->
-                    <div class="space-y-2">
-                        <label class="text-xs text-gray-500">Color</label>
-                        <div class="flex gap-2 mb-2">
-                            <input type="color" id="border-color-picker"
-                                class="h-8 w-1/3 bg-transparent border-0 cursor-pointer" value="#ffffff">
-                            <input type="text" id="border-color-hex"
-                                class="flex-1 bg-white/5 border border-white/10 rounded px-2 text-xs font-mono text-white"
-                                value="#FFFFFF">
-                        </div>
-                        <!-- Preset Colors -->
-                        <div class="flex flex-wrap gap-2">
-                            <button
-                                class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
-                                style="background: #ffffff" data-color="#ffffff"></button>
-                            <button
-                                class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
-                                style="background: #000000" data-color="#000000"></button>
-                            <button
-                                class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
-                                style="background: #ff0000" data-color="#ff0000"></button>
-                            <button
-                                class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
-                                style="background: #00ff00" data-color="#00ff00"></button>
-                            <button
-                                class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
-                                style="background: #0000ff" data-color="#0000ff"></button>
-                            <button
-                                class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
-                                style="background: #ffff00" data-color="#ffff00"></button>
-                            <button
-                                class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
-                                style="background: #ff00ff" data-color="#ff00ff"></button>
-                            <button
-                                class="w-6 h-6 rounded-full border border-white/20 hover:scale-110 transition-transform border-preset-btn"
-                                style="background: #00ffff" data-color="#00ffff"></button>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- CROP Tab -->
-        <div id="crop-panel" class="panel hidden">
-            <div class="flex flex-wrap gap-4">
-                <div>
-                    <label class="text-xs text-gray-500 mb-2 block">Aspect Ratio</label>
-                    <div class="flex flex-wrap gap-1">
-                        <button class="aspect-btn active" data-aspect="free">Free</button>
-                        <button class="aspect-btn" data-aspect="original">Original</button>
-                        <button class="aspect-btn" data-aspect="1:1">1:1</button>
-                        <button class="aspect-btn" data-aspect="4:3">4:3</button>
-                        <button class="aspect-btn" data-aspect="16:9">16:9</button>
-                        <button class="aspect-btn" data-aspect="3:2">3:2</button>
-                    </div>
-                </div>
-                <div>
-                    <label class="text-xs text-gray-500 mb-2 block">Rotate</label>
-                    <div class="flex gap-2">
-                        <button id="rotate-ccw-btn" class="p-2 rounded-lg bg-glass hover:bg-glass-border"
-                            title="Rotate Left">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                        </button>
-                        <input type="range" id="rotation" class="studio-slider w-32" min="-45" max="45" step="0.5"
-                            value="0">
-                        <button id="rotate-cw-btn" class="p-2 rounded-lg bg-glass hover:bg-glass-border"
-                            title="Rotate Right">
-                            <svg class="w-5 h-5 transform scale-x-[-1]" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div>
-                    <label class="text-xs text-gray-500 mb-2 block">Flip</label>
-                    <div class="flex gap-2">
-                        <button id="flip-h-btn" class="p-2 rounded-lg bg-glass hover:bg-glass-border"
-                            title="Flip Horizontal">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                            </svg>
-                        </button>
-                        <button id="flip-v-btn" class="p-2 rounded-lg bg-glass hover:bg-glass-border"
-                            title="Flip Vertical">
-                            <svg class="w-5 h-5 transform rotate-90" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div class="flex gap-2 ml-auto">
-                    <button id="crop-reset-btn"
-                        class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass">Reset</button>
-                    <button id="crop-apply-btn"
-                        class="px-4 py-2 rounded-lg bg-hot-pink text-white font-semibold hover:bg-hot-pink/80">Apply
-                        Crop</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- PRESETS Tab -->
-        <div id="presets-panel" class="panel hidden h-full flex flex-col overflow-hidden">
-            <!-- Categorized Browser -->
-            <div id="preset-browser" class="flex-1 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
-
-                <!-- Essential / User -->
-                <div class="preset-group expanded" data-group="essentials">
-                    <div
-                        class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
-                        <span class="text-xs font-bold tracking-widest text-hot-pink uppercase">Essentials</span>
-                        <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
-                    <div class="group-content p-2 grid grid-cols-2 gap-2">
-                        <button class="preset-category active" data-category="all">All Films</button>
-                        <button class="preset-category" data-category="favorites">⭐ Favorites</button>
-                        <button class="preset-category" data-category="custom">My Presets</button>
-                        <a href="preset_catalog.html" target="_blank"
-                            class="px-3 py-1 rounded-lg bg-white/5 text-gray-400 text-xs font-semibold hover:bg-white/10 hover:text-white flex items-center justify-center gap-1 transition-all decoration-0"
-                            title="Open PDF Catalog">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                </path>
-                            </svg>
-                            Catalog
-                        </a>
-                        <button id="save-preset-btn"
-                            class="px-3 py-1 rounded-lg bg-hot-pink/20 text-hot-pink text-xs font-semibold hover:bg-hot-pink/30">+
-                            Save New</button>
-                    </div>
-                </div>
-
-                <!-- Major Brands -->
-                <div class="preset-group" data-group="brands">
-                    <div
-                        class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
-                        <span class="text-xs font-bold tracking-widest text-moonstone uppercase">Major Brands</span>
-                        <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
-                    <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
-                        <button class="preset-category" data-category="kodak">Kodak</button>
-                        <button class="preset-category" data-category="fuji">Fuji</button>
-                        <button class="preset-category" data-category="ilford">Ilford</button>
-                        <button class="preset-category" data-category="cinestill">Cinestill</button>
-                        <button class="preset-category" data-category="agfa">Agfa</button>
-                        <button class="preset-category" data-category="polaroid">Polaroid</button>
-                        <button class="preset-category" data-category="rollei">Rollei</button>
-                        <button class="preset-category" data-category="lomography">Lomo</button>
-                        <button class="preset-category" data-category="konica">Konica</button>
-                        <button class="preset-category" data-category="yashica">Yashica</button>
-                        <button class="preset-category" data-category="adox">Adox</button>
-                        <button class="preset-category" data-category="harman">Harman</button>
-                    </div>
-                </div>
-
-                <!-- Indie & Boutique -->
-                <div class="preset-group" data-group="indie">
-                    <div
-                        class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
-                        <span class="text-xs font-bold tracking-widest text-moonstone uppercase">Indie & Boutique</span>
-                        <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
-                    <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
-                        <button class="preset-category" data-category="orwo">Orwo</button>
-                        <button class="preset-category" data-category="svema">Svema</button>
-                        <button class="preset-category" data-category="fomapan">Fomapan</button>
-                        <button class="preset-category" data-category="lucky">Lucky</button>
-                        <button class="preset-category" data-category="revolog">Revolog</button>
-                        <button class="preset-category" data-category="fpp">FPP</button>
-                        <button class="preset-category" data-category="yodica">Yodica</button>
-                        <button class="preset-category" data-category="dubblefilm">Dubble</button>
-                        <button class="preset-category" data-category="washi">Washi</button>
-                        <button class="preset-category" data-category="kono">Kono!</button>
-                        <button class="preset-category" data-category="reflx">Reflx</button>
-                        <button class="preset-category" data-category="flicfilm">FlicFilm</button>
-                        <button class="preset-category" data-category="karmir">Karmir</button>
-                        <button class="preset-category" data-category="hanalogital">Hanalogital</button>
-                    </div>
-                </div>
-
-                <!-- Special Collections -->
-                <div class="preset-group" data-group="specials">
-                    <div
-                        class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
-                        <span class="text-xs font-bold tracking-widest text-moonstone uppercase">Curated</span>
-                        <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
-                    <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
-                        <button class="preset-category" data-category="mrnegative">Mr. Negative</button>
-                        <button class="preset-category" data-category="berlin">Berlin</button>
-                        <button class="preset-category" data-category="handsonfilm">HandsOnFilm</button>
-                        <button class="preset-category" data-category="cinemot">CineMot</button>
-                        <button class="preset-category" data-category="candido">Candido</button>
-                        <button class="preset-category" data-category="analogue">Analogue</button>
-                    </div>
-                </div>
-
-                <!-- Collections -->
-                <div class="preset-group" data-group="collections">
-                    <div
-                        class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
-                        <span class="text-xs font-bold tracking-widest text-emerald-400 uppercase">Archives</span>
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
-                    <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
-                        <button class="preset-category" data-category="vintage">Vintage</button>
-                        <button class="preset-category" data-category="obscure">Obscure</button>
-                    </div>
-                </div>
-
-                <!-- Creative Styles -->
-                <div class="preset-group" data-group="styles">
-                    <div
-                        class="group-header flex items-center justify-between px-3 py-2 bg-glass border-b border-glass-border cursor-pointer sticky top-0 z-10">
-                        <span class="text-xs font-bold tracking-widest text-purple-400 uppercase">Creative</span>
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
-                    <div class="group-content p-2 grid grid-cols-2 gap-2 hidden">
-                        <button class="preset-category" data-category="modern">Modern</button>
-                        <button class="preset-category" data-category="moody">Moody</button>
-                        <button class="preset-category" data-category="dreamy">Dreamy</button>
-                        <button class="preset-category" data-category="cinema">Cinema</button>
-                        <button class="preset-category" data-category="monochrome">Monochrome</button>
-                        <button class="preset-category" data-category="experimental">Experimental</button>
-                        <button class="preset-category" data-category="muse">Muse</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3D Preset Wheel -->
-            <div id="preset-wheel-container" class="relative flex-1 perspective-1000 overflow-hidden my-2">
-                <!-- Center Marker Line -->
-                <div
-                    class="absolute top-4 bottom-4 left-1/2 w-0.5 bg-gradient-to-b from-transparent via-hot-pink/50 to-transparent z-20 transform -translate-x-1/2 pointer-events-none">
-                </div>
-
-                <div id="preset-wheel"
-                    class="wheel-scroll-area flex items-center px-[50%] gap-4 h-full overflow-x-auto scroll-snap-x snap-mandatory scrollbar-hide py-4">
-                    <!-- Presets injected here -->
-                </div>
-            </div>
-
-            <!-- Active Preset Name Overlay -->
-            <div id="active-preset-name"
-                class="text-center text-moonstone font-bold text-lg h-8 flex-shrink-0 transition-all opacity-0">
-            </div>
-
-            <!-- Preset Strength Slider -->
-            <div id="preset-strength-container"
-                class="mt-2 pt-2 border-t border-glass-border hidden flex-shrink-0 bg-glass-panel">
-                <div class="flex items-center gap-4">
-                    <span class="text-xs text-gray-400 uppercase tracking-wider">Strength</span>
-                    <input type="range" id="preset-strength" class="studio-slider flex-1" min="0" max="100" value="100">
-                    <span id="preset-strength-value"
-                        class="text-sm text-moonstone font-semibold w-12 text-right">100%</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- MASK Tab -->
-        <div id="mask-panel" class="panel hidden">
-            <div class="flex flex-col gap-4">
-                <!-- Manifesto Mode Toggle -->
-                <div
-                    class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-glass-border mb-2 group hover:border-hot-pink transition-all">
-                    <div class="flex flex-col">
-                        <span class="text-xs font-bold text-hot-pink tracking-widest uppercase">Manifesto Mode</span>
-                        <span class="text-[10px] text-gray-500 uppercase">Unmask the interface</span>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input id="manifesto-mode-toggle" type="checkbox" class="sr-only peer">
-                        <div
-                            class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-none border border-white/20 peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-none after:h-5 after:w-5 after:transition-all peer-checked:bg-hot-pink shadow-[4px_4px_0px_rgba(60,162,200,0.3)] peer-checked:shadow-[4px_4px_0px_rgba(255,255,255,0.2)]">
-                        </div>
-                    </label>
-                </div>
-
-                <!-- Add Mask Button -->
-                <button id="add-mask-btn"
-                    class="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Shoot better next time
-                </button>
-
-                <!-- Mask List -->
-                <div id="mask-list" class="space-y-2 max-h-40 overflow-y-auto">
-                    <!-- Mask items injected by JS -->
-                    <div class="text-center py-8">
-                        <div class="text-xs text-hot-pink/40 uppercase tracking-[0.3em] font-bold mb-4">The Unmasked Era
-                        </div>
-                        <p class="text-sm text-gray-500 mb-6 italic px-8">"We do not paint light. We capture it, we
-                            process it, and we suffer the consequences."</p>
-                        <a href="manifesto.html"
-                            class="inline-block px-6 py-2 border border-hot-pink/20 text-hot-pink text-[10px] font-bold uppercase tracking-widest hover:bg-hot-pink/10 transition-all rounded">
-                            Read the Manifesto
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Active Mask Controls (Initially Hidden) -->
-                <div id="mask-controls" class="hidden border-t border-glass-border pt-4 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-gray-400">Settings</span>
-                        <button id="delete-mask-btn" class="text-xs text-red-400 hover:text-red-300">Delete</button>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <label class="text-xs text-gray-300">Show Overlay</label>
-                        <input type="checkbox" id="mask-overlay-toggle"
-                            class="form-checkbox h-4 w-4 text-hot-pink rounded border-gray-600 bg-white/10 focus:ring-0 focus:ring-offset-0">
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <label class="text-xs text-gray-300">Invert</label>
-                        <input type="checkbox" id="mask-invert"
-                            class="w-4 h-4 rounded bg-white/10 border-white/20 text-hot-pink focus:ring-hot-pink">
-                    </div>
-
-                    <div class="space-y-3 pt-2 border-t border-glass-border">
-                        <div class="text-xs font-semibold text-gray-400">Transform</div>
-
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label>X</label>
-                                <span class="slider-value" data-for="mask-x">0.5</span>
-                            </div>
-                            <input type="range" id="mask-x" class="studio-slider" min="0" max="1" step="0.01"
-                                value="0.5">
-                        </div>
-
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label>Y</label>
-                                <span class="slider-value" data-for="mask-y">0.5</span>
-                            </div>
-                            <input type="range" id="mask-y" class="studio-slider" min="0" max="1" step="0.01"
-                                value="0.5">
-                        </div>
-
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label>Radius</label>
-                                <span class="slider-value" data-for="mask-radius">0.3</span>
-                            </div>
-                            <input type="range" id="mask-radius" class="studio-slider" min="0" max="1" step="0.01"
-                                value="0.3">
-                        </div>
-
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <label>Rotation</label>
-                                <span class="slider-value" data-for="mask-rotation">0</span>
-                            </div>
-                            <input type="range" id="mask-rotation" class="studio-slider" min="0" max="360" step="1"
-                                value="0">
-                        </div>
-                    </div>
-
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>Feather</label>
-                            <span class="slider-value" data-for="mask-feather">0.2</span>
-                        </div>
-                        <input type="range" id="mask-feather" class="studio-slider" min="0" max="1" step="0.01"
-                            value="0.2">
-                    </div>
-                </div>
-            </div>
-        </div>
-        </div>
-
-        <!-- Export Bar -->
-        <div class="flex items-center justify-between px-4 pt-3 pb-8 border-t border-glass-border bg-midnight/50">
-            <div class="flex items-center gap-2">
-                <button id="reset-btn"
-                    class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all text-sm font-medium">
-                    Reset All
-                </button>
-                <button id="toggle-histogram-btn"
-                    class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
-                    title="Toggle Histogram">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                </button>
-                <button id="toggle-history-btn"
-                    class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
-                    title="Toggle History">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </button>
-            </div>
-            <div class="flex items-center gap-3">
-                <!-- Social Media Quick Export -->
-                <div class="relative">
-                    <button id="social-export-btn"
+            <!-- Export Bar -->
+            <div class="flex items-center justify-between px-4 pt-3 pb-8 border-t border-glass-border bg-midnight/50">
+                <div class="flex items-center gap-2">
+                    <button id="reset-btn"
+                        class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all text-sm font-medium">
+                        Reset All
+                    </button>
+                    <button id="toggle-histogram-btn"
                         class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
-                        title="Quick Export for Social Media">
+                        title="Toggle Histogram">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                     </button>
-                    <div id="social-export-menu"
-                        class="absolute bottom-full right-0 mb-2 bg-glass backdrop-blur-glass border border-glass-border rounded-xl p-2 min-w-48 hidden z-50">
-                        <div class="text-xs text-gray-500 uppercase tracking-wider px-2 py-1 mb-1">Quick Export</div>
-                        <button
-                            class="social-export-option w-full text-left px-3 py-2 rounded-lg hover:bg-glass-border text-sm flex items-center gap-3"
-                            data-size="instagram-square">
-                            <span
-                                class="w-6 h-6 rounded bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold">IG</span>
-                            <span>Instagram Square<span class="text-gray-500 ml-2">1080×1080</span></span>
+                    <button id="toggle-history-btn"
+                        class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
+                        title="Toggle History">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex items-center gap-3">
+                    <!-- Social Media Quick Export -->
+                    <div class="relative">
+                        <button id="social-export-btn"
+                            class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
+                            title="Quick Export for Social Media">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
                         </button>
-                        <button
-                            class="social-export-option w-full text-left px-3 py-2 rounded-lg hover:bg-glass-border text-sm flex items-center gap-3"
-                            data-size="instagram-story">
-                            <span
-                                class="w-6 h-6 rounded bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold">IG</span>
-                            <span>Instagram Story<span class="text-gray-500 ml-2">1080×1920</span></span>
-                        </button>
-                        <button
-                            class="social-export-option w-full text-left px-3 py-2 rounded-lg hover:bg-glass-border text-sm flex items-center gap-3"
-                            data-size="twitter">
-                            <span
-                                class="w-6 h-6 rounded bg-blue-500 flex items-center justify-center text-xs font-bold">X</span>
-                            <span>Twitter/X<span class="text-gray-500 ml-2">1200×675</span></span>
-                        </button>
-                        <button
-                            class="social-export-option w-full text-left px-3 py-2 rounded-lg hover:bg-glass-border text-sm flex items-center gap-3"
-                            data-size="facebook">
-                            <span
-                                class="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-xs font-bold">FB</span>
-                            <span>Facebook<span class="text-gray-500 ml-2">1200×630</span></span>
-                        </button>
+                        <div id="social-export-menu"
+                            class="absolute bottom-full right-0 mb-2 bg-glass backdrop-blur-glass border border-glass-border rounded-xl p-2 min-w-48 hidden z-50">
+                            <div class="text-xs text-gray-500 uppercase tracking-wider px-2 py-1 mb-1">Quick Export
+                            </div>
+                            <button
+                                class="social-export-option w-full text-left px-3 py-2 rounded-lg hover:bg-glass-border text-sm flex items-center gap-3"
+                                data-size="instagram-square">
+                                <span
+                                    class="w-6 h-6 rounded bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold">IG</span>
+                                <span>Instagram Square<span class="text-gray-500 ml-2">1080×1080</span></span>
+                            </button>
+                            <button
+                                class="social-export-option w-full text-left px-3 py-2 rounded-lg hover:bg-glass-border text-sm flex items-center gap-3"
+                                data-size="instagram-story">
+                                <span
+                                    class="w-6 h-6 rounded bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold">IG</span>
+                                <span>Instagram Story<span class="text-gray-500 ml-2">1080×1920</span></span>
+                            </button>
+                            <button
+                                class="social-export-option w-full text-left px-3 py-2 rounded-lg hover:bg-glass-border text-sm flex items-center gap-3"
+                                data-size="twitter">
+                                <span
+                                    class="w-6 h-6 rounded bg-blue-500 flex items-center justify-center text-xs font-bold">X</span>
+                                <span>Twitter/X<span class="text-gray-500 ml-2">1200×675</span></span>
+                            </button>
+                            <button
+                                class="social-export-option w-full text-left px-3 py-2 rounded-lg hover:bg-glass-border text-sm flex items-center gap-3"
+                                data-size="facebook">
+                                <span
+                                    class="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-xs font-bold">FB</span>
+                                <span>Facebook<span class="text-gray-500 ml-2">1200×630</span></span>
+                            </button>
+                        </div>
+
+
                     </div>
 
+                    <button id="export-settings-btn"
+                        class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
+                        title="Export Settings">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
+                    <select id="export-format"
+                        class="px-3 py-2 rounded-lg bg-glass border border-glass-border text-sm focus:border-moonstone focus:outline-none">
+                        <option value="jpeg">JPEG</option>
+                        <option value="png">PNG</option>
+                    </select>
 
+                    <!-- Magic Wand (Auto) Button -->
+                    <button id="magic-wand-btn"
+                        class="p-2 rounded-lg text-gray-400 hover:text-yellow-400 hover:bg-glass transition-all"
+                        title="Auto Enhance">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                    </button>
+
+                    <!-- Share Button -->
+                    <button id="share-btn"
+                        class="p-2 rounded-lg text-gray-400 hover:text-moonstone hover:bg-glass transition-all disabled:opacity-50"
+                        title="Share" disabled>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                    </button>
+
+                    <button id="export-btn"
+                        class="export-button px-6 py-2 rounded-xl bg-gradient-to-r from-hot-pink to-pink-600 text-white font-semibold hover:shadow-lg hover:shadow-hot-pink/30 transition-all duration-300 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Export
+                    </button>
                 </div>
-
-                <button id="export-settings-btn"
-                    class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
-                    title="Export Settings">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                </button>
-                <select id="export-format"
-                    class="px-3 py-2 rounded-lg bg-glass border border-glass-border text-sm focus:border-moonstone focus:outline-none">
-                    <option value="jpeg">JPEG</option>
-                    <option value="png">PNG</option>
-                </select>
-
-                <!-- Magic Wand (Auto) Button -->
-                <button id="magic-wand-btn"
-                    class="p-2 rounded-lg text-gray-400 hover:text-yellow-400 hover:bg-glass transition-all"
-                    title="Auto Enhance">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                    </svg>
-                </button>
-
-                <!-- Share Button -->
-                <button id="share-btn"
-                    class="p-2 rounded-lg text-gray-400 hover:text-moonstone hover:bg-glass transition-all disabled:opacity-50"
-                    title="Share" disabled>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                </button>
-
-                <button id="export-btn"
-                    class="export-button px-6 py-2 rounded-xl bg-gradient-to-r from-hot-pink to-pink-600 text-white font-semibold hover:shadow-lg hover:shadow-hot-pink/30 transition-all duration-300 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Export
-                </button>
             </div>
-        </div>
 
-        <!-- Brand Credit Footer -->
-        <div class="brand-credit">
-            <span class="brand-credit-text">Untitled Studio // developed by <span
-                    class="brand-credit-author">mhs</span></span>
-        </div>
+            <!-- Brand Credit Footer -->
+            <div class="brand-credit">
+                <span class="brand-credit-text">Untitled Studio // developed by <span
+                        class="brand-credit-author">mhs</span></span>
+            </div>
     </aside>
 
 

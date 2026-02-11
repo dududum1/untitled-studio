@@ -159,6 +159,10 @@ const Shaders = {
         // Wasm Core Enhancements
         uniform sampler2D u_wasmGrainTexture;
         uniform bool u_useWasmGrain;
+
+        // Phase VIII: Thermal Genesis (Spectral Imaging)
+        uniform int u_thermalMode;        // 0=Off, 1=Ironbow, 2=Rainbow, 3=Aerochrome
+        uniform float u_thermalIntensity; // 0.0 - 1.0 (Blend Strength)
         
         in vec2 v_texCoord;
         out vec4 fragColor;
@@ -793,12 +797,75 @@ const Shaders = {
         // Noise Color: Tint the film grain with a hue
         vec3 applyNoiseColorTint(vec3 grainColor, float hue) {
             if (hue <= 0.0) return grainColor;
-            
             // Convert hue (0-360) to RGB tint
             float h = hue / 360.0;
             vec3 tint = hsl2rgb(vec3(h, 0.6, 0.5));
             
-            return grainColor * tint;
+            return grainColor * tint * 2.0; // Boost tint slightly
+        }
+
+        // Thermal False Color Engine
+        vec3 applySpectralImaging(vec3 c, int mode, float intensity) {
+            if (mode == 0 || intensity <= 0.0) return c;
+            
+            float lum = luminance(c);
+            vec3 result = c;
+            
+            if (mode == 1) { // Ironbow (Thermal)
+                // Black -> Purple -> Blue -> Cyan -> Green -> Yellow -> Orange -> Red -> White
+                // This is a simplified cosine-based palette approximation for speed
+                
+                vec3 col = vec3(0.0);
+                
+                // Manual Gradient Map
+                // 0.0 - 0.15: Black -> Purple
+                // 0.15 - 0.35: Purple -> Blue
+                // 0.35 - 0.55: Blue -> Green
+                // 0.55 - 0.75: Green -> Yellow/Orange
+                // 0.75 - 1.0: Orange -> Red -> White
+                
+                if (lum < 0.15)       col = mix(vec3(0.0, 0.0, 0.0), vec3(0.2, 0.0, 0.5), lum / 0.15);
+                else if (lum < 0.35)  col = mix(vec3(0.2, 0.0, 0.5), vec3(0.0, 0.0, 1.0), (lum - 0.15) / 0.2);
+                else if (lum < 0.55)  col = mix(vec3(0.0, 0.0, 1.0), vec3(0.0, 1.0, 0.0), (lum - 0.35) / 0.2);
+                else if (lum < 0.75)  col = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 1.0, 0.0), (lum - 0.55) / 0.2);
+                else if (lum < 0.9)   col = mix(vec3(1.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), (lum - 0.75) / 0.15);
+                else                  col = mix(vec3(1.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0), (lum - 0.9) / 0.1);
+                
+                result = col;
+                
+            } else if (mode == 2) { // Rainbow (Scientific)
+                // HSL full spectrum mapping
+                // Blue (Cold) -> Red (Hot)
+                // Hue: 240 deg (0.66) -> 0 deg (0.0)
+                float h = 0.666 * (1.0 - clamp(lum, 0.0, 1.0));
+                result = hsl2rgb(vec3(h, 1.0, 0.5));
+                
+            } else if (mode == 3) { // Aerochrome (Infrared Emulation)
+                // The quintessential IR look: Green foliage becomes Red/Pink
+                // Standard digital approximation:
+                // R_out = G_in (Green channel mapped to Red)
+                // G_out = R_in (Red channel mapped to Green)
+                // B_out = B_in * 0.1 (Blue suppressed)
+                
+                vec3 ir = vec3(0.0);
+                
+                // Stronger version
+                // R = G; G = R; B = 0.1;
+                // But vegetation (G) needs to be magenta-ish for Aerochrome III
+                
+                // Mapping Green to Red/Magenta
+                ir.r = c.g * 1.2; 
+                ir.g = c.r * 0.9;
+                ir.b = c.b * 0.2;
+                
+                // Mix in limits
+                result = ir;
+                
+                // Add contrast for that film look
+                result = applyContrast(result, 20.0);
+            }
+            
+            return mix(c, result, intensity);
         }
         
         // AI Denoise: Bilateral filter approximation
@@ -1120,7 +1187,6 @@ const Shaders = {
             }
 
             // === NEW FX (Phase 7) ===
-            color = applyPosterize(color, u_posterize);
             // Diffusion now handled in post-pass for higher quality (Bloom 2.0)
 
             // === ASCII ===
@@ -1204,6 +1270,12 @@ const Shaders = {
             // Soft-clip highlights instead of hard clamp
             color = logShoulder(color);
             
+            // Phase 7: Distortion
+            color.rgb = applyPosterize(color.rgb, u_posterize);
+            
+            // Phase 8: Spectral Imaging (Thermal/Aerochrome)
+            color.rgb = applySpectralImaging(color.rgb, u_thermalMode, u_thermalIntensity);
+
             // Final safety clamp
             color = clamp(color, 0.0, 1.0);
 

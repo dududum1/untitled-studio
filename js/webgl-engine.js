@@ -114,6 +114,10 @@ class WebGLEngine {
             selColorLum: 0,
             selColorFeather: 0.5,
 
+            // Phase VIII: Thermal Genesis
+            thermalMode: 0,
+            thermalIntensity: 0,
+
             // Tilt-Shift
             tiltShiftBlur: 0,       // 0-50
             tiltShiftPos: 0.5,      // 0-1
@@ -365,7 +369,8 @@ class WebGLEngine {
             'u_contentRotation', 'u_contentFlipX', 'u_contentFlipY',
             'u_flipX', 'u_flipY',
             'u_selColorHue', 'u_selColorRange', 'u_selColorSat', 'u_selColorLum', 'u_selColorFeather',
-            'u_tiltShiftBlur', 'u_tiltShiftPos', 'u_tiltShiftFocusWidth', 'u_tiltShiftGradient'
+            'u_tiltShiftBlur', 'u_tiltShiftPos', 'u_tiltShiftFocusWidth', 'u_tiltShiftGradient',
+            'u_thermalMode', 'u_thermalIntensity'
         ];
 
         uniformNames.forEach(name => {
@@ -1234,6 +1239,10 @@ class WebGLEngine {
         gl.uniform1f(this.uniforms.u_tiltShiftPos, v(adj.tiltShiftPos, 0.5));
         gl.uniform1f(this.uniforms.u_tiltShiftFocusWidth, v(adj.tiltShiftFocusWidth, 0.4));
         gl.uniform1f(this.uniforms.u_tiltShiftGradient, v(adj.tiltShiftGradient, 0.2));
+
+        // Phase VIII
+        gl.uniform1i(this.uniforms.u_thermalMode, v(adj.thermalMode));
+        gl.uniform1f(this.uniforms.u_thermalIntensity, v(adj.thermalIntensity));
     }
 
     /**
