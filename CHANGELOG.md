@@ -2,6 +2,14 @@
 
 All notable changes to Untitled Studio will be documented in this file.
 
+## [2.8.0] - 2026-02-12
+
+### 🐛 Critical Fixes
+- **FX Panel Structure**: Fixed a severe layout bug where Digital, Texture, Atmosphere, Creative, and Frame panels were nested inside the Grain panel, making them invisible.
+- **Gallery Mode**: Restored the functionality of the gallery frame toggle and border customization.
+- **UI Logic**: Centralized event listener initialization to prevent duplicates.
+
+
 ## [2.7.0] - 2026-02-05
 
 ### 📟 Phase VII: The Terminal Update

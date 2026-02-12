@@ -167,54 +167,103 @@ input[type="range"] {
     border-color: var(--glass-border);
 }
 
-/* ========== TAB NAVIGATION ========== */
-.tab-btn {
+/* ========== ACCORDION UI (App V2) ========== */
+/* Container */
+.accordion-container {
     display: flex;
     flex-direction: column;
+    width: 100%;
+}
+
+/* Item */
+.accordion-item {
+    border-bottom: 1px solid var(--glass-border);
+    transition: background-color 0.2s ease;
+}
+
+.accordion-item.active {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Header */
+.accordion-header {
+    width: 100%;
+    display: flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--text-muted);
+    justify-content: space-between;
+    padding: 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
     transition: all 0.2s ease;
 }
 
-.tab-btn:hover {
-    color: var(--text-secondary);
+.accordion-header:hover {
     background: rgba(255, 255, 255, 0.05);
 }
 
-.tab-btn.active {
+/* Header Label */
+.accordion-header .label {
+    font-family: 'Courier New', Courier, monospace;
+    /* Brutalist Monospace */
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+}
+
+.accordion-header:hover .label {
+    color: var(--text-primary);
+}
+
+.accordion-item.active .accordion-header .label {
     color: var(--hot-pink);
-    background: rgba(237, 39, 136, 0.1);
+    text-shadow: 0 0 8px var(--hot-pink-glow);
 }
 
-.tab-btn.active svg {
-    filter: drop-shadow(0 0 8px var(--hot-pink-glow));
+/* Indicator */
+.accordion-header .indicator {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    /* Match label size or slightly different */
+    font-weight: 700;
+    color: var(--hot-pink);
+    /* Always pink for Brutalsism or match label? Plan said Hot Pink */
+    margin-right: 0.5rem;
+    /* Add spacing */
+    min-width: 3ch;
+    /* Prevent jitter */
+    display: inline-block;
 }
 
-/* ========== PANEL VISIBILITY ========== */
-.panel {
+/* Content Transition */
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    /* Smooth mechanical feel */
+    will-change: max-height;
+}
+
+.accordion-item.active .accordion-content {
+    /* Max-height will be set via JS for precise transition, 
+       but we set a fallback here or rely on JS */
+}
+
+/* Panel Override within Accordion */
+.accordion-content .panel {
+    display: block !important;
+    /* Always block inside the open accordion */
+    animation: none;
+    /* efficient, no fade needed */
+}
+
+/* Hide panels by default if outside accordion (fallback) */
+.panel.hidden {
     display: none;
-}
-
-.panel.active {
-    display: block;
-    animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .panel.hidden {

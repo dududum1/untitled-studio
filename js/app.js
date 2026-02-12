@@ -434,6 +434,9 @@ class UntitledStudio {
             this.initHistory();
             this.initAtmosphereControls();
             this.initDigitalControls();
+            this.initFrameControls();
+            this.initGalleryFrame();
+            this.initSplitViewControls();
             this.initCropTool();
             this.initGestures();
             this.initScrubbing(); // Mobile Extra 1
@@ -757,9 +760,9 @@ class UntitledStudio {
             redoBtn: document.getElementById('redo-btn'),
 
 
-            // Tabs
-            tabBtns: document.querySelectorAll('.tab-btn'),
-            panels: document.querySelectorAll('.panel'),
+            // Accordion (Replaces Tabs)
+            accordionItems: document.querySelectorAll('.accordion-item'),
+            accordionHeaders: document.querySelectorAll('.accordion-header'),
 
             // Panels
             tonePanel: document.getElementById('tone-panel'),
@@ -1247,9 +1250,7 @@ class UntitledStudio {
     }
 
     setupEventListeners() {
-        this.initCropTool();
-        this.initFrameControls();
-        this.initSplitViewControls();
+        console.log('[App] Setting up event listeners...');
         this.initUniversalSliders(); // Fix Missing FX
         const on = (el, event, handler) => {
             if (!el) return;
@@ -1261,6 +1262,16 @@ class UntitledStudio {
                 el.addEventListener(event, handler);
             }
         };
+
+        // FX Sub-tab navigation
+        if (this.elements.fxSubTabBtns) {
+            this.elements.fxSubTabBtns.forEach(btn => {
+                on(btn, 'click', (e) => {
+                    e.preventDefault();
+                    this.switchFxSubTab(btn.dataset.subtab);
+                });
+            });
+        }
 
         // Secret Muse Mode Trigger
         const logo = document.getElementById('studio-logo');
@@ -1292,9 +1303,16 @@ class UntitledStudio {
         on(this.elements.fileInput, 'change', (e) => this.handleFileSelect(e));
 
         // LUT Import
-        on(this.elements.importLutBtn, 'click', () => this.elements.lutInput.click());
-        on(this.elements.lutInput, 'change', (e) => this.handleLUTUpload(e));
-        on(this.elements.removeLutBtn, 'click', () => this.removeLUT());
+        // (Assuming these elements exist in this.elements)
+        if (this.elements.importLutBtn) {
+            on(this.elements.importLutBtn, 'click', () => this.elements.lutInput?.click());
+        }
+        if (this.elements.lutInput) {
+            on(this.elements.lutInput, 'change', (e) => this.handleLUTUpload(e));
+        }
+        if (this.elements.removeLutBtn) {
+            on(this.elements.removeLutBtn, 'click', () => this.removeLUT());
+        }
 
         // Drag and drop
         if (this.elements.canvasContainer) {
@@ -1313,9 +1331,9 @@ class UntitledStudio {
             });
         }
 
-        // Before/After toggle (hold to show original)
-        if (this.elements.beforeBtn) {
-            const btn = this.elements.beforeBtn;
+        // Before/After toggle
+        if (this.elements.beforeBtn || document.getElementById('before-btn')) {
+            const btn = this.elements.beforeBtn || document.getElementById('before-btn');
             on(btn, 'mousedown', () => this.showOriginal(true));
             on(btn, 'mouseup', () => this.showOriginal(false));
             on(btn, 'mouseleave', () => this.showOriginal(false));
@@ -1328,17 +1346,16 @@ class UntitledStudio {
         on(this.elements.undoBtn, 'click', () => this.undo());
         on(this.elements.redoBtn, 'click', () => this.redo());
 
-        // Tab navigation
-        this.elements.tabBtns.forEach(btn => {
-            on(btn, 'click', () => this.switchTab(btn.dataset.tab));
+        // Accordion Navigation
+        this.elements.accordionHeaders.forEach(header => {
+            on(header, 'click', (e) => {
+                const section = header.parentElement.dataset.section;
+                this.toggleSection(section);
+            });
         });
 
-        // FX Sub-tab navigation
-        if (this.elements.fxSubTabBtns) {
-            this.elements.fxSubTabBtns.forEach(btn => {
-                on(btn, 'click', () => this.switchFxSubTab(btn.dataset.subtab));
-            });
-        }
+        // Initialize Default Section (Tone)
+        setTimeout(() => this.toggleSection('tone'), 100);
 
         // Slider inputs (all studio-sliders)
         document.querySelectorAll('.studio-slider').forEach(slider => {
@@ -1361,7 +1378,7 @@ class UntitledStudio {
             if (this.toneCurve) this.toneCurve.reset();
         });
 
-        // Curve Point Controls (Mobile Refactor)
+        // Curve Point Controls
         on(document.getElementById('curve-add-point-btn'), 'click', () => {
             if (this.toneCurve) this.toneCurve.addPoint();
         });
@@ -1383,8 +1400,8 @@ class UntitledStudio {
         // Aspect ratio buttons
         this.elements.aspectBtns.forEach(btn => {
             on(btn, 'click', () => {
-                this.elements.aspectBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+                this.elements.aspectBtns.forEach(b => b.classList.remove('active', 'bg-moonstone/20', 'text-moonstone'));
+                btn.classList.add('active', 'bg-moonstone/20', 'text-moonstone');
                 if (this.cropTool) {
                     this.cropTool.setAspectRatio(btn.dataset.aspect);
                 }
@@ -1429,8 +1446,7 @@ class UntitledStudio {
             on(this.elements.toggleUIBtn, 'click', () => this.toggleUI());
         }
 
-        // Initialize Light Leak Controls
-        this.initLightLeakControls();
+
 
         if (this.elements.magicWandBtn) {
             console.log('[App] Attaching Magic Wand Listener');
@@ -1470,6 +1486,8 @@ class UntitledStudio {
         on(this.elements.exportSettingsCancel, 'click', () => this.hideExportSettings());
         on(this.elements.exportSettingsSave, 'click', () => this.saveExportSettings());
 
+
+
         if (this.elements.exportResolution) {
             on(this.elements.exportResolution, 'change', (e) => {
                 if (this.elements.customResolutionGroup) {
@@ -1508,16 +1526,6 @@ class UntitledStudio {
         on(this.elements.importTextureBtn, 'click', () => this.elements.textureInput?.click());
         on(this.elements.removeTextureBtn, 'click', () => this.handleRemoveTexture());
         on(this.elements.textureInput, 'change', (e) => this.handleTextureImport(e));
-
-        // Gallery Frame Toggle
-        const galleryToggle = document.getElementById('gallery-frame-toggle');
-        if (galleryToggle) {
-            on(galleryToggle, 'change', (e) => {
-                if (this.engine) this.engine.setAdjustment('galleryFrame', e.target.checked);
-                const options = document.getElementById('gallery-options');
-                if (options) options.classList.toggle('hidden', !e.target.checked);
-            });
-        }
 
         // Shuffle Defects
         const shuffleBtn = document.getElementById('randomize-seed-btn');
@@ -2109,6 +2117,7 @@ class UntitledStudio {
         if (toggle) {
             toggle.addEventListener('change', (e) => {
                 this.isGalleryMode = e.target.checked;
+                if (this.engine) this.engine.setAdjustment('galleryFrame', this.isGalleryMode);
                 preview.classList.toggle('hidden', !this.isGalleryMode);
                 options.classList.toggle('hidden', !this.isGalleryMode);
 
@@ -2409,7 +2418,9 @@ class UntitledStudio {
     }
 
     switchFxSubTab(subTabId) {
-        // Toggle Buttons
+        console.log(`[App] Switching FX Sub-tab to: ${subTabId}`);
+
+        // 1. Toggle Buttons UI
         if (this.elements.fxSubTabBtns) {
             this.elements.fxSubTabBtns.forEach(btn => {
                 const isActive = btn.dataset.subtab === subTabId;
@@ -2417,48 +2428,102 @@ class UntitledStudio {
                 btn.classList.toggle('bg-white/10', isActive);
                 btn.classList.toggle('text-white', isActive);
                 btn.classList.toggle('text-gray-400', !isActive);
+                // Also update ARIA or state if needed
+                btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
             });
         }
 
-        // Toggle Panels
+        // 2. Toggle Panels Visibility
+        let activePanel = null;
         if (this.elements.fxSubPanels) {
             this.elements.fxSubPanels.forEach(panel => {
+                // IDs match "fx-" + subTabId (e.g., fx-texture, fx-creative, etc.)
                 if (panel.id === `fx-${subTabId}`) {
                     panel.classList.remove('hidden');
+                    activePanel = panel;
                 } else {
                     panel.classList.add('hidden');
                 }
             });
         }
+
+        // 3. Recalculate Accordion Height (Crucial for visibility)
+        if (activePanel) {
+            const accordionContent = activePanel.closest('.accordion-content');
+            if (accordionContent) {
+                // Even if not currently active, we want the next open to have correct scrollHeight
+                // But specifically if the parent .accordion-item is active, we must update max-height
+                if (accordionContent.parentElement.classList.contains('active')) {
+                    // Small delay ensures Browser layout calc is complete after removing 'hidden'
+                    setTimeout(() => {
+                        const newHeight = accordionContent.scrollHeight;
+                        accordionContent.style.maxHeight = newHeight + "px";
+                        console.log(`[App] FX Accordion Height updated to: ${newHeight}px`);
+                    }, 50);
+                }
+            }
+        }
     }
 
-    switchTab(tabName) {
-        this.elements.tabBtns.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.tab === tabName);
-        });
+    toggleSection(sectionName) {
+        const targetItem = document.querySelector(`.accordion-item[data-section="${sectionName}"]`);
+        if (!targetItem) return;
 
-        this.elements.panels.forEach(panel => {
-            const isActive = panel.id === `${tabName}-panel`;
-            panel.classList.toggle('active', isActive);
-            panel.classList.toggle('hidden', !isActive);
-        });
+        const isAlreadyActive = targetItem.classList.contains('active');
 
-        // Show/hide crop overlay
-        if (tabName === 'crop' && this.cropTool && this.activeIndex >= 0 && this.engine && this.engine.canvas) {
-            this.cropTool.show(this.engine.canvas.width, this.engine.canvas.height);
-        } else if (this.cropTool) {
-            this.cropTool.hide();
-        }
+        // 1. Close ALL sections first (Exclusive behavior)
+        document.querySelectorAll('.accordion-item').forEach(item => {
+            item.classList.remove('active');
+            const content = item.querySelector('.accordion-content');
+            if (content) content.style.maxHeight = null;
 
-        // FX Tab Specific: Default to Optics if no active subtab or just as a reset
-        if (tabName === 'effects') {
-            // Only if none active? Or always default to first? Let's default if none active.
-            // But wait, user might have left it on another tab. We should probably keep state or default to optics if first load.
-            // Checking if any subtab btn has active class
-            const activeBtn = document.querySelector('.fx-subtab-btn.active');
-            if (!activeBtn) {
-                this.switchFxSubTab('optics');
+            // Reset Indicator to [ + ]
+            const indicator = item.querySelector('.indicator');
+            if (indicator) {
+                indicator.textContent = '[ + ]';
+                indicator.style.color = ''; // Reset color
+                indicator.style.textShadow = ''; // Reset glow
             }
+        });
+
+        // 2. Open Target if not already active
+        if (!isAlreadyActive) {
+            targetItem.classList.add('active');
+            const content = targetItem.querySelector('.accordion-content');
+            if (content) {
+                content.style.maxHeight = content.scrollHeight + "px";
+            }
+
+            // Set Indicator to [ — ]
+            const indicator = targetItem.querySelector('.indicator');
+            if (indicator) {
+                indicator.textContent = '[ — ]';
+                indicator.style.color = 'var(--hot-pink)';
+                indicator.style.textShadow = '0 0 8px var(--hot-pink-glow)';
+            }
+
+            // Handle Transform Tool (formerly Crop)
+            if (sectionName === 'transform') {
+                if (this.cropTool && this.engine && this.engine.canvas && this.images.length > 0) {
+                    setTimeout(() => {
+                        this.cropTool.show(this.engine.canvas.width, this.engine.canvas.height);
+                    }, 300);
+                }
+            } else {
+                if (this.cropTool) this.cropTool.hide();
+            }
+
+            // Handle FX (ensure correct subpanel and height)
+            if (sectionName === 'fx') {
+                const activeBtn = document.querySelector('.fx-subtab-btn.active');
+                if (activeBtn) {
+                    this.switchFxSubTab(activeBtn.dataset.subtab);
+                } else {
+                    this.switchFxSubTab('optics');
+                }
+            }
+        } else {
+            if (this.cropTool) this.cropTool.hide();
         }
     }
 
@@ -2473,6 +2538,8 @@ class UntitledStudio {
             // Special formatting for floats
             if (['tiltShiftPos', 'tiltShiftFocusWidth', 'tiltShiftGradient', 'selColorFeather'].includes(name)) {
                 valueDisplay.textContent = value.toFixed(2);
+            } else if (name === 'borderWidth') {
+                valueDisplay.textContent = Math.round((value / 25) * 100) + '%';
             } else {
                 valueDisplay.textContent = name === 'exposure' ? value.toFixed(2) :
                     (name === 'grainSize' || name === 'grainGlobal') ? value.toFixed(1) : value;
