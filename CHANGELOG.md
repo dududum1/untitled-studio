@@ -2,6 +2,18 @@
 
 All notable changes to Untitled Studio will be documented in this file.
 
+## [2.9.0] - 2026-02-13
+
+### ⌨️ The Command Bar Update
+- **Dedicated Footer**: Consolidated non-creative controls (Undo/Redo, Reset, Settings, Export) into a fixed, glassmorphic command bar at the bottom of the viewport.
+- **Improved Accessibility**: Critical actions are now permanently visible and separated from creative tools.
+- **Refactored Export Flow**: Exporting is now a clear 2-step process (Export Button -> Settings Modal -> Action), reducing accidental exports.
+
+### 🔭 Floating Scopes HUD
+- **Canvas Maximization**: Moved Histogram and Vectorscope out of the sidebar and into a floating, toggleable Heads-Up Display (HUD).
+- **Pro-Camera Aesthetic**: The new HUD floats over the canvas, maximizing the working area for image editing.
+- **Toggleable**: Added a generic `[ M ]` toggle button to show/hide the scopes instantly.
+
 ## [2.8.0] - 2026-02-12
 
 ### 🐛 Critical Fixes

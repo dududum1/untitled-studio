@@ -294,24 +294,6 @@
                     </svg>
                 </button>
 
-                <!-- Undo/Redo -->
-                <button id="undo-btn"
-                    class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all disabled:opacity-30"
-                    title="Undo (Ctrl+Z)" disabled>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                    </svg>
-                </button>
-                <button id="redo-btn"
-                    class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all disabled:opacity-30"
-                    title="Redo (Ctrl+Shift+Z)" disabled>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" />
-                    </svg>
-                </button>
-
                 <!-- Sync All -->
                 <button id="sync-all-btn"
                     class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
@@ -349,17 +331,25 @@
                 <!-- Sync/Export moved to bottom bar -->
             </div>
 
-            <!-- Split View Toggle (Centered in Header) -->
-            <div
-                class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 bg-glass/80 backdrop-blur-md px-4 py-2 rounded-full border border-glass-border z-[60]">
-                <label class="text-xs font-bold text-white/80">SPLIT</label>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="split-view-toggle" class="sr-only peer">
-                    <div
-                        class="w-9 h-5 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-hot-pink rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-hot-pink">
-                    </div>
-                </label>
-            </div>
+            <!-- Toggle Scopes -->
+            <button id="toggle-scopes-btn"
+                class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
+                title="Toggle Scopes (M)">
+                <span class="font-mono font-bold text-xs">[M]</span>
+            </button>
+        </div>
+
+        <!-- Split View Toggle (Centered in Header) -->
+        <div
+            class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 bg-glass/80 backdrop-blur-md px-4 py-2 rounded-full border border-glass-border z-[60]">
+            <label class="text-xs font-bold text-white/80">SPLIT</label>
+            <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="split-view-toggle" class="sr-only peer">
+                <div
+                    class="w-9 h-5 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-hot-pink rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-hot-pink">
+                </div>
+            </label>
+        </div>
         </div>
     </header>
 
@@ -398,23 +388,40 @@
             </div>
 
             <!-- Histogram Overlay -->
-            <div id="histogram-container"
-                class="absolute top-4 right-4 w-48 rounded-lg overflow-hidden bg-midnight/80 border border-glass-border hidden z-50">
-                <canvas id="histogram-canvas" width="192" height="112"></canvas>
-                <div class="flex items-center justify-between px-2 py-1.5 border-t border-glass-border">
-                    <button id="auto-enhance-btn"
-                        class="flex items-center gap-1 px-2 py-1 rounded bg-hot-pink/20 hover:bg-hot-pink/40 text-hot-pink text-[10px] font-bold transition-all"
-                        title="Auto-Enhance (Magic Wand)">
-                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
-                        </svg>
-                        Auto
-                    </button>
-                    <label class="flex items-center gap-1 text-[10px] text-gray-400 cursor-pointer">
-                        <input type="checkbox" id="clipping-toggle" class="accent-hot-pink w-3 h-3">
-                        Clip
-                    </label>
+            <!-- Scopes HUD (Floating) -->
+            <div id="scopes-hud"
+                class="absolute top-20 right-4 flex flex-col gap-2 z-50 pointer-events-none transition-opacity duration-300 hidden">
+                <!-- Histogram -->
+                <div id="histogram-container"
+                    class="w-48 rounded-lg overflow-hidden bg-midnight/50 backdrop-blur-sm border border-glass-border pointer-events-auto">
+                    <canvas id="histogram-canvas" width="192" height="112"></canvas>
+                    <div class="flex items-center justify-between px-2 py-1.5 border-t border-glass-border">
+                        <button id="auto-enhance-btn"
+                            class="flex items-center gap-1 px-2 py-1 rounded bg-hot-pink/20 hover:bg-hot-pink/40 text-hot-pink text-[10px] font-bold transition-all"
+                            title="Auto-Enhance (Magic Wand)">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
+                            </svg>
+                            Auto
+                        </button>
+                        <label class="flex items-center gap-1 text-[10px] text-gray-400 cursor-pointer">
+                            <input type="checkbox" id="clipping-toggle" class="accent-hot-pink w-3 h-3">
+                            Clip
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Vectorscope -->
+                <div id="vectorscope-container"
+                    class="w-48 h-48 rounded-lg overflow-hidden bg-midnight/50 backdrop-blur-sm border border-glass-border pointer-events-auto flex items-center justify-center relative">
+                    <canvas id="vectorscope-canvas" width="192" height="192"></canvas>
+                    <!-- Grid Overlay for Vectorscope -->
+                    <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-30" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="0.5" />
+                        <line x1="50" y1="5" x2="50" y2="95" stroke="white" stroke-width="0.5" />
+                        <line x1="5" y1="50" x2="95" y2="50" stroke="white" stroke-width="0.5" />
+                    </svg>
                 </div>
             </div>
 
@@ -515,21 +522,9 @@
         </div>
     </aside>
 
-    <!-- ========== BOTTOM ACTION BAR (Mobile Thumb Zone) ========== -->
-    <footer id="bottom-action-bar"
-        class="fixed bottom-0 left-0 right-0 z-[60] bg-glass backdrop-blur-xl border-t border-glass-border p-4 pb-[env(safe-area-inset-bottom)] flex items-center justify-center lg:hidden transition-transform duration-300">
-
-        <!-- Export (Primary) -->
-        <button id="batch-export-btn"
-            class="w-full max-w-md py-4 rounded-xl bg-hot-pink hover:bg-hot-pink/90 text-white font-bold text-lg shadow-lg shadow-hot-pink/20 transition-all active:scale-95 disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2">
-            <span>Export</span>
-            <span id="batch-count" class="text-xs bg-white/20 px-2 py-0.5 rounded-full font-medium">0</span>
-        </button>
-    </footer>
-
     <!-- ========== STUDIO DOCK (Bottom / Sidebar on Desktop) ========== -->
     <aside id="studio-dock"
-        class="fixed bottom-[88px] left-0 right-0 lg:top-20 lg:left-auto lg:w-[40vw] lg:h-auto lg:bottom-0 z-50 bg-glass backdrop-blur-glass border-t lg:border-t-0 lg:border-l border-glass-border flex flex-col transition-all duration-500 pb-[env(safe-area-inset-bottom)] lg:pb-0">
+        class="fixed bottom-[48px] left-0 right-0 lg:top-20 lg:left-auto lg:w-[40vw] lg:h-auto lg:bottom-[48px] z-50 bg-glass backdrop-blur-glass border-t lg:border-t-0 lg:border-l border-glass-border flex flex-col transition-all duration-500 pb-[env(safe-area-inset-bottom)] lg:pb-0">
 
         <!-- Accordion Container -->
         <div id="accordion-container" class="flex-1 overflow-y-auto scrollbar-hide pb-safe">
@@ -2015,133 +2010,79 @@
         </div>
         </div> <!-- End of Accordion Container -->
 
-        <!-- Export Bar -->
-        <div class="flex items-center justify-between px-4 pt-3 pb-8 border-t border-glass-border bg-midnight/50">
-            <div class="flex items-center gap-2">
-                <button id="reset-btn"
-                    class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all text-sm font-medium">
-                    Reset All
-                </button>
-                <button id="toggle-histogram-btn"
-                    class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
-                    title="Toggle Histogram">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                </button>
-                <button id="toggle-history-btn"
-                    class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
-                    title="Toggle History">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </button>
-            </div>
-            <div class="flex items-center gap-3">
-                <!-- Social Media Quick Export -->
-                <div class="relative">
-                    <button id="social-export-btn"
-                        class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
-                        title="Quick Export for Social Media">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </button>
-                    <div id="social-export-menu"
-                        class="absolute bottom-full right-0 mb-2 bg-glass backdrop-blur-glass border border-glass-border rounded-xl p-2 min-w-48 hidden z-50">
-                        <div class="text-xs text-gray-500 uppercase tracking-wider px-2 py-1 mb-1">
-                            Quick
-                            Export
-                        </div>
-                        <button
-                            class="social-export-option w-full text-left px-3 py-2 rounded-lg hover:bg-glass-border text-sm flex items-center gap-3"
-                            data-size="instagram-square">
-                            <span
-                                class="w-6 h-6 rounded bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold">IG</span>
-                            <span>Instagram Square<span class="text-gray-500 ml-2">1080×1080</span></span>
-                        </button>
-                        <button
-                            class="social-export-option w-full text-left px-3 py-2 rounded-lg hover:bg-glass-border text-sm flex items-center gap-3"
-                            data-size="instagram-story">
-                            <span
-                                class="w-6 h-6 rounded bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold">IG</span>
-                            <span>Instagram Story<span class="text-gray-500 ml-2">1080×1920</span></span>
-                        </button>
-                        <button
-                            class="social-export-option w-full text-left px-3 py-2 rounded-lg hover:bg-glass-border text-sm flex items-center gap-3"
-                            data-size="twitter">
-                            <span
-                                class="w-6 h-6 rounded bg-blue-500 flex items-center justify-center text-xs font-bold">X</span>
-                            <span>Twitter/X<span class="text-gray-500 ml-2">1200×675</span></span>
-                        </button>
-                        <button
-                            class="social-export-option w-full text-left px-3 py-2 rounded-lg hover:bg-glass-border text-sm flex items-center gap-3"
-                            data-size="facebook">
-                            <span
-                                class="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-xs font-bold">FB</span>
-                            <span>Facebook<span class="text-gray-500 ml-2">1200×630</span></span>
-                        </button>
-                    </div>
+        </div>
+        </div>
+        </div> <!-- End of Accordion Container -->
+    </aside>
 
+    <!-- ========== COMMAND BAR (Fixed Footer) ========== -->
+    <footer id="command-bar"
+        class="fixed bottom-0 left-0 right-0 h-12 bg-[#141414]/95 backdrop-blur border-t border-white/10 z-[100] flex items-center justify-between px-4 pb-[env(safe-area-inset-bottom)]">
 
-                </div>
-
-                <button id="export-settings-btn"
-                    class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-all"
-                    title="Export Settings">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                </button>
-                <select id="export-format"
-                    class="px-3 py-2 rounded-lg bg-glass border border-glass-border text-sm focus:border-moonstone focus:outline-none">
-                    <option value="jpeg">JPEG</option>
-                    <option value="png">PNG</option>
-                </select>
-
-                <!-- Magic Wand (Auto) Button -->
-                <button id="magic-wand-btn"
-                    class="p-2 rounded-lg text-gray-400 hover:text-yellow-400 hover:bg-glass transition-all"
-                    title="Auto Enhance">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                    </svg>
-                </button>
-
-                <!-- Share Button -->
-                <button id="share-btn"
-                    class="p-2 rounded-lg text-gray-400 hover:text-moonstone hover:bg-glass transition-all disabled:opacity-50"
-                    title="Share" disabled>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                </button>
-
-                <button id="export-btn"
-                    class="export-button px-6 py-2 rounded-xl bg-gradient-to-r from-hot-pink to-pink-600 text-white font-semibold hover:shadow-lg hover:shadow-hot-pink/30 transition-all duration-300 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Export
-                </button>
-            </div>
+        <!-- Left: Undo/Redo & History -->
+        <div class="flex items-center gap-2">
+            <button id="undo-btn"
+                class="p-2 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                title="Undo (Ctrl+Z)" disabled>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <button id="redo-btn"
+                class="p-2 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                title="Redo (Ctrl+Shift+Z)" disabled>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+            <div class="w-px h-6 bg-white/10 mx-2"></div>
+            <button id="toggle-history-btn"
+                class="p-2 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors hidden sm:block"
+                title="View History List">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </button>
         </div>
 
-        <!-- Brand Credit Footer -->
-        <div class="brand-credit">
-            <span class="brand-credit-text">Untitled Studio // developed by <span
-                    class="brand-credit-author">mhs</span></span>
+        <!-- Right: Actions -->
+        <div class="flex items-center gap-3">
+            <button id="reset-btn"
+                class="p-2 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                title="Reset All Adjustments">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </button>
+
+            <button id="settings-btn"
+                class="p-2 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                title="Export Settings">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            </button>
+
+            <div class="h-6 w-px bg-white/10 mx-1"></div>
+
+            <button id="main-export-btn"
+                class="px-4 py-1.5 rounded bg-hot-pink hover:bg-hot-pink/90 text-white text-sm font-bold tracking-wide transition-all shadow-[0_0_15px_rgba(237,39,136,0.2)] hover:shadow-[0_0_20px_rgba(237,39,136,0.4)] disabled:opacity-50 disabled:grayscale"
+                disabled>
+                EXPORT
+            </button>
         </div>
+    </footer>
+
+    <!-- Brand Credit Footer -->
+    <div class="brand-credit">
+        <span class="brand-credit-text">Untitled Studio // developed by <span
+                class="brand-credit-author">mhs</span></span>
+    </div>
     </aside>
 
 
@@ -2158,10 +2099,7 @@
 
             <!-- Overall Progress -->
             <div class="mb-4">
-                <div class="flex items-center justify-between text-sm mb-1">
-                    <span class="text-gray-400">Overall Progress</span>
-                    <span id="export-overall-text" class="text-hot-pink font-bold">0 / 0</span>
-                </div>
+                <!-- Progress Bar -->
                 <div
                     class="h-4 bg-midnight rounded-sm overflow-hidden film-progress-strip border-y border-white/5 relative">
                     <div id="export-overall-bar"
@@ -2267,6 +2205,16 @@
             <h3 class="text-lg font-bold text-white mb-6 font-mono">EXPORT SETTINGS</h3>
 
             <div class="space-y-6">
+                <!-- Format -->
+                <div class="space-y-3">
+                    <label class="block text-[10px] text-gray-500 uppercase tracking-[0.2em]">File Format</label>
+                    <select id="export-format"
+                        class="w-full bg-white/5 border border-glass-border rounded-xl px-4 py-3 text-white appearance-none focus:outline-none focus:border-hot-pink">
+                        <option value="jpeg">JPEG (Universal)</option>
+                        <option value="png">PNG (Lossless)</option>
+                    </select>
+                </div>
+
                 <!-- Resolution -->
                 <div class="space-y-3">
                     <label class="block text-[10px] text-gray-500 uppercase tracking-[0.2em]">Resolution</label>
@@ -2314,11 +2262,18 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3 mt-8">
+            <div class="flex items-center justify-between border-t border-glass-border pt-6 mt-8">
                 <button id="export-settings-cancel"
-                    class="py-3 px-4 rounded-xl bg-white/5 text-white text-sm font-semibold hover:bg-white/10 transition-all font-mono uppercase tracking-widest">Cancel</button>
-                <button id="export-settings-save"
-                    class="py-3 px-4 rounded-xl bg-deep-blue text-white text-sm font-semibold hover:bg-deep-blue/90 border border-blue-400/30 transition-all font-mono uppercase tracking-widest">Done</button>
+                    class="text-gray-400 hover:text-white transition-colors text-sm font-mono uppercase tracking-widest">Cancel</button>
+
+                <div class="flex gap-4">
+                    <button id="export-settings-save"
+                        class="hidden text-sm font-semibold text-white/50 hover:text-white">Close</button>
+                    <button id="modal-export-action-btn"
+                        class="px-6 py-2 rounded-lg bg-hot-pink hover:bg-hot-pink/90 text-white font-bold transition-all shadow-[0_0_15px_rgba(237,39,136,0.2)] hover:shadow-[0_0_20px_rgba(237,39,136,0.4)]">
+                        EXPORT IMAGE
+                    </button>
+                </div>
             </div>
         </div>
     </div>

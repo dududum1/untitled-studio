@@ -236,9 +236,49 @@ class UntitledStudio {
                 this.audio.playClick();
             }
         });
+
+        // Initialize Floating Scopes
+        this.scopesVisible = localStorage.getItem('scopesVisible') !== 'false'; // Default true
+        this.initScopes();
     }
 
 
+
+    initScopes() {
+        const hud = document.getElementById('scopes-hud');
+        const toggleBtn = document.getElementById('toggle-scopes-btn');
+
+        if (hud && toggleBtn) {
+            // Set initial state
+            hud.classList.toggle('hidden', !this.scopesVisible);
+            toggleBtn.classList.toggle('text-white', this.scopesVisible);
+            toggleBtn.classList.toggle('text-gray-400', !this.scopesVisible);
+
+            if (this.scopesVisible) {
+                toggleBtn.classList.add('bg-glass');
+            }
+
+            // Toggle Listener
+            toggleBtn.addEventListener('click', () => {
+                this.scopesVisible = !this.scopesVisible;
+                localStorage.setItem('scopesVisible', this.scopesVisible);
+
+                // Animate
+                if (this.scopesVisible) {
+                    hud.classList.remove('hidden');
+                    // Small delay to allow transition if we were using opacity
+                    toggleBtn.classList.remove('text-gray-400');
+                    toggleBtn.classList.add('text-white', 'bg-glass');
+                } else {
+                    hud.classList.add('hidden');
+                    toggleBtn.classList.add('text-gray-400');
+                    toggleBtn.classList.remove('text-white', 'bg-glass');
+                }
+
+                if (this.audio) this.audio.playClick();
+            });
+        }
+    }
 
     initPWA() {
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -754,7 +794,7 @@ class UntitledStudio {
             toggleUIBtn: document.getElementById('toggle-ui-btn'),
             magicWandBtn: document.getElementById('magic-wand-btn'),
             shareBtn: document.getElementById('share-btn'),
-            exportBtn: document.getElementById('export-btn'),
+            exportBtn: document.getElementById('main-export-btn'),
             beforeLabel: document.getElementById('before-label'),
             undoBtn: document.getElementById('undo-btn'),
             redoBtn: document.getElementById('redo-btn'),
@@ -829,10 +869,11 @@ class UntitledStudio {
             // Export
             resetBtn: document.getElementById('reset-btn'),
             exportFormat: document.getElementById('export-format'),
-            exportBtn: document.getElementById('export-btn'),
+            exportBtn: document.getElementById('main-export-btn'),
             exportModal: document.getElementById('export-modal'),
-            exportSettingsBtn: document.querySelectorAll('#export-settings-btn'),
+            exportSettingsBtn: document.getElementById('settings-btn'),
             exportSettingsModal: document.getElementById('export-settings-modal'),
+            modalExportActionBtn: document.getElementById('modal-export-action-btn'), // New export trigger inside modal
             exportResolution: document.getElementById('export-resolution'),
             exportCustomWidth: document.getElementById('export-custom-width'),
             customResolutionGroup: document.getElementById('custom-resolution-group'),
@@ -1481,7 +1522,7 @@ class UntitledStudio {
         on(this.elements.toggleHistoryBtn, 'click', () => this.toggleHistory());
         on(this.elements.closeHistoryBtn, 'click', () => this.toggleHistory(false));
 
-        // Export settings
+        // Export settings (Settings Button in Command Bar)
         on(this.elements.exportSettingsBtn, 'click', () => this.showExportSettings());
         on(this.elements.exportSettingsCancel, 'click', () => this.hideExportSettings());
         on(this.elements.exportSettingsSave, 'click', () => this.saveExportSettings());
@@ -1509,8 +1550,14 @@ class UntitledStudio {
         // Reset
         on(this.elements.resetBtn, 'click', () => this.resetAdjustments());
 
-        // Export
-        on(this.elements.exportBtn, 'click', () => this.exportImage());
+        // Export (Main Button in Command Bar opens Modal)
+        on(this.elements.exportBtn, 'click', () => this.showExportSettings());
+
+        // Actual Export Action (Inside Modal)
+        on(this.elements.modalExportActionBtn, 'click', () => {
+            this.saveExportSettings(); // Ensure settings are up to date
+            this.exportImage();
+        });
 
         // Preset Strength Slider
         if (this.elements.presetStrength) {
