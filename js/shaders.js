@@ -110,6 +110,10 @@ const Shaders = {
 
         // Vibe Procedural (Phase 6)
         uniform float u_lightLeak;
+        uniform vec3 u_lightLeakColor;
+        uniform float u_lightLeakIntensity;
+        uniform float u_lightLeakEntropy;
+        uniform float u_lightLeakScale;
         uniform float u_scratches;
         uniform float u_filmGateWeave;
         uniform bool u_galleryFrame;
@@ -692,35 +696,78 @@ const Shaders = {
             return c * vignette;
         }
 
+        // ============ SIMPLEX NOISE ============
+        // 2D Simplex Noise for Organic Textures
+        vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+
+        float snoise(vec2 v) {
+            const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                     -0.577350269189626, 0.024390243902439);
+            vec2 i  = floor(v + dot(v, C.yy) );
+            vec2 x0 = v -   i + dot(i, C.xx);
+            vec2 i1;
+            i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+            vec4 x12 = x0.xyxy + C.xxzz;
+            x12.xy -= i1;
+            i = mod(i, 289.0);
+            vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+            + i.x + vec3(0.0, i1.x, 1.0 ));
+            vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+            m = m*m ;
+            m = m*m ;
+            vec3 x = 2.0 * fract(p * C.www) - 1.0;
+            vec3 h = abs(x) - 0.5;
+            vec3 ox = floor(x + 0.5);
+            vec3 a0 = x - ox;
+            m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+            vec3 g;
+            g.x  = a0.x  * x0.x  + h.x  * x0.y;
+            g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+            return 130.0 * dot(m, g);
+        }
+
         // ============ PROCEDURAL VIBE ============
         
-        vec3 applyLightLeak(vec3 c, vec2 uv, float amount, float seed) {
+        vec3 applyLightLeak(vec3 c, vec2 uv, float amount, float entropy, float scale, vec3 leakColor) {
             if (amount <= 0.0) return c;
             
-            // Randomize position based on seed
-            float offset = sin(seed * 12.34) * 0.5;
-            float scale = 0.5 + sin(seed * 56.78) * 0.5;
+            // Normalize inputs
+            float t = entropy * 0.5; // Entropy acts as time/seed offset
+            float s = (scale / 50.0); // 1.0 is default
+            if (s < 0.1) s = 0.1;
+
+            // Domain Warping for liquid look
+            vec2 q = vec2(0.);
+            q.x = snoise(uv * s + t);
+            q.y = snoise(uv * s + t + 5.2);
             
-            // Create a blob shape using low-frequency sine waves
-            float leak = 0.0;
+            vec2 r = vec2(0.);
+            r.x = snoise(uv * s + 4.0 * q + vec2(1.7, 9.2) + 0.15 * t);
+            r.y = snoise(uv * s + 4.0 * q + vec2(8.3, 2.8) + 0.126 * t);
             
-            // Primary leak (Side burn)
-            float x = uv.x + offset;
-            float y = uv.y;
+            float f = snoise(uv * s + 4.0 * r);
             
-            float lx = sin(x * 2.0 + seed) * cos(y * 1.5 + seed * 0.5);
-            leak += smoothstep(0.6, 1.0, lx);
+            // Edge constraints (leaks mostly from sides)
+            // Invert distance from center to get "edge-ness"
+            vec2 centerDist = abs(uv - 0.5) * 2.0; // 0 at center, 1 at edge
+            // Bias towards horizontal edges (sides) usually looks more like film roll leaks
+            float edge = smoothstep(0.4, 1.0, max(centerDist.x, centerDist.y));
             
-            // Secondary leak
-            leak += smoothstep(0.8, 1.0, sin(uv.x * 3.0 - seed) * cos(uv.y * 3.0 + seed));
+            // Noise structure masked by edge
+            // We want the leak to "seep" in.
+            float leak = smoothstep(0.2, 0.8, f * edge);
             
-            // Color Mapping (Warm Orange to Red)
-            vec3 leakColor = vec3(1.0, 0.5, 0.2); // Orange base
-            leakColor = mix(leakColor, vec3(1.0, 0.2, 0.1), sin(seed * 10.0) * 0.5 + 0.5); // Random shift to Red
+            // Extra "burn" spots
+            float burn = smoothstep(0.6, 0.9, f * centerDist.x);
             
-            // Blend: Screen/Add
-            float intensity = amount / 100.0;
-            return c + leakColor * leak * intensity;
+            // Composite leak
+            float totalLeak = clamp(leak + burn * 0.5, 0.0, 1.0);
+            
+            // Intensity
+            totalLeak *= (amount / 100.0);
+            
+            // Additive Blend (Screen/Plus)
+            return c + leakColor * totalLeak;
         }
         
         vec3 applyScratches(vec3 c, vec2 uv, float amount, float seed) {
@@ -1178,6 +1225,9 @@ const Shaders = {
             
             // === HSL MIXER ===
             color = applyHSLMixer(color);
+            
+            // === LIGHT LEAKS (Procedural) ===
+            color = applyLightLeak(color, uv, u_lightLeakIntensity, u_lightLeakEntropy, u_lightLeakScale, u_lightLeakColor);
 
             // === CUSTOM 3D LUT ===
             // Applied after color grading but before texture/grain

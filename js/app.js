@@ -1120,6 +1120,17 @@ class UntitledStudio {
         }
     }
 
+    initLightLeakControls() {
+        const colorPicker = document.getElementById('lightLeakColor');
+        if (colorPicker) {
+            colorPicker.addEventListener('input', (e) => {
+                const hex = e.target.value;
+                const rgb = this.hexToRgb(hex);
+                this.engine.setAdjustment('lightLeakColor', rgb);
+            });
+        }
+    }
+
     initDigitalControls() {
         const asciiMode = document.getElementById('asciiMode');
         const asciiColor = document.getElementById('asciiColor');
@@ -1418,6 +1429,9 @@ class UntitledStudio {
             on(this.elements.toggleUIBtn, 'click', () => this.toggleUI());
         }
 
+        // Initialize Light Leak Controls
+        this.initLightLeakControls();
+
         if (this.elements.magicWandBtn) {
             console.log('[App] Attaching Magic Wand Listener');
             on(this.elements.magicWandBtn, 'click', () => {
@@ -1612,7 +1626,7 @@ class UntitledStudio {
 
         // --- VIBE ---
         // Sliders
-        ['lightLeak', 'scratches'].forEach(id => {
+        ['lightLeak', 'scratches', 'lightLeakIntensity', 'lightLeakEntropy', 'lightLeakScale'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 on(el, 'input', (e) => {
@@ -3339,6 +3353,12 @@ class UntitledStudio {
         const glowColorEl = document.getElementById('glowColor');
         if (glowColorEl && adjustments.glowColor) {
             glowColorEl.value = this.rgbToHex(adjustments.glowColor);
+        }
+
+        // 8. Light Leak Color
+        const lightLeakColorEl = document.getElementById('lightLeakColor');
+        if (lightLeakColorEl && adjustments.lightLeakColor) {
+            lightLeakColorEl.value = this.rgbToHex(adjustments.lightLeakColor);
         }
     }
 

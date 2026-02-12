@@ -1165,6 +1165,41 @@
                                 </button>
                             </div>
 
+                            <!-- Procedural Light Leak (New) -->
+                            <div class="mb-4 border-t border-glass-border pt-4">
+                                 <label class="text-xs text-hot-pink font-bold mb-2 block uppercase tracking-wider flex justify-between items-center">
+                                    Light Leak (Beta)
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] text-gray-500 font-normal">Color</span>
+                                        <input type="color" id="lightLeakColor" value="#ff4500" class="w-4 h-4 rounded-full border-0 p-0 overflow-hidden cursor-pointer" title="Leak Color">
+                                    </div>
+                                </label>
+                                
+                                 <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label>Intensity</label>
+                                        <span class="slider-value" data-for="lightLeakIntensity">0</span>
+                                    </div>
+                                    <input type="range" id="lightLeakIntensity" class="studio-slider" min="0" max="100" step="1" value="0">
+                                </div>
+
+                                 <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label>Entropy (Seed)</label>
+                                        <span class="slider-value" data-for="lightLeakEntropy">0</span>
+                                    </div>
+                                    <input type="range" id="lightLeakEntropy" class="studio-slider" min="0" max="100" step="1" value="0">
+                                </div>
+
+                                 <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label>Scale</label>
+                                        <span class="slider-value" data-for="lightLeakScale">50</span>
+                                    </div>
+                                    <input type="range" id="lightLeakScale" class="studio-slider" min="1" max="100" step="1" value="50">
+                                </div>
+                            </div>
+
                             <!-- Texture Overlay Pack -->
                             <div class="mb-4 border-t border-glass-border pt-4">
                                 <label

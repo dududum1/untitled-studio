@@ -77,6 +77,10 @@ class WebGLEngine {
             overlayBlendMode: 0,
             // Vibe Procedural
             lightLeak: 0,
+            lightLeakColor: [1.0, 0.27, 0.0], // #FF4500
+            lightLeakIntensity: 0,
+            lightLeakEntropy: 0,
+            lightLeakScale: 50,
             scratches: 0,
             filmSeed: 0, // Random seed for defects
 
@@ -355,7 +359,8 @@ class WebGLEngine {
             'u_grain', 'u_grainSize', 'u_vignette', 'u_fade', 'u_sharpness',
             'u_dehaze', 'u_clarity', 'u_chromaticAberration',
             'u_overlayTexture', 'u_useOverlay', 'u_overlayOpacity', 'u_overlayBlendMode',
-            'u_lightLeak', 'u_scratches', 'u_filmSeed',
+            'u_lightLeak', 'u_lightLeakColor', 'u_lightLeakIntensity', 'u_lightLeakEntropy', 'u_lightLeakScale',
+            'u_scratches', 'u_filmSeed',
             'u_galleryFrame', 'u_filmGateWeave',
             'u_asciiSize', 'u_asciiMode', 'u_asciiColor', 'u_posterize', 'u_barrelDistortion',
             'u_splitToneBalance', 'u_noiseColorHue', 'u_showClipping', 'u_denoise',
@@ -797,6 +802,10 @@ class WebGLEngine {
 
             // Vibe Procedural
             lightLeak: 0,
+            lightLeakColor: [1.0, 0.27, 0.0],
+            lightLeakIntensity: 0,
+            lightLeakEntropy: 0,
+            lightLeakScale: 50,
             scratches: 0,
             filmSeed: 0,
 
@@ -1214,6 +1223,16 @@ class WebGLEngine {
 
         // Vibe
         gl.uniform1f(this.uniforms.u_lightLeak, v(adj.lightLeak));
+        
+        // New Procedural Light Leak
+        if (this.uniforms.u_lightLeakColor) {
+             const col = adj.lightLeakColor || [1.0, 0.27, 0.0]; // Default to #FF4500
+             gl.uniform3f(this.uniforms.u_lightLeakColor, col[0], col[1], col[2]);
+        }
+        if (this.uniforms.u_lightLeakIntensity) gl.uniform1f(this.uniforms.u_lightLeakIntensity, adj.lightLeakIntensity || 0);
+        if (this.uniforms.u_lightLeakEntropy) gl.uniform1f(this.uniforms.u_lightLeakEntropy, adj.lightLeakEntropy || 0);
+        if (this.uniforms.u_lightLeakScale) gl.uniform1f(this.uniforms.u_lightLeakScale, adj.lightLeakScale || 50);
+
         gl.uniform1f(this.uniforms.u_scratches, v(adj.scratches));
         gl.uniform1f(this.uniforms.u_filmSeed, v(adj.filmSeed));
         gl.uniform1i(this.uniforms.u_galleryFrame, adj.galleryFrame ? 1 : 0);
