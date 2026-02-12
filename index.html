@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="kodak">
 
 <head>
     <meta charset="UTF-8">
@@ -51,8 +51,8 @@
             font-size: 1.5rem;
             /* Adjust size as needed */
             text-decoration: none;
-            color: #ed2788;
-            background: linear-gradient(to right, #3CA2C8, #ed2788);
+            color: var(--logo-color);
+            background: var(--gradient-primary);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -75,7 +75,7 @@
             display: inline-block;
             width: 10px;
             height: 1.2rem;
-            background-color: #ed2788;
+            background-color: var(--accent);
             margin-left: 2px;
             animation: blink 1s step-end infinite;
         }
@@ -177,13 +177,13 @@
             theme: {
                 extend: {
                     colors: {
-                        'midnight': '#121212',
-                        'glass': 'rgba(30, 30, 30, 0.6)',
-                        'glass-border': 'rgba(255, 255, 255, 0.08)',
-                        'hot-pink': '#ed2788',
-                        'hot-pink-glow': 'rgba(237, 39, 136, 0.4)',
-                        'moonstone': '#3CA2C8',
-                        'moonstone-glow': 'rgba(60, 162, 200, 0.4)',
+                        'midnight': 'var(--midnight)',
+                        'glass': 'var(--glass)',
+                        'glass-border': 'var(--glass-border)',
+                        'hot-pink': 'var(--hot-pink)',
+                        'hot-pink-glow': 'var(--hot-pink-glow)',
+                        'moonstone': 'var(--moonstone)',
+                        'moonstone-glow': 'var(--moonstone-glow)',
                     },
                     fontFamily: {
                         'sans': ['Outfit', 'system-ui', 'sans-serif'],
@@ -202,6 +202,9 @@
 </head>
 
 <body class="bg-midnight text-white font-sans overflow-hidden select-none">
+    <!-- Living Background (Deep Fog) -->
+    <div id="deep-fog"></div>
+
     <!-- Manifesto Mode Grain -->
     <div id="manifesto-grain"
         class="fixed inset-0 pointer-events-none opacity-0 z-[100] transition-opacity duration-1000"></div>
@@ -534,7 +537,7 @@
             <!-- TONE Section -->
             <div class="accordion-item active" data-section="tone">
                 <button class="accordion-header">
-                    <span class="indicator">[ — ]</span> <span class="label">TONE</span>
+                    <span class="indicator">[ — ]</span> <span class="label" data-cipher="TONE">TONE</span>
                 </button>
                 <div class="accordion-content">
                     <div id="tone-panel" class="panel p-6">
@@ -542,7 +545,7 @@
                             <div class="slider-group">
                                 <div class="slider-header">
                                     <label>Exposure</label>
-                                    <span class="slider-value" data-for="exposure">0.00</span>
+                                    <span class="slider-value" data-for="exposure" data-scrub="exposure">0.00</span>
                                 </div>
                                 <input type="range" id="exposure" class="studio-slider" min="-2" max="2" step="0.01"
                                     value="0">
@@ -550,7 +553,7 @@
                             <div class="slider-group">
                                 <div class="slider-header">
                                     <label>Contrast</label>
-                                    <span class="slider-value" data-for="contrast">0</span>
+                                    <span class="slider-value" data-for="contrast" data-scrub="contrast">0</span>
                                 </div>
                                 <input type="range" id="contrast" class="studio-slider" min="-100" max="100" step="1"
                                     value="0">
@@ -558,7 +561,7 @@
                             <div class="slider-group">
                                 <div class="slider-header">
                                     <label>Highlights</label>
-                                    <span class="slider-value" data-for="highlights">0</span>
+                                    <span class="slider-value" data-for="highlights" data-scrub="highlights">0</span>
                                 </div>
                                 <input type="range" id="highlights" class="studio-slider" min="-100" max="100" step="1"
                                     value="0">
@@ -566,7 +569,7 @@
                             <div class="slider-group">
                                 <div class="slider-header">
                                     <label>Shadows</label>
-                                    <span class="slider-value" data-for="shadows">0</span>
+                                    <span class="slider-value" data-for="shadows" data-scrub="shadows">0</span>
                                 </div>
                                 <input type="range" id="shadows" class="studio-slider" min="-100" max="100" step="1"
                                     value="0">
@@ -574,7 +577,7 @@
                             <div class="slider-group">
                                 <div class="slider-header">
                                     <label>Whites</label>
-                                    <span class="slider-value" data-for="whites">0</span>
+                                    <span class="slider-value" data-for="whites" data-scrub="whites">0</span>
                                 </div>
                                 <input type="range" id="whites" class="studio-slider" min="-100" max="100" step="1"
                                     value="0">
@@ -582,7 +585,7 @@
                             <div class="slider-group">
                                 <div class="slider-header">
                                     <label>Blacks</label>
-                                    <span class="slider-value" data-for="blacks">0</span>
+                                    <span class="slider-value" data-for="blacks" data-scrub="blacks">0</span>
                                 </div>
                                 <input type="range" id="blacks" class="studio-slider" min="-100" max="100" step="1"
                                     value="0">
@@ -595,7 +598,7 @@
             <!-- CURVE Section -->
             <div class="accordion-item" data-section="curve">
                 <button class="accordion-header">
-                    <span class="indicator">[ + ]</span> <span class="label">CURVE</span>
+                    <span class="indicator">[ + ]</span> <span class="label" data-cipher="CURVE">CURVE</span>
                 </button>
                 <div class="accordion-content">
                     <div id="curve-panel" class="panel p-6">
@@ -640,7 +643,7 @@
             <!-- COLOR Section -->
             <div class="accordion-item" data-section="color">
                 <button class="accordion-header">
-                    <span class="indicator">[ + ]</span> <span class="label">COLOR</span>
+                    <span class="indicator">[ + ]</span> <span class="label" data-cipher="COLOR">COLOR</span>
                 </button>
                 <div class="accordion-content">
                     <div id="color-panel" class="panel p-6">
@@ -661,7 +664,8 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Opacity</label>
-                                        <span class="slider-value" data-for="lutOpacity">1.0</span>
+                                        <span class="slider-value" data-for="lutOpacity"
+                                            data-scrub="lutOpacity">1.0</span>
                                     </div>
                                     <input type="range" id="lutOpacity" class="studio-slider" min="0" max="100" step="1"
                                         value="100">
@@ -674,7 +678,7 @@
                             <div class="slider-group">
                                 <div class="slider-header">
                                     <label>Temperature</label>
-                                    <span class="slider-value" data-for="temperature">0</span>
+                                    <span class="slider-value" data-for="temperature" data-scrub="temperature">0</span>
                                 </div>
                                 <input type="range" id="temperature" class="studio-slider temp" min="-100" max="100"
                                     step="1" value="0">
@@ -682,7 +686,7 @@
                             <div class="slider-group">
                                 <div class="slider-header">
                                     <label>Tint</label>
-                                    <span class="slider-value" data-for="tint">0</span>
+                                    <span class="slider-value" data-for="tint" data-scrub="tint">0</span>
                                 </div>
                                 <input type="range" id="tint" class="studio-slider tint" min="-100" max="100" step="1"
                                     value="0">
@@ -690,7 +694,7 @@
                             <div class="slider-group">
                                 <div class="slider-header">
                                     <label>Vibrance</label>
-                                    <span class="slider-value" data-for="vibrance">0</span>
+                                    <span class="slider-value" data-for="vibrance" data-scrub="vibrance">0</span>
                                 </div>
                                 <input type="range" id="vibrance" class="studio-slider" min="-100" max="100" step="1"
                                     value="0">
@@ -698,7 +702,7 @@
                             <div class="slider-group">
                                 <div class="slider-header">
                                     <label>Saturation</label>
-                                    <span class="slider-value" data-for="saturation">0</span>
+                                    <span class="slider-value" data-for="saturation" data-scrub="saturation">0</span>
                                 </div>
                                 <input type="range" id="saturation" class="studio-slider" min="-100" max="100" step="1"
                                     value="0">
@@ -803,7 +807,7 @@
             <!-- EFFECTS ACCORDION ITEM -->
             <div class="accordion-item" data-section="fx">
                 <button class="accordion-header">
-                    <span class="indicator">[ + ]</span> <span class="label">FX</span>
+                    <span class="indicator">[ + ]</span> <span class="label" data-cipher="FX">FX</span>
                 </button>
                 <div class="accordion-content">
                     <div class="p-4 space-y-6">
@@ -866,7 +870,7 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Dehaze</label>
-                                        <span class="slider-value" data-for="dehaze">0</span>
+                                        <span class="slider-value" data-for="dehaze" data-scrub="dehaze">0</span>
                                     </div>
                                     <input type="range" id="dehaze" class="studio-slider" min="-100" max="100" step="1"
                                         value="0">
@@ -874,7 +878,7 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Clarity</label>
-                                        <span class="slider-value" data-for="clarity">0</span>
+                                        <span class="slider-value" data-for="clarity" data-scrub="clarity">0</span>
                                     </div>
                                     <input type="range" id="clarity" class="studio-slider" min="-100" max="100" step="1"
                                         value="0">
@@ -882,7 +886,7 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Sharpness</label>
-                                        <span class="slider-value" data-for="sharpness">0</span>
+                                        <span class="slider-value" data-for="sharpness" data-scrub="sharpness">0</span>
                                     </div>
                                     <input type="range" id="sharpness" class="studio-slider" min="0" max="100" step="1"
                                         value="0">
@@ -890,7 +894,7 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Vignette</label>
-                                        <span class="slider-value" data-for="vignette">0</span>
+                                        <span class="slider-value" data-for="vignette" data-scrub="vignette">0</span>
                                     </div>
                                     <input type="range" id="vignette" class="studio-slider" min="0" max="100" step="1"
                                         value="0">
@@ -898,7 +902,7 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Fade</label>
-                                        <span class="slider-value" data-for="fade">0</span>
+                                        <span class="slider-value" data-for="fade" data-scrub="fade">0</span>
                                     </div>
                                     <input type="range" id="fade" class="studio-slider" min="0" max="100" step="1"
                                         value="0">
@@ -906,7 +910,8 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Lens Fringing</label>
-                                        <span class="slider-value" data-for="chromaticAberration">0</span>
+                                        <span class="slider-value" data-for="chromaticAberration"
+                                            data-scrub="chromaticAberration">0</span>
                                     </div>
                                     <input type="range" id="chromaticAberration" class="studio-slider" min="0" max="100"
                                         step="1" value="0">
@@ -914,7 +919,8 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Barrel Distortion</label>
-                                        <span class="slider-value" data-for="barrelDistortion">0</span>
+                                        <span class="slider-value" data-for="barrelDistortion"
+                                            data-scrub="barrelDistortion">0</span>
                                     </div>
                                     <input type="range" id="barrelDistortion" class="studio-slider" min="-100" max="100"
                                         step="1" value="0">
@@ -939,7 +945,8 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Global Grain</label>
-                                        <span class="slider-value" data-for="grainGlobal">1.0</span>
+                                        <span class="slider-value" data-for="grainGlobal"
+                                            data-scrub="grainGlobal">1.0</span>
                                     </div>
                                     <input type="range" id="grainGlobal" class="studio-slider" min="0" max="2"
                                         step="0.1" value="1">
@@ -947,7 +954,8 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Shadow Grain</label>
-                                        <span class="slider-value" data-for="grainShadow">0</span>
+                                        <span class="slider-value" data-for="grainShadow"
+                                            data-scrub="grainShadow">0</span>
                                     </div>
                                     <input type="range" id="grainShadow" class="studio-slider" min="0" max="100"
                                         step="1" value="0">
@@ -955,7 +963,8 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Highlight Grain</label>
-                                        <span class="slider-value" data-for="grainHighlight">0</span>
+                                        <span class="slider-value" data-for="grainHighlight"
+                                            data-scrub="grainHighlight">0</span>
                                     </div>
                                     <input type="range" id="grainHighlight" class="studio-slider" min="0" max="100"
                                         step="1" value="0">
@@ -963,7 +972,8 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Grain Size</label>
-                                        <span class="slider-value" data-for="grainSize">1.0</span>
+                                        <span class="slider-value" data-for="grainSize"
+                                            data-scrub="grainSize">1.0</span>
                                     </div>
                                     <input type="range" id="grainSize" class="studio-slider" min="0.5" max="3"
                                         step="0.1" value="1">
@@ -971,7 +981,8 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Noise Color</label>
-                                        <span class="slider-value" data-for="noiseColorHue">0</span>
+                                        <span class="slider-value" data-for="noiseColorHue"
+                                            data-scrub="noiseColorHue">0</span>
                                     </div>
                                     <input type="range" id="noiseColorHue" class="studio-slider" min="0" max="360"
                                         step="1" value="0">
@@ -979,7 +990,7 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>AI Denoise</label>
-                                        <span class="slider-value" data-for="denoise">0</span>
+                                        <span class="slider-value" data-for="denoise" data-scrub="denoise">0</span>
                                     </div>
                                     <input type="range" id="denoise" class="studio-slider" min="0" max="100" step="1"
                                         value="0">
@@ -1004,7 +1015,8 @@
                                     <div class="slider-group">
                                         <div class="slider-header">
                                             <label>Color Depth</label>
-                                            <span class="slider-value" data-for="ditherDepth">8</span>
+                                            <span class="slider-value" data-for="ditherDepth"
+                                                data-scrub="ditherDepth">8</span>
                                         </div>
                                         <input type="range" id="ditherDepth" class="studio-slider" min="2" max="8"
                                             step="1" value="8">
@@ -1012,7 +1024,8 @@
                                     <div class="slider-group">
                                         <div class="slider-header">
                                             <label>Strength</label>
-                                            <span class="slider-value" data-for="ditherStrength">0</span>
+                                            <span class="slider-value" data-for="ditherStrength"
+                                                data-scrub="ditherStrength">0</span>
                                         </div>
                                         <input type="range" id="ditherStrength" class="studio-slider" min="0" max="100"
                                             step="1" value="0">
@@ -1045,7 +1058,8 @@
                                     <div class="slider-group">
                                         <div class="slider-header">
                                             <label>Bloom Strength</label>
-                                            <span class="slider-value" data-for="bloomStrength">0</span>
+                                            <span class="slider-value" data-for="bloomStrength"
+                                                data-scrub="bloomStrength">0</span>
                                         </div>
                                         <input type="range" id="bloomStrength" class="studio-slider" min="0" max="100"
                                             step="1" value="0">
@@ -1053,7 +1067,8 @@
                                     <div class="slider-group">
                                         <div class="slider-header">
                                             <label>Bloom Threshold</label>
-                                            <span class="slider-value" data-for="bloomThreshold">70</span>
+                                            <span class="slider-value" data-for="bloomThreshold"
+                                                data-scrub="bloomThreshold">70</span>
                                         </div>
                                         <input type="range" id="bloomThreshold" class="studio-slider" min="0" max="100"
                                             step="1" value="70">
@@ -1061,7 +1076,8 @@
                                     <div class="slider-group">
                                         <div class="slider-header">
                                             <label>Halation</label>
-                                            <span class="slider-value" data-for="halation">0</span>
+                                            <span class="slider-value" data-for="halation"
+                                                data-scrub="halation">0</span>
                                         </div>
                                         <input type="range" id="halation" class="studio-slider" min="0" max="100"
                                             step="1" value="0">
@@ -1069,7 +1085,8 @@
                                     <div class="slider-group">
                                         <div class="slider-header">
                                             <label>Mist Diffusion</label>
-                                            <span class="slider-value" data-for="diffusion">0</span>
+                                            <span class="slider-value" data-for="diffusion"
+                                                data-scrub="diffusion">0</span>
                                         </div>
                                         <input type="range" id="diffusion" class="studio-slider" min="0" max="100"
                                             step="1" value="0">
@@ -1124,7 +1141,8 @@
                                             <div class="slider-group">
                                                 <div class="slider-header">
                                                     <label>Intensity</label>
-                                                    <span class="slider-value" data-for="thermalIntensity">0</span>
+                                                    <span class="slider-value" data-for="thermalIntensity"
+                                                        data-scrub="thermalIntensity">0</span>
                                                 </div>
                                                 <input type="range" id="thermalIntensity" class="studio-slider" min="0"
                                                     max="100" step="1" value="0">
@@ -1166,7 +1184,8 @@
                                             <div class="slider-group">
                                                 <div class="slider-header">
                                                     <label>Intensity</label>
-                                                    <span class="slider-value" data-for="lightLeakIntensity">0</span>
+                                                    <span class="slider-value" data-for="lightLeakIntensity"
+                                                        data-scrub="lightLeakIntensity">0</span>
                                                 </div>
                                                 <input type="range" id="lightLeakIntensity" class="studio-slider"
                                                     min="0" max="100" step="1" value="0">
@@ -1175,7 +1194,8 @@
                                             <div class="slider-group">
                                                 <div class="slider-header">
                                                     <label>Entropy (Seed)</label>
-                                                    <span class="slider-value" data-for="lightLeakEntropy">0</span>
+                                                    <span class="slider-value" data-for="lightLeakEntropy"
+                                                        data-scrub="lightLeakEntropy">0</span>
                                                 </div>
                                                 <input type="range" id="lightLeakEntropy" class="studio-slider" min="0"
                                                     max="100" step="1" value="0">
@@ -1184,7 +1204,8 @@
                                             <div class="slider-group">
                                                 <div class="slider-header">
                                                     <label>Scale</label>
-                                                    <span class="slider-value" data-for="lightLeakScale">50</span>
+                                                    <span class="slider-value" data-for="lightLeakScale"
+                                                        data-scrub="lightLeakScale">50</span>
                                                 </div>
                                                 <input type="range" id="lightLeakScale" class="studio-slider" min="1"
                                                     max="100" step="1" value="50">
@@ -1211,7 +1232,8 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Glitch</label>
-                                        <span class="slider-value" data-for="glitchStrength">0</span>
+                                        <span class="slider-value" data-for="glitchStrength"
+                                            data-scrub="glitchStrength">0</span>
                                     </div>
                                     <input type="range" id="glitchStrength" class="studio-slider" min="0" max="100"
                                         step="1" value="0">
@@ -1220,7 +1242,8 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Pixelate</label>
-                                        <span class="slider-value" data-for="pixelateSize">0</span>
+                                        <span class="slider-value" data-for="pixelateSize"
+                                            data-scrub="pixelateSize">0</span>
                                     </div>
                                     <input type="range" id="pixelateSize" class="studio-slider" min="0" max="20"
                                         step="1" value="0">
@@ -1229,7 +1252,8 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Dither</label>
-                                        <span class="slider-value" data-for="ditherStrength">0</span>
+                                        <span class="slider-value" data-for="ditherStrength"
+                                            data-scrub="ditherStrength">0</span>
                                     </div>
                                     <input type="range" id="ditherStrength" class="studio-slider" min="0" max="100"
                                         step="1" value="0">
@@ -1238,7 +1262,8 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Scanlines</label>
-                                        <span class="slider-value" data-for="scanlineIntensity">0</span>
+                                        <span class="slider-value" data-for="scanlineIntensity"
+                                            data-scrub="scanlineIntensity">0</span>
                                     </div>
                                     <input type="range" id="scanlineIntensity" class="studio-slider" min="0" max="100"
                                         step="1" value="0">
@@ -1247,7 +1272,7 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>ASCII</label>
-                                        <span class="slider-value" data-for="asciiSize">0</span>
+                                        <span class="slider-value" data-for="asciiSize" data-scrub="asciiSize">0</span>
                                     </div>
                                     <input type="range" id="asciiSize" class="studio-slider" min="0" max="2" step="0.01"
                                         value="0">
@@ -1279,7 +1304,7 @@
                                 <div class="slider-group">
                                     <div class="slider-header">
                                         <label>Posterize</label>
-                                        <span class="slider-value" data-for="posterize">0</span>
+                                        <span class="slider-value" data-for="posterize" data-scrub="posterize">0</span>
                                     </div>
                                     <input type="range" id="posterize" class="studio-slider" min="0" max="100" step="1"
                                         value="0">
@@ -1335,7 +1360,8 @@
                                     <div class="slider-group">
                                         <div class="slider-header">
                                             <label>Overlay Opacity</label>
-                                            <span class="slider-value" data-for="overlayOpacity">0</span>
+                                            <span class="slider-value" data-for="overlayOpacity"
+                                                data-scrub="overlayOpacity">0</span>
                                         </div>
                                         <input type="range" id="overlayOpacity" class="studio-slider" min="0" max="100"
                                             step="1" value="0">
@@ -1361,7 +1387,8 @@
                                         <div class="slider-group">
                                             <div class="slider-header">
                                                 <label>Scratches</label>
-                                                <span class="slider-value" data-for="scratches">0</span>
+                                                <span class="slider-value" data-for="scratches"
+                                                    data-scrub="scratches">0</span>
                                             </div>
                                             <input type="range" id="scratches" class="studio-slider" min="0" max="100"
                                                 step="1" value="0">
@@ -1369,7 +1396,8 @@
                                         <div class="slider-group">
                                             <div class="slider-header">
                                                 <label>Gate Weave</label>
-                                                <span class="slider-value" data-for="filmGateWeave">0</span>
+                                                <span class="slider-value" data-for="filmGateWeave"
+                                                    data-scrub="filmGateWeave">0</span>
                                             </div>
                                             <input type="range" id="filmGateWeave" class="studio-slider" min="0"
                                                 max="100" step="1" value="0">
@@ -1414,7 +1442,8 @@
                                                 <div id="sel-color-preview"
                                                     class="w-3 h-3 rounded-full bg-red-500 border border-white/20">
                                                 </div>
-                                                <span class="slider-value" data-for="selColorHue">0°</span>
+                                                <span class="slider-value" data-for="selColorHue"
+                                                    data-scrub="selColorHue">0°</span>
                                             </div>
                                         </div>
                                         <!-- Rainbow gradient background for context -->
@@ -1427,7 +1456,8 @@
                                         <div class="slider-group">
                                             <div class="slider-header">
                                                 <label>Range</label>
-                                                <span class="slider-value" data-for="selColorRange">0</span>
+                                                <span class="slider-value" data-for="selColorRange"
+                                                    data-scrub="selColorRange">0</span>
                                             </div>
                                             <input type="range" id="selColorRange" class="studio-slider" min="0"
                                                 max="180" step="1" value="45">
@@ -1436,7 +1466,8 @@
                                         <div class="slider-group">
                                             <div class="slider-header">
                                                 <label>Feather</label>
-                                                <span class="slider-value" data-for="selColorFeather">0.5</span>
+                                                <span class="slider-value" data-for="selColorFeather"
+                                                    data-scrub="selColorFeather">0.5</span>
                                             </div>
                                             <input type="range" id="selColorFeather" class="studio-slider" min="0"
                                                 max="1" step="0.01" value="0.5">
@@ -1447,7 +1478,8 @@
                                         <div class="slider-group">
                                             <div class="slider-header">
                                                 <label>Saturation</label>
-                                                <span class="slider-value" data-for="selColorSat">0</span>
+                                                <span class="slider-value" data-for="selColorSat"
+                                                    data-scrub="selColorSat">0</span>
                                             </div>
                                             <input type="range" id="selColorSat" class="studio-slider" min="-100"
                                                 max="100" step="1" value="0">
@@ -1456,7 +1488,8 @@
                                         <div class="slider-group">
                                             <div class="slider-header">
                                                 <label>Luminance</label>
-                                                <span class="slider-value" data-for="selColorLum">0</span>
+                                                <span class="slider-value" data-for="selColorLum"
+                                                    data-scrub="selColorLum">0</span>
                                             </div>
                                             <input type="range" id="selColorLum" class="studio-slider" min="-100"
                                                 max="100" step="1" value="0">
@@ -1475,7 +1508,8 @@
                                     <div class="slider-group">
                                         <div class="slider-header">
                                             <label>Blur Strength</label>
-                                            <span class="slider-value" data-for="tiltShiftBlur">0</span>
+                                            <span class="slider-value" data-for="tiltShiftBlur"
+                                                data-scrub="tiltShiftBlur">0</span>
                                         </div>
                                         <input type="range" id="tiltShiftBlur" class="studio-slider" min="0" max="50"
                                             step="1" value="0">
@@ -1485,7 +1519,8 @@
                                         <div class="slider-group">
                                             <div class="slider-header">
                                                 <label class="text-[0.6rem]">Position</label>
-                                                <span class="slider-value" data-for="tiltShiftPos">0.5</span>
+                                                <span class="slider-value" data-for="tiltShiftPos"
+                                                    data-scrub="tiltShiftPos">0.5</span>
                                             </div>
                                             <input type="range" id="tiltShiftPos" class="studio-slider" min="0" max="1"
                                                 step="0.01" value="0.5">
@@ -1493,7 +1528,8 @@
                                         <div class="slider-group">
                                             <div class="slider-header">
                                                 <label class="text-[0.6rem]">Width</label>
-                                                <span class="slider-value" data-for="tiltShiftFocusWidth">0.4</span>
+                                                <span class="slider-value" data-for="tiltShiftFocusWidth"
+                                                    data-scrub="tiltShiftFocusWidth">0.4</span>
                                             </div>
                                             <input type="range" id="tiltShiftFocusWidth" class="studio-slider" min="0"
                                                 max="1" step="0.01" value="0.4">
@@ -1501,7 +1537,8 @@
                                         <div class="slider-group">
                                             <div class="slider-header">
                                                 <label class="text-[0.6rem]">Fade</label>
-                                                <span class="slider-value" data-for="tiltShiftGradient">0.2</span>
+                                                <span class="slider-value" data-for="tiltShiftGradient"
+                                                    data-scrub="tiltShiftGradient">0.2</span>
                                             </div>
                                             <input type="range" id="tiltShiftGradient" class="studio-slider" min="0"
                                                 max="1" step="0.01" value="0.2">
@@ -1532,7 +1569,7 @@
                                     <div class="slider-group">
                                         <div class="slider-header">
                                             <label>Thickness</label>
-                                            <span class="slider-value" data-for="borderWidth"
+                                            <span class="slider-value" data-for="borderWidth" data-scrub="borderWidth"
                                                 id="border-width-val">0%</span>
                                         </div>
                                         <input type="range" id="borderWidth" class="studio-slider" min="0" max="25"
@@ -1957,7 +1994,8 @@
                                         <div class="slider-group">
                                             <div class="slider-header">
                                                 <label>X</label>
-                                                <span class="slider-value" data-for="mask-x">0.5</span>
+                                                <span class="slider-value" data-for="mask-x"
+                                                    data-scrub="mask-x">0.5</span>
                                             </div>
                                             <input type="range" id="mask-x" class="studio-slider" min="0" max="1"
                                                 step="0.01" value="0.5">
@@ -1966,7 +2004,8 @@
                                         <div class="slider-group">
                                             <div class="slider-header">
                                                 <label>Y</label>
-                                                <span class="slider-value" data-for="mask-y">0.5</span>
+                                                <span class="slider-value" data-for="mask-y"
+                                                    data-scrub="mask-y">0.5</span>
                                             </div>
                                             <input type="range" id="mask-y" class="studio-slider" min="0" max="1"
                                                 step="0.01" value="0.5">
@@ -1975,7 +2014,8 @@
                                         <div class="slider-group">
                                             <div class="slider-header">
                                                 <label>Radius</label>
-                                                <span class="slider-value" data-for="mask-radius">0.3</span>
+                                                <span class="slider-value" data-for="mask-radius"
+                                                    data-scrub="mask-radius">0.3</span>
                                             </div>
                                             <input type="range" id="mask-radius" class="studio-slider" min="0" max="1"
                                                 step="0.01" value="0.3">
@@ -1984,7 +2024,8 @@
                                         <div class="slider-group">
                                             <div class="slider-header">
                                                 <label>Rotation</label>
-                                                <span class="slider-value" data-for="mask-rotation">0</span>
+                                                <span class="slider-value" data-for="mask-rotation"
+                                                    data-scrub="mask-rotation">0</span>
                                             </div>
                                             <input type="range" id="mask-rotation" class="studio-slider" min="0"
                                                 max="360" step="1" value="0">
@@ -1994,7 +2035,8 @@
                                     <div class="slider-group">
                                         <div class="slider-header">
                                             <label>Feather</label>
-                                            <span class="slider-value" data-for="mask-feather">0.2</span>
+                                            <span class="slider-value" data-for="mask-feather"
+                                                data-scrub="mask-feather">0.2</span>
                                         </div>
                                         <input type="range" id="mask-feather" class="studio-slider" min="0" max="1"
                                             step="0.01" value="0.2">
@@ -2068,11 +2110,37 @@
                 </svg>
             </button>
 
+            <div class="theme-picker-wrapper">
+                <button id="theme-picker-btn"
+                    class="p-2 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                    title="Theme Picker">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485" />
+                    </svg>
+                </button>
+                <div id="theme-drawer" class="theme-drawer">
+                    <div class="theme-swatch" data-theme="kodak" data-label="KODAK"
+                        style="background: linear-gradient(135deg, #FFC700, #FF9900);"></div>
+                    <div class="theme-swatch" data-theme="braun" data-label="BRAUN"
+                        style="background: linear-gradient(135deg, #E5E5E5, #D1D1D1);"></div>
+                    <div class="theme-swatch" data-theme="phosphor" data-label="PHOSPHOR"
+                        style="background: linear-gradient(135deg, #4AF626, #2C8F1B);"></div>
+                    <div class="theme-swatch" data-theme="safelight" data-label="SAFELIGHT"
+                        style="background: linear-gradient(135deg, #FF0000, #660000);"></div>
+                    <div class="theme-swatch" data-theme="cyanotype" data-label="CYANOTYPE"
+                        style="background: linear-gradient(135deg, #7FDBFF, #0074D9);"></div>
+                    <div class="theme-swatch" data-theme="vapor" data-label="VAPOR"
+                        style="background: linear-gradient(135deg, #FF0099, #BD00FF, #00F0FF);"></div>
+                </div>
+            </div>
+
             <div class="h-6 w-px bg-white/10 mx-1"></div>
 
             <button id="main-export-btn"
-                class="px-4 py-1.5 rounded bg-hot-pink hover:bg-hot-pink/90 text-white text-sm font-bold tracking-wide transition-all shadow-[0_0_15px_rgba(237,39,136,0.2)] hover:shadow-[0_0_20px_rgba(237,39,136,0.4)] disabled:opacity-50 disabled:grayscale"
-                disabled>
+                class="px-4 py-1.5 rounded text-white text-sm font-bold tracking-wide transition-all disabled:opacity-50 disabled:grayscale"
+                style="background: var(--gradient-primary); box-shadow: 0 0 15px var(--hot-pink-glow);" disabled
+                data-cipher="EXPORT">
                 EXPORT
             </button>
         </div>
@@ -2427,6 +2495,10 @@
             </div>
         </div>
     </div>
+
+    <!-- Cipher Reveal Engine -->
+    <script src="js/cipher-reveal.js"></script>
+    <script src="js/scrubber.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {

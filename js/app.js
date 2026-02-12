@@ -19,8 +19,7 @@ class UntitledStudio {
         this.cropTool = null;
         this.terminalViewer = null;
 
-        // Audio Engine (Initialize EARLY so startup toast can use it)
-        this.audio = new AudioEngine();
+
 
         // State
         this.images = [];
@@ -46,6 +45,9 @@ class UntitledStudio {
         // PWA Install State
         this.deferredPrompt = null;
         this.initPWA();
+
+        // Theme Engine
+        this.initThemeEngine();
 
         // Initialize Startup Toast (Random)
         const toastContainer = document.getElementById('startup-toast');
@@ -125,20 +127,7 @@ class UntitledStudio {
             // 3. Inject and Animate
             toastContainer.innerHTML = contentHTML;
 
-            // Audio Trigger
-            if (rand < 0.15) {
-                // ASCII
-                this.audio.playStartup();
-            } else if (rand > 0.90) {
-                // Error
-                this.audio.playGlitch();
-            } else if (rand > 0.75) {
-                // Warning
-                this.audio.playShutter(); // Heavy clack
-            } else {
-                // Normal
-                this.audio.playStartup();
-            }
+
 
             // Fade out
             setTimeout(() => {
@@ -2628,14 +2617,7 @@ class UntitledStudio {
 
         // Push to history (debounced)
 
-        // Update histogramic Detents
-        if (navigator.vibrate) {
-            const min = parseFloat(slider.min);
-            const max = parseFloat(slider.max);
-            if (value === 0 || value === min || value === max) {
-                this.hapticFeedback('light');
-            }
-        }
+
 
         // Update histogram
         this.updateHistogram();
@@ -3678,9 +3660,6 @@ class UntitledStudio {
 
                 activeMode = btn.dataset.channel;
                 updateSliders();
-
-                // Haptic
-                this.hapticFeedback('light');
             });
         });
 
@@ -4775,7 +4754,6 @@ class UntitledStudio {
 
         this.hideExportSettings();
         this.showToast('Export settings saved');
-        this.hapticFeedback('success');
     }
 
     initPresetAccordion() {
@@ -4801,13 +4779,111 @@ class UntitledStudio {
                         }
                     });
                 }
-
-                this.hapticFeedback('light');
             });
         });
 
         // Ensure save preset btn element ref is updated for the listener
         this.elements.savePresetBtn = document.getElementById('save-preset-btn');
+    }
+
+    // ============ DYNAMIC THEME ENGINE (v2 — 6 Themes + Drawer) ============
+    initThemeEngine() {
+        const THEMES = ['kodak', 'braun', 'phosphor', 'safelight', 'cyanotype', 'vapor'];
+        const saved = localStorage.getItem('untitled-theme') || 'kodak';
+        this.currentTheme = THEMES.includes(saved) ? saved : 'kodak';
+        this._originalLogoText = null; // Cache for Safelight restore
+
+        // Initialize Cipher Reveal
+        if (window.CipherReveal) {
+            window.CipherReveal.init('[data-cipher]');
+        }
+
+        // Apply saved theme on load
+        this._applyTheme(this.currentTheme);
+
+        // Drawer toggle
+        const pickerBtn = document.getElementById('theme-picker-btn');
+        const drawer = document.getElementById('theme-drawer');
+        if (pickerBtn && drawer) {
+            pickerBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                drawer.classList.toggle('open');
+                if (this.hapticFeedback) this.hapticFeedback('light');
+            });
+
+            // Close drawer on outside click
+            document.addEventListener('click', (e) => {
+                if (!drawer.contains(e.target) && e.target !== pickerBtn) {
+                    drawer.classList.remove('open');
+                }
+            });
+
+            // Swatch click handlers
+            drawer.querySelectorAll('.theme-swatch').forEach(swatch => {
+                swatch.addEventListener('click', () => {
+                    const theme = swatch.dataset.theme;
+                    if (theme && THEMES.includes(theme)) {
+                        this._applyTheme(theme);
+                        localStorage.setItem('untitled-theme', theme);
+                        if (this.hapticFeedback) this.hapticFeedback('medium');
+                        console.log(`[Theme] Switched to ${theme.toUpperCase()}`);
+                    }
+                });
+            });
+
+            // Mark active swatch on load
+            this._updateActiveSwatches();
+        }
+    }
+
+    /** Apply a theme — sets data-theme, updates swatches, syncs meta, applies manifesto touches */
+    _applyTheme(theme) {
+        this.currentTheme = theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        this._updateActiveSwatches();
+        this._syncMetaThemeColor();
+        this._applyManifesto(theme);
+
+        // Trigger Cipher Reveal Animation
+        if (window.CipherReveal) {
+            window.CipherReveal.fireAll();
+        }
+    }
+
+    /** Update active ring on swatches */
+    _updateActiveSwatches() {
+        document.querySelectorAll('.theme-swatch').forEach(s => {
+            s.classList.toggle('active', s.dataset.theme === this.currentTheme);
+        });
+    }
+
+    /** Manifesto behaviors — special per-theme overrides */
+    _applyManifesto(theme) {
+        const logoEl = document.querySelector('.logo');
+        if (logoEl) {
+            // Cache original content on first call
+            if (!this._originalLogoHTML) {
+                this._originalLogoHTML = logoEl.innerHTML;
+            }
+
+            if (theme === 'safelight') {
+                logoEl.innerHTML = '<span class="prompt">&gt;</span>DARKROOM MODE<span class="cursor"></span>';
+            } else {
+                logoEl.innerHTML = this._originalLogoHTML;
+            }
+        }
+    }
+
+    /** Sync <meta name="theme-color"> with the active theme's --bg-main */
+    _syncMetaThemeColor() {
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) {
+            requestAnimationFrame(() => {
+                const bgMain = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--bg-main').trim();
+                if (bgMain) meta.setAttribute('content', bgMain);
+            });
+        }
     }
 }
 // Handle B key release for Before/After

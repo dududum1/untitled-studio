@@ -19,7 +19,394 @@
     /* Adaptive Environment */
     --adaptive-bg: #121212;
     --adaptive-fg: #ffffff;
+
+    /* Theme Tokens (Defaults = Kodak) */
+    --bg-main: #161618;
+    --bg-panel: #222224;
+    --accent: #FFC700;
+    --border: #333333;
+
+    /* Logo & Gradients (Defaults = Kodak) */
+    --logo-color: #FFC700;
+    --gradient-primary: linear-gradient(135deg, #FFC700 0%, #FF9900 100%);
+    --gradient-glow: radial-gradient(circle, rgba(255, 199, 0, 0.4) 0%, rgba(0, 0, 0, 0) 70%);
 }
+
+/* ========== DYNAMIC THEME ENGINE ========== */
+/* Theme A: KODAK (Warm Dark - The Default) */
+[data-theme="kodak"],
+:root {
+    --bg-main: #161618;
+    --bg-panel: #222224;
+    --accent: #FFC700;
+    --border: #333333;
+    --logo-color: #FFC700;
+    --gradient-primary: linear-gradient(135deg, #FFC700 0%, #FF9900 100%);
+    --gradient-glow: radial-gradient(circle, rgba(255, 199, 0, 0.4) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+/* Theme B: BRAUN (Clean Light - The Gallery) */
+[data-theme="braun"] {
+    --bg-main: #E5E5E5;
+    --bg-panel: #F4F4F4;
+    --text-primary: #111111;
+    --text-secondary: #444444;
+    --text-muted: #666666;
+    --accent: #FF4400;
+    --border: #D1D1D1;
+    --midnight: #E5E5E5;
+    --glass: rgba(244, 244, 244, 0.85);
+    --glass-solid: #F4F4F4;
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --hot-pink: #FF4400;
+    --hot-pink-glow: rgba(255, 68, 0, 0.3);
+    --moonstone: #0066CC;
+    --moonstone-glow: rgba(0, 102, 204, 0.3);
+    --adaptive-bg: #E5E5E5;
+    --adaptive-fg: #111111;
+    --logo-color: #FF4400;
+    --gradient-primary: linear-gradient(135deg, #FF4400 0%, #D43000 100%);
+    --gradient-glow: none;
+}
+
+/* Theme C: PHOSPHOR (Hacker - The Terminal) */
+[data-theme="phosphor"] {
+    --bg-main: #051008;
+    --bg-panel: #0A1F10;
+    --text-primary: #4AF626;
+    --text-secondary: #38B81D;
+    --text-muted: #2C8F1B;
+    --accent: #4AF626;
+    --border: #1A3F20;
+    --midnight: #051008;
+    --glass: rgba(10, 31, 16, 0.85);
+    --glass-solid: #0A1F10;
+    --glass-border: rgba(74, 246, 38, 0.12);
+    --hot-pink: #4AF626;
+    --hot-pink-glow: rgba(74, 246, 38, 0.3);
+    --moonstone: #4AF626;
+    --moonstone-glow: rgba(74, 246, 38, 0.2);
+    --adaptive-bg: #051008;
+    --adaptive-fg: #4AF626;
+    --logo-color: #4AF626;
+    --gradient-primary: linear-gradient(180deg, #4AF626 0%, #2C8F1B 100%);
+    --gradient-glow: radial-gradient(circle, rgba(74, 246, 38, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+/* Theme D: SAFELIGHT (The Physical Darkroom) */
+[data-theme="safelight"] {
+    --bg-main: #000000;
+    --bg-panel: #0A0000;
+    --text-primary: #FF3333;
+    --text-secondary: #CC2222;
+    --text-muted: #660000;
+    --accent: #FF0000;
+    --border: #330000;
+    --midnight: #000000;
+    --glass: rgba(10, 0, 0, 0.9);
+    --glass-solid: #0A0000;
+    --glass-border: rgba(255, 0, 0, 0.1);
+    --hot-pink: #FF0000;
+    --hot-pink-glow: rgba(255, 0, 0, 0.3);
+    --moonstone: #FF3333;
+    --moonstone-glow: rgba(255, 51, 51, 0.2);
+    --adaptive-bg: #000000;
+    --adaptive-fg: #FF3333;
+    --logo-color: #FF0000;
+    --gradient-primary: linear-gradient(135deg, #FF0000 0%, #990000 100%);
+    --gradient-glow: radial-gradient(circle, rgba(255, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+/* Theme E: CYANOTYPE (The Blueprint) */
+[data-theme="cyanotype"] {
+    --bg-main: #001F3F;
+    --bg-panel: #003366;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B0D4E8;
+    --text-muted: #8AAAC2;
+    --accent: #7FDBFF;
+    --border: #004080;
+    --midnight: #001F3F;
+    --glass: rgba(0, 51, 102, 0.85);
+    --glass-solid: #003366;
+    --glass-border: rgba(127, 219, 255, 0.15);
+    --hot-pink: #7FDBFF;
+    --hot-pink-glow: rgba(127, 219, 255, 0.3);
+    --moonstone: #7FDBFF;
+    --moonstone-glow: rgba(127, 219, 255, 0.2);
+    --adaptive-bg: #001F3F;
+    --adaptive-fg: #FFFFFF;
+    --logo-color: #7FDBFF;
+    --gradient-primary: linear-gradient(135deg, #7FDBFF 0%, #0074D9 100%);
+    --gradient-glow: radial-gradient(circle, rgba(127, 219, 255, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+/* Theme F: VAPOR (The Glitch — VHS) */
+[data-theme="vapor"] {
+    --bg-main: #120428;
+    --bg-panel: #1F0838;
+    --text-primary: #00F0FF;
+    --text-secondary: #E066FF;
+    --text-muted: #BD00FF;
+    --accent: #FF0099;
+    --border: #4D0099;
+    --midnight: #120428;
+    --glass: rgba(31, 8, 56, 0.88);
+    --glass-solid: #1F0838;
+    --glass-border: rgba(255, 0, 153, 0.15);
+    --hot-pink: #FF0099;
+    --hot-pink-glow: rgba(255, 0, 153, 0.35);
+    --moonstone: #00F0FF;
+    --moonstone-glow: rgba(0, 240, 255, 0.25);
+    --adaptive-bg: #120428;
+    --adaptive-fg: #00F0FF;
+    --logo-color: #FF0099;
+    --gradient-primary: linear-gradient(135deg, #FF0099 0%, #BD00FF 50%, #00F0FF 100%);
+    --gradient-glow: radial-gradient(circle, rgba(255, 0, 153, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+/* ========== SAFELIGHT: Text Overrides (like Braun but for red-on-black) ========== */
+[data-theme="safelight"] .text-white {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="safelight"] .text-gray-300,
+[data-theme="safelight"] .text-gray-400,
+[data-theme="safelight"] .text-gray-500 {
+    color: var(--text-muted) !important;
+}
+
+/* ========== VAPOR: Retro Font Override ========== */
+[data-theme="vapor"] h1,
+[data-theme="vapor"] h2,
+[data-theme="vapor"] h3,
+[data-theme="vapor"] .logo,
+[data-theme="vapor"] .accordion-header span,
+[data-theme="vapor"] .fx-subtab-btn,
+[data-theme="vapor"] .tab-btn {
+    font-family: 'Courier New', 'Share Tech Mono', monospace !important;
+}
+
+/* ========== THEME PICKER DRAWER ========== */
+.theme-picker-wrapper {
+    position: relative;
+}
+
+.theme-drawer {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 50%;
+    transform: translateX(50%);
+    display: flex;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--glass-solid);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(50%) translateY(8px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 200;
+}
+
+.theme-drawer.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(50%) translateY(0);
+}
+
+.theme-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.15s ease, border-color 0.2s ease;
+}
+
+.theme-swatch:hover {
+    transform: scale(1.2);
+}
+
+.theme-swatch.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent), 0 0 12px var(--hot-pink-glow);
+}
+
+/* Swatch tooltip */
+.theme-swatch::after {
+    content: attr(data-label);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 8px;
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    border-radius: 4px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+.theme-swatch:hover::after {
+    opacity: 1;
+}
+
+/* ========== THEME TRANSITIONS ========== */
+*,
+*::before,
+*::after {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Exclude elements where transitions cause jank */
+canvas,
+video,
+input[type="range"],
+input[type="range"]::-webkit-slider-thumb,
+.no-theme-transition {
+    transition: none !important;
+}
+
+/* ========== PHOSPHOR CRT FLICKER ========== */
+@keyframes crt-flicker {
+    0% {
+        opacity: 1;
+    }
+
+    3% {
+        opacity: 0.97;
+    }
+
+    6% {
+        opacity: 1;
+    }
+
+    45% {
+        opacity: 1;
+    }
+
+    48% {
+        opacity: 0.95;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    92% {
+        opacity: 1;
+    }
+
+    95% {
+        opacity: 0.98;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+[data-theme="phosphor"] body {
+    animation: crt-flicker 0.15s infinite;
+}
+
+/* ========== BRAUN THEME: LIGHT MODE OVERRIDES ========== */
+/* Standard Tailwind text classes don't use CSS vars, so we override them */
+[data-theme="braun"] body {
+    color: var(--text-primary);
+}
+
+/* Body text-white override (global) */
+[data-theme="braun"] .text-white {
+    color: var(--text-primary) !important;
+}
+
+/* Grey text adaptation */
+[data-theme="braun"] .text-gray-100,
+[data-theme="braun"] .text-gray-200,
+[data-theme="braun"] .text-gray-300 {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="braun"] .text-gray-400,
+[data-theme="braun"] .text-gray-500 {
+    color: var(--text-muted) !important;
+}
+
+/* White-alpha backgrounds → dark-alpha in Braun */
+[data-theme="braun"] .bg-white\/5,
+[data-theme="braun"] .bg-white\/10 {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="braun"] .hover\:bg-white\/10:hover {
+    background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Border overrides */
+[data-theme="braun"] .border-white\/5,
+[data-theme="braun"] .border-white\/10,
+[data-theme="braun"] .border-white\/20 {
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Sidebar & Panels */
+[data-theme="braun"] #studio-dock,
+[data-theme="braun"] .accordion-header,
+[data-theme="braun"] .accordion-content {
+    color: var(--text-primary);
+}
+
+[data-theme="braun"] .bg-glass-panel {
+    background: rgba(244, 244, 244, 0.92) !important;
+}
+
+/* Preset cards & Output Transform buttons */
+[data-theme="braun"] .preset-card,
+[data-theme="braun"] .output-btn,
+[data-theme="braun"] [id^="fx-"] button,
+[data-theme="braun"] .fx-subtab-btn,
+[data-theme="braun"] .tab-btn {
+    color: var(--text-primary);
+}
+
+[data-theme="braun"] .preset-card {
+    border-color: var(--border);
+}
+
+/* Slider labels & values */
+[data-theme="braun"] .slider-header label,
+[data-theme="braun"] .slider-value {
+    color: var(--text-primary) !important;
+}
+
+/* Select dropdowns */
+[data-theme="braun"] select {
+    background-color: var(--glass-solid) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
+}
+
+/* Scrollbar for Braun */
+[data-theme="braun"] ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="braun"] ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
+}
+
 
 /* ========== OLED MODE (TRUE BLACK) ========== */
 body.oled-mode {
@@ -42,6 +429,32 @@ body.oled-mode .bg-glass {
     backdrop-filter: none;
     /* Save battery */
     border-color: #1a1a1a;
+}
+
+/* ========== CIPHER REVEAL EFFECT ========== */
+/* Default: Scramble uses theme accent color */
+[data-cipher] {
+    --cipher-color: var(--accent);
+}
+
+/* While scrambling, use the cipher color */
+[data-cipher]._cipher-running {
+    color: var(--cipher-color);
+}
+
+/* Phosphor: Force Green Scramble */
+[data-theme="phosphor"] [data-cipher] {
+    --cipher-color: #4AF626;
+}
+
+/* Safelight: Force Red Scramble */
+[data-theme="safelight"] [data-cipher] {
+    --cipher-color: #FF0000;
+}
+
+/* Export Button: Scramble should be white (or light) to be visible on gradient */
+#main-export-btn[data-cipher] {
+    --cipher-color: rgba(255, 255, 255, 0.8);
 }
 
 /* ========== BASE STYLES ========== */
@@ -249,8 +662,8 @@ input[type="range"] {
 }
 
 .accordion-item.active .accordion-content {
-    /* Max-height will be set via JS for precise transition, 
-       but we set a fallback here or rely on JS */
+    /* Max-height will be set via JS for precise transition */
+    max-height: none;
 }
 
 /* Panel Override within Accordion */
@@ -1911,4 +2324,164 @@ body.manifesto-mode .preset-category.active {
     background: var(--moonstone) !important;
     color: black !important;
     border-color: #ffffff !important;
+}
+
+/* ========== SCRUBBABLE INPUTS ========== */
+body.scrubbing {
+    cursor: none !important;
+    /* Hide cursor globally during scrub */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+[data-scrub] {
+    cursor: ew-resize;
+    /* Indicate draggable */
+}
+
+/* Active state for the number being scrubbed */
+[data-scrub].text-accent {
+    color: var(--accent) !important;
+    text-shadow: 0 0 10px var(--hot-pink-glow);
+}
+
+/* Floating Delta Label */
+#scrub-label {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    background: var(--glass-solid);
+    border: 1px solid var(--glass-border);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transform: translate(-50%, -100%);
+    margin-top: -12px;
+    white-space: nowrap;
+}
+
+#scrub-label.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ========== LIVING BACKGROUND (DEEP FOG) ========== */
+#deep-fog {
+    display: none !important;
+    /* PERFORMANCE HOTFIX: Disabled due to lag */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    /* Base background is handled by body color, fog overlays it */
+}
+
+/* Blob 1 */
+#deep-fog::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, rgba(255, 199, 0, 0.15), transparent 70%);
+    border-radius: 50%;
+    filter: blur(60px);
+    animation: fogMove 20s infinite ease-in-out;
+    will-change: transform;
+    opacity: 0.8;
+}
+
+/* Blob 2 */
+#deep-fog::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    right: -20%;
+    width: 70vw;
+    height: 70vw;
+    background: radial-gradient(circle, rgba(255, 199, 0, 0.10), transparent 70%);
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: fogMove 25s infinite ease-in-out reverse;
+    will-change: transform;
+    opacity: 0.6;
+}
+
+@keyframes fogMove {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(10vw, 5vh) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-5vw, 10vh) scale(0.9);
+    }
+}
+
+/* Theme Overrides for Fog */
+[data-theme="safelight"] #deep-fog::before,
+[data-theme="safelight"] #deep-fog::after {
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.1), transparent 70%);
+}
+
+[data-theme="phosphor"] #deep-fog::before,
+[data-theme="phosphor"] #deep-fog::after {
+    background: radial-gradient(circle, rgba(74, 246, 38, 0.1), transparent 70%);
+}
+
+/* ========== GLASSMORPHISM (FROSTED PANELS) ========== */
+.glass-panel-heavy {
+    background: rgba(20, 20, 20, 0.6) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Apply to specific elements if class isn't added directly in HTML */
+#studio-dock,
+.modal {
+    background: rgba(20, 20, 20, 0.6) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Performance Guardrails */
+@media (prefers-reduced-motion: reduce) {
+
+    #deep-fog::before,
+    #deep-fog::after {
+        animation: none;
+    }
+}
+
+/* ========== ZEN MODE ========== */
+body.ui-hidden footer,
+body.ui-hidden header,
+body.ui-hidden #studio-dock,
+body.ui-hidden #batch-bar,
+body.ui-hidden #command-bar,
+body.ui-hidden #history-sidebar,
+body.ui-hidden .logo {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    transform: translateY(20px);
 }
