@@ -25,6 +25,7 @@
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap"
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/boot.css">
 
     <style>
         :root {
@@ -2496,7 +2497,8 @@
         </div>
     </div>
 
-    <!-- Cipher Reveal Engine -->
+    <!-- Boot Sequence (BIOS) -->
+    <script src="js/boot-sequence.js"></script>
     <script src="js/cipher-reveal.js"></script>
     <script src="js/scrubber.js"></script>
 
@@ -2527,7 +2529,11 @@
             }
 
             if (logo) {
-                logo.addEventListener('click', openModal);
+                // Soft Reboot Trigger (Replaces Manifesto)
+                logo.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (window.triggerReboot) window.triggerReboot();
+                });
             }
 
             if (closeBtn) closeBtn.addEventListener('click', closeModal);

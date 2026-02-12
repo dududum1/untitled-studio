@@ -65,7 +65,8 @@ python -m http.server 8000
 Open `http://localhost:3000` (or 8000) in your browser.
 
 ## Easter Eggs
-Triple-click the "Developed by MHS" credit in the bottom bar for a special dedication.
+- Triple-click the "Developed by MHS" credit in the bottom bar for a special dedication.
+- Click the "UNTITLED STUDIO" logo in the header to trigger a Soft Reboot sequence.
 
 ## License
 Copyright (c) 2026 MHS. All Rights Reserved.

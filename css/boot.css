@@ -1,0 +1,108 @@
+/* --- BOOT TERMINAL (Matrix/BIOS) --- */
+#boot-terminal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+    color: #00FF41;
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    font-size: 14px;
+    z-index: 9999;
+    padding: 2rem;
+    overflow-y: hidden;
+    /* Scroll logic handles view */
+    /* CRT Scanline Effect */
+    background:
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: auto;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    /* Pin to bottom like a terminal output */
+    transition: opacity 0.5s ease-out;
+}
+
+.boot-line {
+    white-space: pre-wrap;
+    line-height: 1.4;
+    font-size: 1rem;
+    margin-bottom: 2px;
+    font-weight: bold;
+    opacity: 0.9;
+}
+
+/* Cursor Blink on last line */
+#boot-terminal::after {
+    content: "█";
+    animation: blink 1s step-end infinite;
+    color: #00FF41;
+    margin-left: 4px;
+    display: inline-block;
+    width: 10px;
+    height: 14px;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+/* CRT Turn-Off Animation */
+.crt-collapse {
+    /* Scale Y to 0.005 (thin line), then Scale X to 0 */
+    animation: crt-off 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards !important;
+    pointer-events: none;
+}
+
+@keyframes crt-off {
+    0% {
+        transform: scale(1, 1);
+        filter: brightness(1) blur(0px);
+        opacity: 1;
+    }
+
+    40% {
+        transform: scale(1, 0.005);
+        /* Thin horizontal line */
+        filter: brightness(5) blur(2px);
+        /* Flash */
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(0, 0);
+        /* Collapse point */
+        opacity: 0;
+    }
+}
+
+/* White Flash Overlay */
+.crt-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: white;
+    z-index: 10000;
+    animation: flash-frame 0.15s linear forwards;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    /* Additive flash */
+}
+
+@keyframes flash-frame {
+    0% {
+        opacity: 0.8;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}

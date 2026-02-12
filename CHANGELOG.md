@@ -2,6 +2,14 @@
 
 All notable changes to Untitled Studio will be documented in this file.
 
+## [2.10.0] - 2026-02-13
+
+### The Matrix Update
+- **BIOS Boot Sequence**: Added a cinematic, high-fidelity BIOS boot simulation that runs on application startup, featuring variable typing speeds and system diagnostics.
+- **Soft Reboot**: Clicking the "UNTITLED STUDIO" logo now triggers a full system reboot animation (CRT power-off, BIOS sequence, power-on).
+- **Stability**: Fixed a critical startup crash caused by residual audio engine code.
+- **UI Responsiveness**: Resolved issues where sliders and buttons would become unresponsive due to broken haptic feedback calls.
+
 ## [2.9.0] - 2026-02-13
 
 ### ⌨️ The Command Bar Update
