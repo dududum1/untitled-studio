@@ -5,11 +5,6 @@
 
 **Untitled Studio** is a high-performance, privacy-first web image editor built for the aesthetic era. It leverages **WebGL 2.0** to perform cinema-grade color grading, film emulation, and creative effects entirely in the browser—your photos never leave your device.
 
-##  The Manifesto of the Unmasked
-Untitled Studio is governed by a strict philosophy of **unmasked global adjustments**. We reject the digital perversion of "Selective Editing" in favor of holistic, chemical-simulated processing. 
-> "If you can’t fix the whole frame, you haven't earned the shot."
-
-Read the full 7-chapter [Manifesto](manifesto.html) to understand the "Unmasked" identity.
 
 ##  Key Features
 

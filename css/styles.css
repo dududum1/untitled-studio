@@ -193,30 +193,48 @@
 }
 
 .theme-drawer {
-    position: absolute;
-    bottom: calc(100% + 8px);
-    right: 50%;
-    transform: translateX(50%);
-    display: flex;
-    gap: 8px;
-    padding: 8px 12px;
+    position: fixed;
+    left: 110px;
+    /* Right of the 90px sidebar */
+    bottom: 30px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 14px;
     background: var(--glass-solid);
     border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    border-radius: 18px;
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
     opacity: 0;
     pointer-events: none;
-    transform: translateX(50%) translateY(8px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    z-index: 200;
+    transform: translateX(15px);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 9999;
+    width: 130px;
+}
+
+/* Mobile: Pop Up */
+@media (max-width: 768px) {
+    .theme-drawer {
+        left: 50%;
+        bottom: 85px;
+        /* Above the 70px mobile navbar */
+        transform: translateX(-50%) translateY(15px);
+    }
 }
 
 .theme-drawer.open {
     opacity: 1;
     pointer-events: auto;
-    transform: translateX(50%) translateY(0);
+    transform: translateX(0) translateY(0);
+}
+
+@media (max-width: 768px) {
+    .theme-drawer.open {
+        transform: translateX(-50%) translateY(0);
+    }
 }
 
 .theme-swatch {
@@ -543,7 +561,13 @@ input[type="range"] {
     min-height: 44px;
     min-width: 44px;
     touch-action: manipulation;
+    touch-action: manipulation;
     /* Disable double-tap zoom delay */
+}
+
+.fx-subtab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* Specific fix for smaller buttons to maintain visual size but increase hit area */
@@ -721,7 +745,15 @@ input[type="range"] {
     border-radius: 2px;
     cursor: pointer;
     position: relative;
-    margin: 10px 0;
+    margin: 12px 0;
+    /* Increased from 10px */
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
 }
 
 .studio-slider::-webkit-slider-thumb {
@@ -2484,4 +2516,72 @@ body.ui-hidden .logo {
     pointer-events: none !important;
     transition: opacity 0.5s ease, transform 0.5s ease;
     transform: translateY(20px);
+}
+
+/* --- GOOEY LIQUID TEXT --- */
+.gooey-text,
+.logo {
+    display: inline-block;
+    filter: url(#gooey);
+    will-change: filter;
+}
+
+/* --- PHOSPHOR RAIN EFFECT --- */
+.phosphor-rain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    mix-blend-mode: screen;
+
+    background-image: repeating-linear-gradient(90deg,
+            #00FF41 0px,
+            #00FF41 1px,
+            transparent 1px,
+            transparent 40px);
+    background-size: 100% 200%;
+
+    mask-image: linear-gradient(180deg, transparent 0%, black 50%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 50%, transparent 100%);
+
+    animation: data-fall 4s linear infinite;
+}
+
+[data-theme='phosphor'] .phosphor-rain {
+    opacity: 0.15;
+}
+
+@keyframes data-fall {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: 0% 100%;
+    }
+}
+
+
+/* --- DEBUG FIXES --- */
+
+/* 1. Gooey Text Fix: Remove static filter, let JS manage it */
+.logo {
+    filter: none;
+    z-index: 50;
+    position: relative;
+    contain: layout style paint;
+}
+
+/* 2. Phosphor Rain Fix: Handle Capitalized Theme & Z-Index */
+[data-theme='Phosphor'] .phosphor-rain {
+    opacity: 0.15;
+}
+
+/* Ensure Rain is visible but behind UI */
+.phosphor-rain {
+    z-index: 1;
+    /* Above background */
+    pointer-events: none;
 }

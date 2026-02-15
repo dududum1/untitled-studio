@@ -56,7 +56,7 @@ class BootTerminal {
             "   > THREE_JS_RENDERER... [ACTIVE]",
             "CHECKING_COPYRIGHT_HEADERS...",
             "   > (C) 2026 UNTITLED STUDIO // MHS",
-            "   > MANIFESTO_INTEGRITY: 100%",
+
             "CALIBRATING_COLOR_SCIENCE...",
             "SYSTEM_READY.",
             "BOOTING_INTERFACE..."

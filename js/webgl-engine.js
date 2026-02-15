@@ -1223,11 +1223,11 @@ class WebGLEngine {
 
         // Vibe
         gl.uniform1f(this.uniforms.u_lightLeak, v(adj.lightLeak));
-        
+
         // New Procedural Light Leak
         if (this.uniforms.u_lightLeakColor) {
-             const col = adj.lightLeakColor || [1.0, 0.27, 0.0]; // Default to #FF4500
-             gl.uniform3f(this.uniforms.u_lightLeakColor, col[0], col[1], col[2]);
+            const col = adj.lightLeakColor || [1.0, 0.27, 0.0]; // Default to #FF4500
+            gl.uniform3f(this.uniforms.u_lightLeakColor, col[0], col[1], col[2]);
         }
         if (this.uniforms.u_lightLeakIntensity) gl.uniform1f(this.uniforms.u_lightLeakIntensity, adj.lightLeakIntensity || 0);
         if (this.uniforms.u_lightLeakEntropy) gl.uniform1f(this.uniforms.u_lightLeakEntropy, adj.lightLeakEntropy || 0);
@@ -2471,6 +2471,16 @@ class WebGLEngine {
         this.render();
 
         return asciiStr;
+    }
+    toggleSplitView() {
+        if (this.adjustments.splitPos === -1.0) {
+            this.adjustments.splitPos = 0.5;
+            console.log("Split View Enabled");
+        } else {
+            this.adjustments.splitPos = -1.0;
+            console.log("Split View Disabled");
+        }
+        this.render();
     }
 }
 

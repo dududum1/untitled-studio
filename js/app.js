@@ -46,8 +46,7 @@ class UntitledStudio {
         this.deferredPrompt = null;
         this.initPWA();
 
-        // Theme Engine
-        this.initThemeEngine();
+        // Theme Engine initialization moved to init() method to avoid duplication
 
         // Initialize Startup Toast (Random)
         const toastContainer = document.getElementById('startup-toast');
@@ -220,9 +219,10 @@ class UntitledStudio {
         this.lutParser = new LUTParser();
 
         // Global Audio Listener
+        this.audio = window.Sonic; // Initialize from global
         document.addEventListener('click', (e) => {
-            if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.classList.contains('studio-slider')) {
-                this.audio.playClick();
+            if (this.audio && (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.classList.contains('studio-slider'))) {
+                this.audio.playClick(); // Ensure playClick exists if checking audio
             }
         });
 
@@ -472,10 +472,19 @@ class UntitledStudio {
             this.initOLED();      // Mobile Extra 2
             this.initVibePack();  // Retro Vibe Pack
             this.initPresetAccordion(); // New: Collapsible Menu
+            this.initRailNavigation();  // Phase 2: Sidebar Rail
             this.initCRT();         // CRT Visualization Mode
-            this.initManifestoMode(); // Brutalist Theme
+
+            this.initThemeEngine();    // Restoration
             this.initTerminalViewer(); // Phase VII
-            this.initSpectral();       // Phase VIII
+            this.initSpectral();        // Initialize Receipt Scanner
+            if (window.ReceiptScannerClass) {
+                this.receiptScanner = new window.ReceiptScannerClass(this);
+                this.receiptScanner.init();
+            }
+
+            // Initialize Receipt Printer logic
+            this.initReceiptPrinter(); // Thermal Printer
 
             await this.loadSavedSessions().catch(err => console.warn('Failed to load saved sessions:', err));
             await this.loadCustomPresets().catch(err => console.warn('Failed to load presets:', err));
@@ -486,6 +495,60 @@ class UntitledStudio {
             console.error('Critical initialization error:', error);
             alert('Some features may not work correctly. Check console for details.');
         }
+    }
+
+    initReceiptPrinter() {
+        const btn = document.getElementById('export-receipt-btn');
+        const modal = document.getElementById('receipt-modal');
+        const container = document.getElementById('receipt-container');
+        const img = document.getElementById('receipt-image');
+        const closeBtn = document.getElementById('close-receipt');
+        const downloadLink = document.getElementById('download-receipt');
+
+        if (!btn || !modal) return;
+
+        btn.addEventListener('click', async () => {
+            // 1. Play Sound
+            if (window.Sonic) window.Sonic.playPrinter();
+
+            // 2. Generate Receipt
+            if (window.ReceiptGenerator) {
+                // Use current engine adjustments
+                // If using 'presets', we might need to resolve effective adjustments
+                // For now, use engine.adjustments
+                const state = this.engine.adjustments;
+                const dataUrl = await window.ReceiptGenerator.generate(state);
+
+                img.src = dataUrl;
+                downloadLink.href = dataUrl;
+
+                // 3. Show Modal with Animation
+                modal.classList.remove('hidden');
+                // Trigger reflow
+                void modal.offsetWidth;
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+
+                // Slide Down
+                setTimeout(() => {
+                    container.classList.remove('translate-y-[-100vh]');
+                    container.classList.add('translate-y-0');
+                }, 100);
+            }
+        });
+
+        const close = () => {
+            container.classList.remove('translate-y-0');
+            container.classList.add('translate-y-[-100vh]');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 500); // 0.3s opacity + buffer
+        };
+
+        if (closeBtn) closeBtn.addEventListener('click', close);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) close();
+        });
     }
 
     initVibePack() {
@@ -592,39 +655,7 @@ class UntitledStudio {
         }
     }
 
-    initManifestoMode() {
-        const toggle = document.getElementById('manifesto-mode-toggle');
-        const grain = document.getElementById('manifesto-grain');
 
-        const isManifesto = localStorage.getItem('manifestoMode') === 'true';
-
-        const applyMode = (active) => {
-            document.body.classList.toggle('manifesto-mode', active);
-            if (grain) {
-                grain.style.opacity = active ? '0.1' : '0';
-                grain.style.display = active ? 'block' : 'none';
-            }
-            if (toggle) toggle.checked = active;
-            localStorage.setItem('manifestoMode', active);
-        };
-
-        if (isManifesto) {
-            applyMode(true);
-        }
-
-        if (toggle) {
-            toggle.addEventListener('change', (e) => {
-                const active = e.target.checked;
-                applyMode(active);
-                this.hapticFeedback(active ? 'heavy' : 'light');
-                if (active) {
-                    this.audio.playGlitch();
-                    console.log('Take the amplified and the reversal, then smash together those two different expressions of infinity to create and push out imaginary mass.');
-                    console.log('Imaginary Technique: Purple.');
-                }
-            });
-        }
-    }
 
     initCRT() {
         const toggle = document.getElementById('crt-toggle-btn');
@@ -774,6 +805,7 @@ class UntitledStudio {
             thumbnailQueue: document.getElementById('thumbnail-queue'),
             importBtn: document.getElementById('import-btn'),
             importHeroBtn: document.getElementById('import-hero-btn'),
+            dockImportBtn: document.getElementById('dock-import-btn'), // New
             syncAllBtn: document.getElementById('sync-all-btn'),
             newRollBtn: document.getElementById('new-roll-btn'),
             batchCount: document.getElementById('batch-count'),
@@ -897,6 +929,11 @@ class UntitledStudio {
             lqipImage: document.getElementById('lqip-image'),
             lqipProgressFill: document.getElementById('lqip-progress-fill'),
             lqipProgressText: document.getElementById('lqip-progress-text'),
+
+            // Split View
+            splitSliderContainer: document.getElementById('split-slider-container'),
+            splitSlider: document.getElementById('split-slider'),
+            splitLine: document.getElementById('split-line'),
 
             // Preset Strength
             presetStrengthContainer: document.getElementById('preset-strength-container'),
@@ -1329,6 +1366,7 @@ class UntitledStudio {
         // File import
         on(this.elements.importBtn, 'click', () => this.openFilePicker());
         on(this.elements.importHeroBtn, 'click', () => this.openFilePicker());
+        on(this.elements.dockImportBtn, 'click', () => this.openFilePicker());
         on(this.elements.newRollBtn, 'click', () => this.createNewRoll());
         on(this.elements.fileInput, 'change', (e) => this.handleFileSelect(e));
 
@@ -1336,7 +1374,18 @@ class UntitledStudio {
         // (Assuming these elements exist in this.elements)
         if (this.elements.importLutBtn) {
             on(this.elements.importLutBtn, 'click', () => this.elements.lutInput?.click());
+            on(this.elements.lutInput, 'change', (e) => this.handleLutSelect(e));
+            on(this.elements.removeLutBtn, 'click', () => this.removeLUT());
         }
+
+        // Texture Import
+        if (this.elements.importTextureBtn) {
+            on(this.elements.importTextureBtn, 'click', () => this.elements.textureInput?.click());
+            on(this.elements.importTextureBtnAlt, 'click', () => this.elements.textureInput?.click());
+            on(this.elements.textureInput, 'change', (e) => this.handleTextureSelect(e));
+            on(this.elements.removeTextureBtn, 'click', () => this.removeTexture());
+        }
+
         if (this.elements.lutInput) {
             on(this.elements.lutInput, 'change', (e) => this.handleLUTUpload(e));
         }
@@ -1878,8 +1927,51 @@ class UntitledStudio {
         document.addEventListener('keydown', (e) => this.handleKeyboard(e));
     }
 
+    switchFxSubTab(tabName) {
+        // validate tabName
+        if (!tabName) return;
+
+        // Update Buttons
+        if (this.elements.fxSubTabBtns) {
+            this.elements.fxSubTabBtns.forEach(btn => {
+                const isActive = btn.dataset.subtab === tabName;
+                btn.classList.toggle('active', isActive);
+                // Tailwind classes for active state
+                if (isActive) {
+                    btn.classList.remove('text-gray-400');
+                    btn.classList.add('bg-white/10', 'text-white');
+                } else {
+                    btn.classList.add('text-gray-400');
+                    btn.classList.remove('bg-white/10', 'text-white');
+                }
+            });
+        }
+
+        // Update Panels
+        if (this.elements.fxSubPanels) {
+            this.elements.fxSubPanels.forEach(panel => {
+                const isTarget = panel.id === `fx-${tabName}`;
+                if (isTarget) {
+                    panel.classList.remove('hidden');
+                    // Trigger reflow/animation if needed
+                    panel.classList.add('active');
+                } else {
+                    panel.classList.add('hidden');
+                    panel.classList.remove('active');
+                }
+            });
+        }
+
+        // Haptic Feedback
+        this.hapticFeedback('light');
+    }
+
     openFilePicker() {
-        this.elements.fileInput.click();
+        if (this.elements.fileInput) {
+            this.elements.fileInput.click();
+        } else {
+            console.error('File Input element not found');
+        }
     }
 
     async handleFileSelect(e) {
@@ -2282,6 +2374,20 @@ class UntitledStudio {
                 }
                 thumb.dataset.rollId = imageData.rollId;
                 return;
+            }
+        }
+
+        // Ensure we have a queue container
+        if (!this.elements.thumbnailQueue) {
+            this.elements.thumbnailQueue = document.getElementById('thumbnail-queue');
+            this.elements.importBtn = document.getElementById('dock-import-btn');
+
+            // Fallback if still missing (shouldn't happen with HTML fix)
+            if (!this.elements.thumbnailQueue) return;
+
+            // Bind import button if found
+            if (this.elements.importBtn) {
+                this.elements.importBtn.addEventListener('click', () => document.getElementById('file-input').click());
             }
         }
 
@@ -3003,6 +3109,19 @@ class UntitledStudio {
             wheel.innerHTML = newCardHtml + wheel.innerHTML;
         }
 
+        // Add "Scan Receipt" Card if Custom or All
+        if (category === 'custom' || category === 'all') {
+            const scanCardHtml = `
+            <div class="wheel-card group border-dashed border-2 border-white/20 hover:border-hot-pink/50" id="scan-receipt-card">
+                <div class="wheel-card-preview flex items-center justify-center bg-black/20">
+                    <svg class="w-8 h-8 text-hot-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                </div>
+                <div class="wheel-card-label text-hot-pink">Scan Receipt</div>
+            </div>`;
+            // Insert at the very beginning (before New Preset if it exists)
+            wheel.innerHTML = scanCardHtml + wheel.innerHTML;
+        }
+
         // 3. Initialize IntersectionObserver for Center Detection
         const options = {
             root: wheel,
@@ -3070,6 +3189,14 @@ class UntitledStudio {
         if (createCard) {
             createCard.addEventListener('click', () => {
                 this.showSavePresetModal();
+            });
+        }
+
+        // 7. Handle "Scan Receipt" Click
+        const scanCard = wheel.querySelector('#scan-receipt-card');
+        if (scanCard) {
+            scanCard.addEventListener('click', () => {
+                if (this.receiptScanner) this.receiptScanner.open();
             });
         }
 
@@ -4788,51 +4915,69 @@ class UntitledStudio {
 
     // ============ DYNAMIC THEME ENGINE (v2 — 6 Themes + Drawer) ============
     initThemeEngine() {
-        const THEMES = ['kodak', 'braun', 'phosphor', 'safelight', 'cyanotype', 'vapor'];
-        const saved = localStorage.getItem('untitled-theme') || 'kodak';
-        this.currentTheme = THEMES.includes(saved) ? saved : 'kodak';
-        this._originalLogoText = null; // Cache for Safelight restore
+        try {
+            const THEMES = ['kodak', 'braun', 'phosphor', 'safelight', 'cyanotype', 'vapor'];
+            const saved = localStorage.getItem('untitled-theme') || 'kodak';
+            this.currentTheme = THEMES.includes(saved) ? saved : 'kodak';
 
-        // Initialize Cipher Reveal
-        if (window.CipherReveal) {
-            window.CipherReveal.init('[data-cipher]');
-        }
+            console.log(`[Theme] System ready. Initial: ${this.currentTheme.toUpperCase()}`);
 
-        // Apply saved theme on load
-        this._applyTheme(this.currentTheme);
+            if (window.CipherReveal) {
+                window.CipherReveal.init('[data-cipher]');
+            }
 
-        // Drawer toggle
-        const pickerBtn = document.getElementById('theme-picker-btn');
-        const drawer = document.getElementById('theme-drawer');
-        if (pickerBtn && drawer) {
-            pickerBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                drawer.classList.toggle('open');
-                if (this.hapticFeedback) this.hapticFeedback('light');
-            });
+            this._applyTheme(this.currentTheme);
 
-            // Close drawer on outside click
+            // Robust Delegated Listener attached to document
             document.addEventListener('click', (e) => {
-                if (!drawer.contains(e.target) && e.target !== pickerBtn) {
-                    drawer.classList.remove('open');
+                const pickerBtn = document.getElementById('theme-picker-btn');
+                const drawer = document.getElementById('theme-drawer');
+
+                if (!pickerBtn || !drawer) return;
+
+                const isTrigger = e.target === pickerBtn || pickerBtn.contains(e.target);
+                const isInsideDrawer = drawer.contains(e.target);
+
+                if (isTrigger) {
+                    console.log('[Theme] Toggle clicked');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    drawer.classList.toggle('open');
+                    if (this.hapticFeedback) this.hapticFeedback('light');
+                    if (window.Sonic && window.Sonic.playClick) window.Sonic.playClick();
+                } else if (isInsideDrawer) {
+                    const swatch = e.target.closest('.theme-swatch');
+                    if (swatch) {
+                        const theme = swatch.dataset.theme;
+                        if (theme && THEMES.includes(theme)) {
+                            console.warn(`[Theme] Switching to: ${theme.toUpperCase()}`);
+                            this._applyTheme(theme);
+                            localStorage.setItem('untitled-theme', theme);
+                            if (this.hapticFeedback) this.hapticFeedback('medium');
+                        }
+                    }
+                    // Keep drawer open if they clicked inside but didn't hit a swatch?
+                    // Actually, let's stop propagation if inside drawer so outside click doesn't close it
+                    e.stopPropagation();
+                } else {
+                    // Outside click - Close
+                    if (drawer.classList.contains('open')) {
+                        console.log('[Theme] Closing drawer (outside click)');
+                        drawer.classList.remove('open');
+                    }
                 }
             });
 
-            // Swatch click handlers
-            drawer.querySelectorAll('.theme-swatch').forEach(swatch => {
-                swatch.addEventListener('click', () => {
-                    const theme = swatch.dataset.theme;
-                    if (theme && THEMES.includes(theme)) {
-                        this._applyTheme(theme);
-                        localStorage.setItem('untitled-theme', theme);
-                        if (this.hapticFeedback) this.hapticFeedback('medium');
-                        console.log(`[Theme] Switched to ${theme.toUpperCase()}`);
-                    }
-                });
-            });
-
-            // Mark active swatch on load
             this._updateActiveSwatches();
+
+            // Developer Fallback
+            window.untitledTheme = {
+                apply: (t) => this._applyTheme(t),
+                current: () => this.currentTheme,
+                list: () => THEMES
+            };
+        } catch (e) {
+            console.error('[Theme] Init failed:', e);
         }
     }
 
@@ -4842,7 +4987,7 @@ class UntitledStudio {
         document.documentElement.setAttribute('data-theme', theme);
         this._updateActiveSwatches();
         this._syncMetaThemeColor();
-        this._applyManifesto(theme);
+
 
         // Trigger Cipher Reveal Animation
         if (window.CipherReveal) {
@@ -4857,22 +5002,7 @@ class UntitledStudio {
         });
     }
 
-    /** Manifesto behaviors — special per-theme overrides */
-    _applyManifesto(theme) {
-        const logoEl = document.querySelector('.logo');
-        if (logoEl) {
-            // Cache original content on first call
-            if (!this._originalLogoHTML) {
-                this._originalLogoHTML = logoEl.innerHTML;
-            }
 
-            if (theme === 'safelight') {
-                logoEl.innerHTML = '<span class="prompt">&gt;</span>DARKROOM MODE<span class="cursor"></span>';
-            } else {
-                logoEl.innerHTML = this._originalLogoHTML;
-            }
-        }
-    }
 
     /** Sync <meta name="theme-color"> with the active theme's --bg-main */
     _syncMetaThemeColor() {
@@ -4885,6 +5015,262 @@ class UntitledStudio {
             });
         }
     }
+    initRailNavigation() {
+        // New Sidebar Rail Logic (Phase 2 Refactor & Restoration)
+        const railButtons = document.querySelectorAll('.rail-icon');
+
+        // Map Tabs to Container IDs
+        const map = {
+            'tone': 'group-tone',
+            'curve': 'group-curve',
+            'color': 'group-color',
+            'fx': 'group-fx',
+            'transform': 'group-transform',
+            'presets': 'group-presets'
+        };
+
+        // Tool Bindings
+        const toolMap = {
+            'rail-undo-btn': () => this.history.undo(),
+            'rail-redo-btn': () => this.history.redo(),
+            'rail-history-btn': () => {
+                const historySidebar = document.getElementById('history-sidebar');
+                if (historySidebar) {
+                    // Toggle translate-x-full to slide in/out
+                    if (historySidebar.classList.contains('translate-x-full')) {
+                        historySidebar.classList.remove('translate-x-full');
+                    } else {
+                        historySidebar.classList.add('translate-x-full');
+                    }
+                }
+            },
+            'rail-split-btn': () => this.toggleSplitView(),
+            'rail-histogram-btn': () => {
+                const hud = document.getElementById('scopes-hud');
+                if (hud) hud.classList.toggle('hidden');
+                console.log('Toggle Histogram/Scopes');
+            },
+            'rail-receipt-btn': () => {
+                const modal = document.getElementById('receipt-scanner-modal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    setTimeout(() => modal.querySelector('#scanner-content').classList.remove('opacity-0', 'scale-95'), 10);
+                    setTimeout(() => modal.querySelector('#scanner-backdrop').classList.remove('opacity-0'), 10);
+                    if (window.ReceiptScanner) window.ReceiptScanner.startCamera();
+                }
+            },
+            'rail-settings-btn': () => this.showExportSettings(),
+            'rail-export-btn': () => this.showExportSettings()
+        };
+
+        railButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const button = e.currentTarget;
+
+                // 1. Tool Logic
+                if (button.id && toolMap[button.id]) {
+                    // Visual Feedback
+                    button.classList.add('text-hot-pink');
+                    setTimeout(() => button.classList.remove('text-hot-pink'), 200);
+                    toolMap[button.id]();
+                    return;
+                }
+
+                // 2. Tab Logic
+                const tab = button.dataset.tab;
+                if (!tab) return;
+
+                const targetId = map[tab];
+                if (!targetId) return;
+
+                // Update Subtitle
+                const subtitleMap = {
+                    'tone': 'LIGHT & TONE',
+                    'curve': 'TONE CURVE',
+                    'color': 'COLOR GRADING',
+                    'fx': 'EFFECTS & OPTICS',
+                    'transform': 'GEOMETRY',
+                    'presets': 'FILM LOOKS'
+                };
+                const subtitleEl = document.getElementById('panel-subtitle');
+                if (subtitleEl && subtitleMap[tab]) {
+                    subtitleEl.textContent = subtitleMap[tab];
+                    // Optional: trigger animation
+                    subtitleEl.style.opacity = '0.5';
+                    setTimeout(() => subtitleEl.style.opacity = '1', 50);
+                }
+
+                // Update Rail UI
+                document.querySelectorAll('.rail-icon[data-tab]').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+
+                // Toggle visibility
+                Object.values(map).forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        if (id === targetId) {
+                            el.classList.add('active');
+                            el.classList.remove('hidden');
+                            if (targetId === 'group-presets') {
+                                // refresh?
+                            }
+                        } else {
+                            el.classList.remove('active');
+                            el.classList.add('hidden');
+                        }
+                    }
+                });
+
+                // Mobile Drawer
+                const panel = document.getElementById('control-panel');
+                if (window.innerWidth < 768 && panel) {
+                    panel.classList.add('active');
+                }
+            });
+        });
+
+        this.initExportLogic();
+    }
+
+    initHistory() {
+        if (typeof HistoryManager !== 'undefined') {
+            this.history = new HistoryManager();
+            this.history.onStateChange = (state) => this.renderHistoryPanel(state);
+            console.log('✓ History Initialized');
+        } else {
+            console.warn('HistoryManager not loaded');
+            this.history = { undo: () => { }, redo: () => { }, push: () => { } };
+        }
+    }
+
+    renderHistoryPanel(state) {
+        const list = document.getElementById('history-list');
+        if (!list) return;
+
+        list.innerHTML = ''; // Clear
+
+        if (!state || !state.states) return;
+
+        // Show newest at top
+        const reversed = [...state.states].reverse();
+
+        reversed.forEach(item => {
+            const el = document.createElement('div');
+            el.className = `p-2 mb-1 rounded cursor-pointer text-xs flex justify-between items-center ${item.isCurrent ? 'bg-hot-pink/20 text-hot-pink font-bold border-l-2 border-hot-pink' : 'hover:bg-white/10 text-gray-400'}`;
+            el.innerHTML = `
+                <span>${item.label || 'Adjustment'}</span>
+                <span class="text-[10px] opacity-50">${new Date(item.timestamp).toLocaleTimeString()}</span>
+            `;
+            el.addEventListener('click', () => {
+                this.history.jumpTo(item.index);
+            });
+            list.appendChild(el);
+        });
+    }
+
+    initExportLogic() {
+        const confirmBtn = document.getElementById('confirm-export-btn');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => this.exportImage());
+        }
+
+        document.querySelectorAll('.export-format-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.export-format-btn').forEach(b => {
+                    b.classList.remove('active', 'bg-hot-pink/20', 'border-hot-pink', 'text-white');
+                    b.classList.add('bg-white/5', 'border-white/10', 'text-gray-400');
+                });
+                btn.classList.add('active', 'bg-hot-pink/20', 'border-hot-pink', 'text-white');
+                btn.classList.remove('bg-white/5', 'border-white/10', 'text-gray-400');
+            });
+        });
+
+        const qSlider = document.getElementById('export-quality');
+        const qVal = document.getElementById('export-quality-val');
+        if (qSlider && qVal) {
+            qSlider.addEventListener('input', (e) => {
+                qVal.textContent = e.target.value + '%';
+            });
+        }
+    }
+
+    exportImage() {
+        const formatBtn = document.querySelector('.export-format-btn.active');
+        const format = formatBtn ? formatBtn.dataset.format : 'jpeg';
+        const quality = document.getElementById('export-quality').value / 100;
+
+        if (!this.engine || !this.engine.gl) return;
+
+        const canvas = this.engine.gl.canvas;
+        const mime = format === 'png' ? 'image/png' : 'image/jpeg';
+        const dataURL = canvas.toDataURL(mime, quality);
+
+        const link = document.createElement('a');
+        link.download = `untitled_edit_${Date.now()}.${format}`;
+        link.href = dataURL;
+        link.click();
+
+        this.showToast('Image Exported Successfully');
+        document.getElementById('export-settings-modal').classList.add('hidden');
+    }
+
+    toggleSplitView() {
+        if (!this.elements.splitSliderContainer) return;
+
+        const isHidden = this.elements.splitSliderContainer.classList.contains('hidden');
+        if (isHidden) {
+            // Enable
+            this.elements.splitSliderContainer.classList.remove('hidden');
+            if (this.engine) {
+                // Initialize split position
+                const val = this.elements.splitSlider ? parseFloat(this.elements.splitSlider.value) : 0.5;
+                this.engine.setAdjustment('splitPos', val);
+                // Force a render
+                this.engine.requestRender();
+            }
+            this.showToast('Split View Enabled ◐');
+        } else {
+            // Disable
+            this.elements.splitSliderContainer.classList.add('hidden');
+            if (this.engine) {
+                this.engine.setAdjustment('splitPos', -1.0); // Disable in shader
+                this.engine.requestRender();
+            }
+            this.showToast('Split View Disabled');
+        }
+    }
+
+    initSplitViewControls() {
+        if (!this.elements.splitSlider) return;
+
+        // Listen for slider changes
+        this.elements.splitSlider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+
+            // 1. Update Engine
+            if (this.engine) {
+                this.engine.setAdjustment('splitPos', val);
+                // Only request render if necessary (e.g. if not animating)
+                // But since it's a drag, we want smooth updates. 
+                // Engine loop might handle it, or we force it.
+                // Let's assume engine handles it via loop if playing, or we might need to trigger.
+                // For now, let's trigger it.
+                // this.engine.render(); // If render exposes it
+            }
+
+            // 2. Update Visual Line Position
+            if (this.elements.splitLine) {
+                this.elements.splitLine.style.left = (val * 100) + '%';
+            }
+        });
+
+        // Ensure line is initially positioned correctly
+        if (this.elements.splitLine && this.elements.splitSlider) {
+            const val = parseFloat(this.elements.splitSlider.value);
+            this.elements.splitLine.style.left = (val * 100) + '%';
+        }
+    }
+
 }
 // Handle B key release for Before/After
 document.addEventListener('keyup', (e) => {

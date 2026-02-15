@@ -2,6 +2,21 @@
 
 All notable changes to Untitled Studio will be documented in this file.
 
+## [3.0.0] - 2026-02-15
+
+### Major Release: Sidebar & Theme Overhaul
+- **Theme System Restoration**: Re-anchored the Theme Picker to the global Sidebar Rail for consistent access.
+- **Fixed Drawer Layout**: Refactored the theme drawer with `position: fixed` to prevent clipping and layout desync across different screen sizes.
+- **Robust Event Pipeline**: Implemented a delegated event listener model to ensure reliable toggling even when the DOM is dynamically updated.
+- **Developer Fallback**: Exposed `window.untitledTheme` API for console-based theme switching and debugging.
+
+### UI Polish & Refinement
+- **Subtab Optimization**: Refined the FX sub-navigation with `xs` typography, overflow-scrolling, and `nowrap` constraints to fix overlapping text issues.
+- **Vertical Rhythm**: Increased vertical margins on `.studio-slider` components to improve interactive precision and visual clarity.
+
+## [2.11.0] - 2026-02-15 (Pre-release)
+- **Logo Restoration**: Fixed the studio logo positioning in the header rail.
+
 ## [2.10.0] - 2026-02-13
 
 ### The Matrix Update
