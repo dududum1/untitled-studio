@@ -1614,34 +1614,7 @@ select:focus-visible {
 }
 
 /* ========== BRAND CREDIT FOOTER ========== */
-.brand-credit {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 1rem;
-    background: rgba(0, 0, 0, 0.3);
-    border-top: 1px solid var(--glass-border);
-}
-
-.brand-credit-text {
-    font-size: 10px;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: #444444;
-    transition: color 0.3s ease;
-}
-
-.brand-credit-author {
-    color: #444444;
-    transition: color 0.3s ease, text-shadow 0.3s ease;
-}
-
-.brand-credit:hover .brand-credit-author {
-    color: var(--hot-pink);
-    text-shadow: 0 0 8px var(--hot-pink-glow), 0 0 16px var(--hot-pink-glow);
-}
+/* Superseded by Tailwind util classes in index.html */
 
 /* ========== UTILITY: HIDDEN STATE ========== */
 .hidden {
@@ -2518,13 +2491,7 @@ body.ui-hidden .logo {
     transform: translateY(20px);
 }
 
-/* --- GOOEY LIQUID TEXT --- */
-.gooey-text,
-.logo {
-    display: inline-block;
-    filter: url(#gooey);
-    will-change: filter;
-}
+
 
 /* --- PHOSPHOR RAIN EFFECT --- */
 .phosphor-rain {
@@ -2566,9 +2533,8 @@ body.ui-hidden .logo {
 
 /* --- DEBUG FIXES --- */
 
-/* 1. Gooey Text Fix: Remove static filter, let JS manage it */
+/* 1. Logo Position Fix: Ensure visible relative to panels */
 .logo {
-    filter: none;
     z-index: 50;
     position: relative;
     contain: layout style paint;
@@ -2584,4 +2550,38 @@ body.ui-hidden .logo {
     z-index: 1;
     /* Above background */
     pointer-events: none;
+}
+
+/* --- EASTER EGGS --- */
+
+/* 1. Negative Development Mode */
+.negative-mode {
+    filter: invert(1) hue-rotate(180deg);
+    transition: filter 0.1s steps(2);
+}
+
+/* 2. mhs Signature Pulse */
+@keyframes pulse-text {
+    0% {
+        opacity: 1;
+        text-shadow: 0 0 10px var(--hot-pink);
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        text-shadow: 0 0 20px var(--hot-pink), 0 0 40px var(--hot-pink);
+        transform: scale(1.05);
+    }
+
+    100% {
+        opacity: 1;
+        text-shadow: 0 0 10px var(--hot-pink);
+        transform: scale(1);
+    }
+}
+
+.mhs-pulse {
+    animation: pulse-text 0.1s infinite;
+    color: var(--hot-pink) !important;
 }

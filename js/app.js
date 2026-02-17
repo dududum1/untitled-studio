@@ -218,17 +218,215 @@ class UntitledStudio {
         // LUT Parser
         this.lutParser = new LUTParser();
 
-        // Global Audio Listener
-        this.audio = window.Sonic; // Initialize from global
+        // Global Audio Listener (REMOVED)
+        // this.audio = window.Sonic; 
+        /*
         document.addEventListener('click', (e) => {
             if (this.audio && (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.classList.contains('studio-slider'))) {
-                this.audio.playClick(); // Ensure playClick exists if checking audio
+                this.audio.playClick(); 
             }
         });
+        */
 
         // Initialize Floating Scopes
         this.scopesVisible = localStorage.getItem('scopesVisible') !== 'false'; // Default true
         this.initScopes();
+
+        // Easter Eggs
+        this.initEasterEggs();
+
+        // Footer Modals
+        this.initFooter();
+    }
+
+    initFooter() {
+        const modals = [
+            { id: 'about', url: 'README.md', target: 'about-content' },
+            { id: 'changelog', url: 'CHANGELOG.md', target: 'changelog-content' }
+        ];
+
+        modals.forEach(({ id, url, target }) => {
+            const openBtn = document.getElementById(`open-${id}-btn`);
+            const closeBtn = document.getElementById(`close-${id}-btn`);
+            const modal = document.getElementById(`modal-${id}`);
+            const backdrop = document.getElementById(`modal-${id}-backdrop`);
+            const contentContainer = document.getElementById(target);
+
+            if (openBtn && modal) {
+                openBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    modal.classList.remove('hidden');
+                    // if (window.Sonic) window.Sonic.playClick();
+
+                    // Load content if not already loaded
+                    if (contentContainer && !contentContainer.dataset.loaded) {
+                        fetch(url)
+                            .then(response => {
+                                if (!response.ok) throw new Error('Network response was not ok');
+                                return response.text();
+                            })
+                            .then(text => {
+                                contentContainer.innerHTML = this.parseMarkdown(text);
+                                contentContainer.dataset.loaded = 'true';
+                            })
+                            .catch(err => {
+                                contentContainer.innerHTML = `<p class="text-red-500">Failed to load ${url}</p>`;
+                                console.error(err);
+                            });
+                    }
+                });
+            }
+
+            if (closeBtn && modal) {
+                closeBtn.addEventListener('click', () => {
+                    modal.classList.add('hidden');
+                    // if (window.Sonic) window.Sonic.playClick();
+                });
+            }
+
+            if (backdrop && modal) {
+                backdrop.addEventListener('click', () => {
+                    modal.classList.add('hidden');
+                });
+            }
+        });
+    }
+
+    parseMarkdown(markdown) {
+        let html = markdown
+            // Headers
+            .replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold text-white mt-6 mb-2">$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold text-hot-pink mt-8 mb-4 border-b border-white/10 pb-2">$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-white mb-6 hidden">$1</h1>') // Hide H1 as title is in modal header
+
+            // Bold
+            .replace(/\*\*(.*)\*\*/gim, '<strong class="text-white">$1</strong>')
+
+            // Images (Simple handling, optional)
+            .replace(/!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1" class="w-full rounded-lg my-4 opacity-80 border border-white/10">')
+
+            // Links
+            .replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" target="_blank" class="text-cyan-400 hover:text-cyan-300 underline">$1</a>')
+
+            // Lists (Simple bullet points)
+            .replace(/^\s*[-*]\s+(.*)$/gim, '<li class="ml-4 text-gray-400 list-disc pl-2 mb-1">$1</li>')
+
+            // Code Blocks (Inline)
+            .replace(/`([^`]+)`/gim, '<code class="bg-white/10 px-1 py-0.5 rounded text-xs font-mono text-hot-pink">$1</code>')
+
+            // Paragraphs (Double newlines)
+            .replace(/\n\n/gim, '<br><br>');
+
+        return `<div class="markdown-body space-y-2 font-sans text-sm leading-relaxed">${html}</div>`;
+    }
+
+    initEasterEggs() {
+        // 1. Negative Development Mode (Logo Click)
+        const logo = document.querySelector('#sidebar-rail .text-hot-pink'); // The >_ logo
+        if (logo) {
+            logo.style.cursor = 'pointer';
+            logo.addEventListener('click', () => {
+                console.log('[Easter Egg] Negative Mode Triggered');
+                document.body.classList.toggle('negative-mode');
+
+                // Audio (REMOVED)
+                // if (window.Sonic) window.Sonic.playBlip();
+
+                // Auto-revert after 5s
+                if (document.body.classList.contains('negative-mode')) {
+                    setTimeout(() => {
+                        document.body.classList.remove('negative-mode');
+                    }, 5000);
+                }
+            });
+        }
+
+        // 2. mhs Signature (Title Click)
+        const title = document.querySelector('#control-panel h1');
+        let titleClicks = 0;
+        let titleTimer = null;
+
+        if (title) {
+            title.addEventListener('click', () => {
+                titleClicks++;
+
+                // if (window.Sonic) window.Sonic.playThud();
+
+                clearTimeout(titleTimer);
+                titleTimer = setTimeout(() => {
+                    titleClicks = 0;
+                }, 500);
+
+                if (titleClicks === 3) {
+                    console.log('[Easter Egg] mhs Signature Triggered');
+                    titleClicks = 0;
+                    this.triggerMhsSignature();
+                }
+            });
+        }
+    }
+
+    triggerMhsSignature() {
+        // Audio (REMOVED)
+        // if (window.Sonic) {
+        //    window.Sonic.playSuccess();
+        // }
+
+        // Pulse UI
+        document.body.classList.add('mhs-pulse');
+        setTimeout(() => document.body.classList.remove('mhs-pulse'), 3000);
+
+        // ASCII Toast
+        const toast = document.getElementById('startup-toast');
+        if (toast) {
+            toast.innerHTML = `
+                <div class="bg-black/95 text-hot-pink font-mono text-[4px] p-4 rounded-lg border border-hot-pink shadow-[0_0_50px_rgba(237,39,136,0.5)] text-center overflow-hidden max-w-[90vw] max-h-[80vh]">
+                    <pre class="leading-none mb-2 whitespace-pre text-left mx-auto inline-block">
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⡀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡀⠤⠒⠊⠉⠀⠀⠀⠀⠉⠐⠢⠄⣀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣶⣬⣅⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠒⠤⣀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠤⡖⣯⡐⠺⡜⠤⠈⣻⢱⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠁⠢⢄
+⠀⠀⠀⠀⠀⢀⣀⣠⣤⣤⣴⣶⣶⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣷⣿⣶⣷⣤⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠢⡀
+⣠⣤⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣌⠢⡀
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀⠀⢠⣿⣷⡵⡀
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⡀⠀⠀⠀⠀⢸⣿⣿⣿⣧
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡄⠀⠀⠀⣼⣿⣿⣿⣿⡄
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠛⠛⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣆⠀⢠⣿⣿⣿⣿⣿⣧
+⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⡿⠟⠉⠀⠀⠀⢀⡔⠁⠀⠀⠀⠈⢉⢟⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣚⣿⣿⣿⣿⣿⣯⡄
+⣿⣿⣿⣿⣿⡿⠋⢁⠞⠉⠀⠀⠀⠀⠀⣰⡟⠀⠀⠀⠀⢀⠔⠁⡎⠀⠀⠀⠉⠛⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣱⠟⣿⣿⣿⣿⣣
+⣿⣿⣿⡿⠋⠀⠀⠃⠀⠀⠀⠀⠀⢀⠞⡝⠀⠀⠀⠀⣰⣃⠀⠸⠀⠀⠀⠀⠀⠀⠀⠀⠙⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣬⠽⣿⣿⣿⡿
+⣿⣿⠟⠀⠀⠀⠀⠀⠀⠀⠀⠀⣔⠁⢰⠀⠀⠀⢀⠎⠀⠀⠉⡇⠀⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣠⣿⣿⣿⣿⡇
+⡿⠃⠀⠀⠀⠀⠀⠀⠀⠀⢠⠞⠛⠿⡆⡄⠀⢠⡂⠀⠀⠀⢰⠀⠀⢀⡞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠉⠻⣿⣿⣤
+⠁⠀⠀⠀⡘⠀⠀⢀⠀⡰⠡⠀⠀⢀⣏⣇⢠⣷⣌⠢⡀⠀⢸⠀⠀⠎⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠈⠻⢿⣆
+⠀⠀⠀⢠⠃⠀⢀⡎⡘⠀⠀⡆⣰⠿⢿⣿⣿⣿⣿⣷⣌⠂⢸⠀⡜⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⠀⠙⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣇⠀⠀⠀⡙⡝⢅⠒
+⠀⠀⠀⣾⠀⠀⠎⡗⠀⠀⠀⠈⠣⢔⠂⢌⠙⢿⣿⣏⠃⠀⠸⢠⠁⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⢂⡼⠋⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⡇⠐⠜
+⠀⠀⢰⣿⠀⡜⠀⠃⠀⠀⠀⠀⠀⠀⠈⠒⠧⣊⠟⠁⠀⠀⠀⡞⠀⢸⡄⠀⠀⠀⠀⠀⠀⠀⠀⣎⣾⡀⠃⠀⠀⠀⠈⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀⢱⠀⠀⡗
+⠀⡇⣾⢿⢰⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⡗⡀⠀⠀⠀⠀⡐⠀⣼⠋⠈⢣⡆⠀⠀⢠⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣇⠀⠀⢆⠀⠇
+⠀⣧⣿⡎⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠃⠐⡄⠀⠀⠀⡇⢀⠃⠀⠀⠀⠇⠀⠀⣼⠀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠘⠌
+⠀⣿⣯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠦⡀⠀⣿⢘⢂⠀⠀⢰⠄⠀⢀⡇⢀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇
+⠀⢿⡏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⣪⣼⣦⣿⣿⣷⣕⢄⡈⠀⠠⢺⡇⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷
+⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠤⠤⢀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢼⡉⠙⠻⣿⣿⣿⡿⣷⢃⠔⠁⣿⢧⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⠀⠈⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⢍⢢⠈⢻⣿⠇⠘⢿⣦⣰⣿⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄
+⠀⠀⢿⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⠥⡼⣋⠠⠐⠛⠛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇
+⡀⠀⠸⣿⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇
+⣱⡄⠀⢻⣿⣳⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠇
+⡷⣿⣦⣀⢿⣷⠈⠢⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠆⠀⢠⡿⠯⣠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟
+⡇⠈⠛⢿⣿⣷⣄⣀⠈⠐⢄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⠊⠀⠀⣀⠏⠀⠀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠁
+⡋⠀⠀⠀⢿⣿⡿⢿⣿⢎⣴⡬⡢⢄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠠⠐⢁⡠⠀⠀⠉⠢⠀⢀⣰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠟⠛⠉
+⠃⠀⠀⠀⢸⣿⣇⠀⠈⠺⠿⣿⣿⣶⣼⣾⣦⣦⡄⠄⡀⡀⠠⠤⠀⣂⣉⣤⣴⣾⣿⣷⣤⣀⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⠉⠉⠁⡰⠁
+⠀⠀⠀⠀⣸⣿⢣⢓⣉⣐⠠⣀⠈⠙⣿⡿⣛⣥⣾⣿⡽⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⣩⣿⣿⣿⣿⣿⠟⣽⠟⠁</pre>
+                    <div class="font-bold tracking-widest text-lg mt-4">HANDCRAFTED BY MHS</div>
+                    <div class="text-[10px] opacity-70 mt-1">WEST JAVA // 2026</div>
+                </div>
+            `;
+            // Force redraw/re-layout
+            void toast.offsetWidth;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 6000);
+        }
     }
 
 
@@ -3299,6 +3497,40 @@ class UntitledStudio {
             presetToApply.grainType = this.detectGrainType(preset.name);
         }
 
+        // Handle Auto-Overlay for Yodica or other textures
+        if (presetToApply.overlay) {
+            let url = presetToApply.overlay;
+
+            // 1. Check if asset is already in registry (Base64)
+            if (window.TextureAssets && window.TextureAssets[url]) {
+                url = window.TextureAssets[url];
+            }
+            // 2. Fallback: Generate procedurally if it's a Yodica asset
+            else if (window.YodicaGenerator && (url.includes('antares') || url.includes('vega') || url.includes('rainbow') || url.includes('patchwork'))) {
+                const generated = window.YodicaGenerator.generate(url);
+                if (generated) {
+                    url = generated;
+                    // Cache it so we don't regenerate every apply
+                    if (!window.TextureAssets) window.TextureAssets = {};
+                    window.TextureAssets[presetToApply.overlay] = generated;
+                }
+            }
+
+            this.engine.loadOverlay(url).then(() => {
+                // Set preset-specific opacity if defined, else default
+                const op = presetToApply.overlayOpacity ?? 80;
+                this.engine.setAdjustment('overlayOpacity', op);
+            });
+        } else {
+            // Clear overlay if preset doesn't have one? 
+            // In applyPreset, engine preserves savedOverlayTex, so we might want to optionally clear it.
+            // For now, if preset doesn't define one, we keep current (user's custom) or clear?
+            // Actually, applyPreset in engine preserves it. Let's force clear if explicitly empty.
+            if (presetToApply.overlay === "") {
+                this.engine.removeOverlay();
+            }
+        }
+
         this.engine.applyPreset(presetToApply);
 
         // Store the full preset adjustments
@@ -3954,7 +4186,9 @@ class UntitledStudio {
     }
 
     updateBatchCount() {
-        this.elements.batchCount.textContent = `${this.images.length} / 10`;
+        if (this.elements.batchCount) {
+            this.elements.batchCount.textContent = `${this.images.length} / 10`;
+        }
     }
 
     updateUIState() {
@@ -3976,15 +4210,21 @@ class UntitledStudio {
             }
         }
 
-        this.elements.syncAllBtn.disabled = this.images.length <= 1;
-        this.elements.exportBtn.disabled = !hasActiveImage;
+        if (this.elements.syncAllBtn) {
+            this.elements.syncAllBtn.disabled = this.images.length <= 1;
+        }
+        if (this.elements.exportBtn) {
+            this.elements.exportBtn.disabled = !hasActiveImage;
+        }
         const batchBtn = document.getElementById('batch-export-btn');
         if (batchBtn) {
             // Show only if we have images
             if (hasImages) batchBtn.classList.remove('hidden');
             else batchBtn.classList.add('hidden');
         }
-        this.elements.resetBtn.disabled = !hasActiveImage;
+        if (this.elements.resetBtn) {
+            this.elements.resetBtn.disabled = !hasActiveImage;
+        }
 
         // Share button
         if (this.elements.shareBtn) {
@@ -4953,6 +5193,10 @@ class UntitledStudio {
                             console.warn(`[Theme] Switching to: ${theme.toUpperCase()}`);
                             this._applyTheme(theme);
                             localStorage.setItem('untitled-theme', theme);
+                            // Close drawer on mobile after selection
+                            if (window.innerWidth < 768) {
+                                setTimeout(() => drawer.classList.remove('open'), 300);
+                            }
                             if (this.hapticFeedback) this.hapticFeedback('medium');
                         }
                     }
@@ -5059,8 +5303,8 @@ class UntitledStudio {
                     if (window.ReceiptScanner) window.ReceiptScanner.startCamera();
                 }
             },
-            'rail-settings-btn': () => this.showExportSettings(),
-            'rail-export-btn': () => this.showExportSettings()
+            'rail-settings-btn': () => { this.showExportSettings(); if (this.hapticFeedback) this.hapticFeedback('light'); },
+            'rail-export-btn': () => { this.showExportSettings(); if (this.hapticFeedback) this.hapticFeedback('medium'); }
         };
 
         railButtons.forEach(btn => {
@@ -5169,9 +5413,13 @@ class UntitledStudio {
     }
 
     initExportLogic() {
-        const confirmBtn = document.getElementById('confirm-export-btn');
+        // Support both old and new ID for export confirmation
+        const confirmBtn = document.getElementById('modal-export-action-btn') || document.getElementById('confirm-export-btn');
         if (confirmBtn) {
-            confirmBtn.addEventListener('click', () => this.exportImage());
+            confirmBtn.addEventListener('click', () => {
+                this.exportImage();
+                if (this.hapticFeedback) this.hapticFeedback('success');
+            });
         }
 
         document.querySelectorAll('.export-format-btn').forEach(btn => {

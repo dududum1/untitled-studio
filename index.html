@@ -321,58 +321,81 @@
 
         /* Mobile Drawer Overrides */
         @media (max-width: 768px) {
+            #app-container {
+                display: flex;
+                flex-direction: column-reverse;
+                height: 100dvh;
+                /* Use dynamic viewport height */
+            }
+
             #sidebar-rail {
                 flex-direction: row;
                 justify-content: space-between;
                 align-items: center;
                 width: 100%;
-                height: 70px;
-                padding: 0 1rem;
+                height: auto;
+                /* Allow safe-area-inset-bottom to expand it */
+                min-height: 70px;
+                padding: 0 0.5rem;
+                padding-bottom: env(safe-area-inset-bottom, 12px);
                 border-top: 1px solid var(--glass-border);
                 border-right: none;
                 background: rgba(10, 10, 10, 0.98);
                 overflow: visible !important;
+                z-index: 100;
+                /* Higher than panel */
             }
 
-            #sidebar-rail>div:first-child,
-            /* Logo */
-            .rail-scroll-area {
+            #sidebar-rail>div:first-child {
                 display: none;
-                /* Hide logo and tool scroll on mobile navbar */
+                /* Hide logo */
             }
 
-            #sidebar-rail .rail-scroll-area nav {
-                flex-direction: row;
+            .rail-scroll-area {
+                display: flex !important;
+                /* Restore tools on mobile */
+                flex: 1;
+                overflow-x: auto;
+                overflow-y: hidden;
+                mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
             }
 
-            #sidebar-rail>div:last-child {
-                /* Actions group */
-                flex-direction: row;
-                width: 100%;
-                justify-content: space-around;
-                border-top: none;
-                padding: 0;
-                background: transparent;
-                backdrop-filter: none;
+            .rail-scroll-area nav {
+                flex-direction: row !important;
+                padding: 0 1rem;
+                gap: 1rem !important;
+                width: max-content;
+            }
+
+            /* Smaller icons for mobile rail */
+            .rail-icon,
+            .theme-btn-trigger {
+                font-size: 24px !important;
+                padding: 12px !important;
+                flex-shrink: 0;
             }
 
             #control-panel {
                 position: fixed;
-                bottom: 70px;
-                /* Above rail */
+                bottom: calc(70px + env(safe-area-inset-bottom, 12px));
                 left: 0;
                 right: 0;
-                height: 60vh;
+                height: 65vh;
                 border-top: 1px solid var(--glass-border);
                 border-right: none;
-                border-radius: 20px 20px 0 0;
+                border-radius: 24px 24px 0 0;
                 transform: translateY(110%);
-                /* Hidden by default */
-                box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
+                box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.9);
+                z-index: 90;
             }
 
             #control-panel.active {
                 transform: translateY(0);
+            }
+
+            /* Ensure theme drawer is above safe area */
+            .theme-drawer {
+                bottom: calc(85px + env(safe-area-inset-bottom, 12px)) !important;
             }
         }
     </style>
@@ -404,6 +427,9 @@
     </script>
     <!-- Custom Scripts -->
     <script src="js/lut-parser.js"></script>
+    <script src="js/yodica-generator.js"></script>
+    <script src="js/washi-generator.js"></script>
+    <script src="js/hanalogital-generator.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="css/styles.css?v=21">
 </head>
@@ -468,45 +494,42 @@
                     <button class="rail-icon" id="rail-receipt-btn" title="Receipt Scanner">
                         <i class="ph ph-receipt"></i>
                     </button>
-                </nav>
-            </div>
+                    <div class="w-8 h-px bg-white/5 my-2"></div>
 
-            <!-- Fixed Bottom Actions -->
-            <div
-                class="flex flex-col items-center gap-4 py-6 border-t border-white/5 w-full bg-midnight/50 backdrop-blur-md">
-                <button class="rail-icon" id="rail-settings-btn" title="Settings">
-                    <i class="ph ph-gear"></i>
-                </button>
-                <button class="rail-icon text-hot-pink" id="rail-export-btn" title="Export Image">
-                    <i class="ph ph-download-simple"></i>
-                </button>
-
-                <!-- Theme Picker -->
-                <div class="theme-picker-wrapper relative">
-                    <button id="theme-picker-btn" class="theme-btn-trigger" title="Theme Selector">
-                        <i class="ph ph-palette"></i>
+                    <button class="rail-icon" id="rail-settings-btn" title="Settings">
+                        <i class="ph ph-gear"></i>
                     </button>
-                    <div id="theme-drawer" class="theme-drawer">
-                        <div class="theme-swatch w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform border-2 border-transparent"
-                            data-theme="kodak" data-label="KODAK"
-                            style="background: linear-gradient(135deg, #FFC700, #FF9900);"></div>
-                        <div class="theme-swatch w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform border-2 border-transparent"
-                            data-theme="braun" data-label="BRAUN"
-                            style="background: linear-gradient(135deg, #E5E5E5, #D1D1D1);"></div>
-                        <div class="theme-swatch w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform border-2 border-transparent"
-                            data-theme="phosphor" data-label="PHOSPHOR"
-                            style="background: linear-gradient(135deg, #4AF626, #2C8F1B);"></div>
-                        <div class="theme-swatch w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform border-2 border-transparent"
-                            data-theme="safelight" data-label="SAFELIGHT"
-                            style="background: linear-gradient(135deg, #FF0000, #660000);"></div>
-                        <div class="theme-swatch w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform border-2 border-transparent"
-                            data-theme="cyanotype" data-label="CYANOTYPE"
-                            style="background: linear-gradient(135deg, #7FDBFF, #0074D9);"></div>
-                        <div class="theme-swatch w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform border-2 border-transparent"
-                            data-theme="vapor" data-label="VAPOR"
-                            style="background: linear-gradient(135deg, #FF0099, #BD00FF, #00F0FF);"></div>
+                    <button class="rail-icon text-hot-pink" id="rail-export-btn" title="Export Image">
+                        <i class="ph ph-download-simple"></i>
+                    </button>
+
+                    <!-- Theme Picker -->
+                    <div class="theme-picker-wrapper relative">
+                        <button id="theme-picker-btn" class="theme-btn-trigger" title="Theme Selector">
+                            <i class="ph ph-palette"></i>
+                        </button>
+                        <div id="theme-drawer" class="theme-drawer">
+                            <div class="theme-swatch w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform border-2 border-transparent"
+                                data-theme="kodak" data-label="KODAK"
+                                style="background: linear-gradient(135deg, #FFC700, #FF9900);"></div>
+                            <div class="theme-swatch w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform border-2 border-transparent"
+                                data-theme="braun" data-label="BRAUN"
+                                style="background: linear-gradient(135deg, #E5E5E5, #D1D1D1);"></div>
+                            <div class="theme-swatch w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform border-2 border-transparent"
+                                data-theme="phosphor" data-label="PHOSPHOR"
+                                style="background: linear-gradient(135deg, #4AF626, #2C8F1B);"></div>
+                            <div class="theme-swatch w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform border-2 border-transparent"
+                                data-theme="safelight" data-label="SAFELIGHT"
+                                style="background: linear-gradient(135deg, #FF0000, #660000);"></div>
+                            <div class="theme-swatch w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform border-2 border-transparent"
+                                data-theme="cyanotype" data-label="CYANOTYPE"
+                                style="background: linear-gradient(135deg, #7FDBFF, #0074D9);"></div>
+                            <div class="theme-swatch w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform border-2 border-transparent"
+                                data-theme="vapor" data-label="VAPOR"
+                                style="background: linear-gradient(135deg, #FF0099, #BD00FF, #00F0FF);"></div>
+                        </div>
                     </div>
-                </div>
+                </nav>
             </div>
         </aside>
 
@@ -516,7 +539,8 @@
                 <h1 class="font-bold text-2xl tracking-tighter text-white/90 leading-none flex items-center gap-2">
                     UNTITLED
                     <span class="text-hot-pink">STUDIO</span>
-                    <span class="text-[10px] text-gray-600 font-mono border border-gray-700 px-1 rounded">v2.0</span>
+                    <span
+                        class="text-[10px] text-gray-600 font-mono border border-gray-700 px-2 py-0.5 rounded-full bg-hot-pink/10 text-hot-pink border-hot-pink/20">3.0</span>
                 </h1>
                 <div class="flex items-center gap-2">
                     <span class="w-1.5 h-1.5 rounded-full bg-moonstone/80 animate-pulse"></span>
@@ -1860,9 +1884,90 @@
                             </div>
                         </div>
                     </div>
+
+                </div>
+
+                <!-- Brand Credit (Sticky Footer) -->
+                <div
+                    class="brand-credit px-4 py-4 border-t border-glass-border select-none bg-[#121212]/50 backdrop-blur-md grid grid-cols-3 gap-2">
+                    <a href="https://www.instagram.com/dambmh/" target="_blank"
+                        class="w-full flex items-center justify-center rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-cyan-400/50 hover:text-cyan-400 transition-all px-1 py-1.5 text-[10px] uppercase tracking-wider text-gray-400 whitespace-nowrap">
+                        Follow
+                    </a>
+                    <button id="open-about-btn"
+                        class="w-full flex items-center justify-center rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-cyan-400/50 hover:text-cyan-400 transition-all px-1 py-1.5 text-[10px] uppercase tracking-wider text-gray-400 whitespace-nowrap">
+                        About
+                    </button>
+                    <button id="open-changelog-btn"
+                        class="w-full flex items-center justify-center rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-cyan-400/50 hover:text-cyan-400 transition-all px-1 py-1.5 text-[10px] uppercase tracking-wider text-gray-400 whitespace-nowrap">
+                        Changelog
+                    </button>
+                </div>
+        </aside>
+
+        <!-- Modals -->
+        <!-- About Modal -->
+        <div id="modal-about" class="fixed inset-0 z-[100] hidden">
+            <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" id="modal-about-backdrop"></div>
+            <div
+                class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#1a1a1a] border border-glass-border rounded-xl w-full max-w-lg shadow-2xl flex flex-col max-h-[80vh]">
+                <div
+                    class="p-6 border-b border-white/10 flex justify-between items-center bg-[#1a1a1a] z-10 sticky top-0 rounded-t-xl">
+                    <h2 class="text-xl font-bold text-white">About</h2>
+                    <button id="close-about-btn" class="text-gray-500 hover:text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="p-6 overflow-y-auto" id="about-content">
+                    <!-- Content injected from README.md -->
+                    <div class="animate-pulse space-y-4">
+                        <div class="h-4 bg-white/10 rounded w-3/4"></div>
+                        <div class="h-4 bg-white/10 rounded w-1/2"></div>
+                        <div class="h-4 bg-white/10 rounded w-full"></div>
+                    </div>
                 </div>
             </div>
-        </aside>
+        </div>
+
+        <!-- Changelog Modal -->
+        <div id="modal-changelog" class="fixed inset-0 z-[100] hidden">
+            <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" id="modal-changelog-backdrop"></div>
+            <div
+                class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#1a1a1a] border border-glass-border rounded-xl w-full max-w-lg shadow-2xl flex flex-col max-h-[80vh]">
+                <div class="p-6 border-b border-white/10 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-white">Changelog</h2>
+                    <button id="close-changelog-btn" class="text-gray-500 hover:text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="p-6 overflow-y-auto" id="changelog-content">
+                    <!-- v1.0.0 -->
+                    <div class="mb-8 relative pl-6 border-l border-white/10">
+                        <div
+                            class="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-hot-pink shadow-[0_0_10px_rgba(237,39,136,0.5)]">
+                        </div>
+                        <h3 class="text-white font-bold text-sm mb-1">v1.0.0 <span
+                                class="text-gray-500 font-normal ml-2">Initial Release</span></h3>
+                        <p class="text-[10px] text-gray-500 font-mono mb-3">FEBRUARY 2026</p>
+                        <ul class="space-y-2 text-sm text-gray-400">
+                            <li>• Core Image Processing Engine (WebGL)</li>
+                            <li>• 50+ Film Presets & LUT Support</li>
+                            <li>• Advanced Curves & Color Wheels</li>
+                            <li>• Receipt Generator & QR Scanner</li>
+                            <li>• "Negative Mode" & "Signature" Easter Eggs</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
 
@@ -2271,7 +2376,7 @@
 
     <!-- Dynamic Startup Toast -->
     <div id="startup-toast"
-        class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[200] pointer-events-none transition-opacity duration-1000">
+        class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[200] pointer-events-none transition-opacity duration-1000 opacity-0">
         <!-- Content injected by JS -->
     </div>
 
@@ -2294,8 +2399,11 @@
     <script src="js/gesture-handler.js?v=14"></script>
     <script src="js/raw-decoder.js?v=14"></script>
     <script src="js/lut-exporter.js?v=14"></script>
+    <script src="js/washi-generator.js"></script>
+    <script src="js/hanalogital-generator.js"></script>
+    <script src="js/yodica-generator.js"></script>
     <!-- script src="js/textures.js?v=14"></script> -->
-    <script src="js/audio-engine.js?v=1"></script>
+    <script src="js/sonic-engine.js"></script>
     <script src="js/app.js?v=16"></script>
 
     <!-- Global CRT Overlay -->
@@ -2479,7 +2587,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     <script src="js/receipt-generator.js"></script>
     <script src="js/receipt-scanner.js"></script>
-    <script src="js/gooey-text.js"></script>
+
 
     <!-- Service Worker Registration -->
     <script>

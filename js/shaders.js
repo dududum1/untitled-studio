@@ -167,6 +167,9 @@ const Shaders = {
         // Phase VIII: Thermal Genesis (Spectral Imaging)
         uniform int u_thermalMode;        // 0=Off, 1=Ironbow, 2=Rainbow, 3=Aerochrome
         uniform float u_thermalIntensity; // 0.0 - 1.0 (Blend Strength)
+
+        // Phase IX: Washi Spectral Emulation
+        uniform int u_spectralSensitivity; // 0: Pan, 1: Ortho, 2: IR
         
         in vec2 v_texCoord;
         out vec4 fragColor;
@@ -353,6 +356,16 @@ const Shaders = {
         }
         
         float luminance(vec3 c) {
+            if (u_spectralSensitivity == 1) {
+                // Orthochromatic: Sensitive to blue/green, blind to red
+                // Weighting heavily towards Green and Blue
+                return dot(c, vec3(0.0, 0.7, 0.3));
+            } else if (u_spectralSensitivity == 2) {
+                // Near-Infrared (Aero): High Green/Red, low Blue reflection
+                // Foliage (G) becomes white, sky (B) becomes black
+                return dot(c, vec3(0.5, 0.5, -0.2));
+            }
+            // Standard Panchromatic (Rec.709)
             return dot(c, vec3(0.2126, 0.7152, 0.0722));
         }
         
@@ -1498,6 +1511,7 @@ const Shaders = {
         // Bloom/Halation/Mist
         uniform float u_amount;      // Bloom/Halation Strength
         uniform vec3 u_tint;         // Bloom Color (White for Glow, Pink for Halation)
+        uniform float u_halation;    // CineStill Red Halation Mix
         
         // Grain (Moved here to be ON TOP of Bloom)
         uniform float u_grainShadow;
@@ -1698,10 +1712,18 @@ const Shaders = {
             // mix(base, white, start) -> tinting
             
             // Apply Tint to Bloom first
-            vec3 tintedBloom = bloom * u_tint;
+            // vec3 tintedBloom = bloom * u_tint;
             
+            // Halation Logic (Red Tint)
+            // CineStill Red: 1.0, 0.2, 0.0
+            vec3 halationTint = vec3(1.0, 0.25, 0.05); 
+            vec3 finalBloom = mix(bloom, bloom * halationTint * 1.5, u_halation); // 1.5x boost for visibility
+            
+            vec3 tintedBloom = finalBloom * u_tint;
+
             // Additive Blend
             vec3 color = processedColor + (tintedBloom * (u_amount / 100.0));
+            // vec3 color = processedColor + (tintedBloom * (u_amount / 100.0));
             
             // 4. Grain
             // If we have a texture and it's Grain 2.0 (type 3), use it

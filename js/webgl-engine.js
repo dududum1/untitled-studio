@@ -129,7 +129,10 @@ class WebGLEngine {
             tiltShiftGradient: 0.2, // 0-1
 
             // Advanced Atmosphere
-            glowColor: [1.0, 0.4, 0.6] // Default Halation Pink
+            glowColor: [1.0, 0.4, 0.6], // Default Halation Pink
+
+            // Spectral Sensitivity (Washi)
+            spectralSensitivity: 0 // 0: Pan, 1: Ortho, 2: IR
         };
 
         // Tone curve state
@@ -375,7 +378,8 @@ class WebGLEngine {
             'u_flipX', 'u_flipY',
             'u_selColorHue', 'u_selColorRange', 'u_selColorSat', 'u_selColorLum', 'u_selColorFeather',
             'u_tiltShiftBlur', 'u_tiltShiftPos', 'u_tiltShiftFocusWidth', 'u_tiltShiftGradient',
-            'u_thermalMode', 'u_thermalIntensity'
+            'u_thermalMode', 'u_thermalIntensity',
+            'u_spectralSensitivity'
         ];
 
         uniformNames.forEach(name => {
@@ -394,7 +398,8 @@ class WebGLEngine {
             'u_dustTexture', 'u_dustIntensity',
             'u_resolution', 'u_time',
             'u_useBorder', 'u_borderWidth', 'u_borderColor',
-            'u_tiltShiftBlur', 'u_tiltShiftPos', 'u_tiltShiftFocusWidth', 'u_tiltShiftGradient'
+            'u_tiltShiftBlur', 'u_tiltShiftPos', 'u_tiltShiftFocusWidth', 'u_tiltShiftGradient',
+            'u_halation'
         ];
         compositeNames.forEach(name => {
             this.compositeUniforms[name] = gl.getUniformLocation(this.programs.composite, name);
@@ -746,6 +751,61 @@ class WebGLEngine {
             }
         });
 
+        // Washi Procedural Texture Injection
+        if (preset.name && preset.name.startsWith('Washi')) {
+            let texName = '';
+            if (preset.name.includes('Washi W')) texName = 'w_paper';
+            if (preset.name.includes('Washi D')) texName = 'd_leaks';
+
+            if (texName && window.WashiGenerator) {
+                const dataUrl = window.WashiGenerator.generate(texName);
+                if (dataUrl) {
+                    this.loadOverlay(dataUrl);
+                    this.adjustments.overlayOpacity = (texName === 'w_paper') ? 30 : 50;
+                    this.adjustments.overlayBlendMode = (texName === 'w_paper') ? 1 : 2; // W=Multiply, D=Screen
+                }
+            }
+        }
+
+        // Hanalogital Procedural Texture Injection
+        if (preset.name && preset.name.startsWith('Hanalogital')) {
+            let texName = '';
+            let blendMode = 2; // Default Screen
+            let opacity = 50;
+
+            if (preset.name.includes('Solaris')) { texName = 'solaris'; opacity = 60; }
+            if (preset.name.includes('Renegade')) { texName = 'renegade'; opacity = 80; }
+            if (preset.name.includes('Fuel')) { texName = 'fuel'; opacity = 40; }
+            if (preset.name.includes('Flux')) { texName = 'flux'; opacity = 50; }
+
+            if (texName && window.HanalogitalGenerator) {
+                const dataUrl = window.HanalogitalGenerator.generate(texName);
+                if (dataUrl) {
+                    this.loadOverlay(dataUrl);
+                    this.adjustments.overlayOpacity = opacity;
+                    this.adjustments.overlayBlendMode = blendMode;
+                }
+            }
+        }
+
+        // Yodica Procedural Texture Injection
+        if (preset.name && preset.name.startsWith('Yodica')) {
+            const overlayMap = {
+                'Yodica Antares': 'gradient_antares',
+                'Yodica Vega': 'gradient_vega',
+                'Yodica Pegasus': 'gradient_rainbow_horizontal',
+                'Yodica Atlas': 'patchwork_rainbow'
+            };
+            const texName = overlayMap[preset.name];
+
+            if (texName && window.YodicaGenerator) {
+                const dataUrl = window.YodicaGenerator.generate(texName);
+                if (dataUrl) {
+                    this.loadOverlay(dataUrl);
+                }
+            }
+        }
+
         this.render();
     }
 
@@ -832,8 +892,8 @@ class WebGLEngine {
             splitPos: -1.0,
 
             // Flip
-            flipX: 0, // Using 0 for consistency with uniform type (int)
-            flipY: 0,
+            flipX: false,
+            flipY: false,
 
             // Borders
             borderEnabled: false,
@@ -841,10 +901,13 @@ class WebGLEngine {
             borderColor: [1, 1, 1],
 
             // Output Transform
-            outputTransform: 0
+            outputTransform: 0,
+
+            // Phase IX: Spectral Sensitivity
+            spectralSensitivity: 0
         };
         this.useToneCurve = false;
-        this.overlayTexture = null; // Prevent sticky overlays
+        this.overlayTexture = null;
         this.render();
     }
 
@@ -957,6 +1020,7 @@ class WebGLEngine {
 
         gl.useProgram(this.programs.composite);
         const cu = this.compositeUniforms;
+        const adj = this.adjustments;
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.textures.main);
@@ -968,9 +1032,10 @@ class WebGLEngine {
 
         if (cu.u_amount) gl.uniform1f(cu.u_amount, glowStrength);
         if (cu.u_tint) gl.uniform3fv(cu.u_tint, glowTint);
+        if (cu.u_halation) gl.uniform1f(cu.u_halation, adj.halation || 0);
 
         // Pass Grain Uniforms to Composite
-        const adj = this.adjustments;
+        // const adj = this.adjustments; // Moved up
         const gGlobal = adj.grainGlobal !== undefined ? adj.grainGlobal : 1.0;
         const gShadow = (adj.grainShadow !== undefined ? adj.grainShadow : (adj.grain || 0)) * gGlobal;
         const gHighlight = (adj.grainHighlight !== undefined ? adj.grainHighlight : (adj.grain || 0)) * gGlobal;
@@ -1077,6 +1142,9 @@ class WebGLEngine {
         gl.uniform1i(this.uniforms.u_showClipping, adj.showClipping ? 1 : 0);
         gl.uniform1i(this.uniforms.u_showClipping, adj.showClipping ? 1 : 0);
         gl.uniform1f(this.uniforms.u_denoise, adj.denoise || 0);
+
+        // Phase IX: Spectral Sensitivity
+        gl.uniform1i(this.uniforms.u_spectralSensitivity, adj.spectralSensitivity || 0);
 
         // Rotation (Degrees to Radians)
         const rad = (adj.rotation || 0) * (Math.PI / 180.0);
@@ -1262,6 +1330,9 @@ class WebGLEngine {
         // Phase VIII
         gl.uniform1i(this.uniforms.u_thermalMode, v(adj.thermalMode));
         gl.uniform1f(this.uniforms.u_thermalIntensity, v(adj.thermalIntensity));
+
+        // Phase IX: Spectral Sensitivity
+        gl.uniform1i(this.uniforms.u_spectralSensitivity, v(adj.spectralSensitivity));
     }
 
     /**
