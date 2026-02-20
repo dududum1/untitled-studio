@@ -990,6 +990,10 @@ class WebGLEngine {
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.ping);
         gl.viewport(0, 0, effW, effH);
         gl.useProgram(this.programs.threshold);
+        // Fix feedback loop: unbind ping texture from TEXTURE1 (leftover from previous frame)
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.textures.main);
         gl.uniform1i(gl.getUniformLocation(this.programs.threshold, 'u_image'), 0);
@@ -1094,8 +1098,8 @@ class WebGLEngine {
 
         // Content transforms for Original Image
         if (cu.u_contentRotation) gl.uniform1f(cu.u_contentRotation, adj.rotation || 0);
-        if (cu.u_contentFlipX) gl.uniform1i(cu.u_contentFlipX, adj.flipX ? 1 : 0);
-        if (cu.u_contentFlipY) gl.uniform1i(cu.u_contentFlipY, adj.flipY ? 1 : 0);
+        if (cu.u_contentFlipX) gl.uniform1f(cu.u_contentFlipX, adj.flipX ? 1.0 : 0.0);
+        if (cu.u_contentFlipY) gl.uniform1f(cu.u_contentFlipY, adj.flipY ? 1.0 : 0.0);
 
         if (cu.u_splitPos) gl.uniform1f(cu.u_splitPos, adj.splitPos !== undefined ? adj.splitPos : -1.0);
 
