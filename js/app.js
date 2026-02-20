@@ -533,7 +533,7 @@ class UntitledStudio {
         if (btnMagicEraser) {
             btnMagicEraser.addEventListener('click', () => {
                 if (window.aiEngine) {
-                    if (!window.aiEngine.modelState.inpainting) {
+                    if (window.aiEngine.modelState.currentModel !== 'inpainting' || !window.aiEngine.modelState.isLoaded) {
                         window.aiEngine.loadModel('inpainting');
                     } else {
                         this.showToast('Magic Eraser already active');
@@ -545,7 +545,7 @@ class UntitledStudio {
         if (btnSmartSelect) {
             btnSmartSelect.addEventListener('click', () => {
                 if (window.aiEngine) {
-                    if (!window.aiEngine.modelState.segmentation) {
+                    if (window.aiEngine.modelState.currentModel !== 'segmentation' || !window.aiEngine.modelState.isLoaded) {
                         window.aiEngine.loadModel('segmentation');
                     } else {
                         this.showToast('Smart Select already active');
