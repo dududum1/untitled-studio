@@ -14,6 +14,7 @@ class HistoryManager {
     constructor(maxStates = 50) {
         this.maxStates = maxStates;
         this.states = [];
+        this.snapshots = []; // Verified States
         this.currentIndex = -1;
         this.isRecording = true;
 
@@ -207,6 +208,46 @@ class HistoryManager {
     }
 
     /**
+     * Create a named snapshot
+     */
+    createSnapshot(name) {
+        const state = this.getCurrentState();
+        if (!state) return;
+
+        this.snapshots.push({
+            id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            name: name || `Version ${this.snapshots.length + 1}`,
+            timestamp: Date.now(),
+            data: JSON.parse(JSON.stringify(state))
+        });
+
+        this._hapticPulse();
+        this._notifyChange();
+    }
+
+    /**
+     * Restore a snapshot (pushes as new state)
+     */
+    restoreSnapshot(id) {
+        const snap = this.snapshots.find(s => s.id === id);
+        if (!snap) return;
+
+        this.push(snap.data, `Restored: ${snap.name}`);
+    }
+
+    /**
+     * Delete a snapshot
+     */
+    deleteSnapshot(id) {
+        this.snapshots = this.snapshots.filter(s => s.id !== id);
+        this._notifyChange();
+    }
+
+    getSnapshots() {
+        return this.snapshots;
+    }
+
+    /**
      * Get history length
      */
     get length() {
@@ -246,7 +287,8 @@ class HistoryManager {
                 canRedo: this.canRedo(),
                 currentIndex: this.currentIndex,
                 totalStates: this.states.length,
-                states: this.getStates()
+                states: this.getStates(),
+                snapshots: this.snapshots
             });
         }
     }

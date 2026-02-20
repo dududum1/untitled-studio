@@ -937,8 +937,12 @@ class WebGLEngine {
                 const localAdj = this.mergeAdjustments(this.adjustments, mask.adjustments);
                 this.renderPass(localAdj, this.fbos.local);
 
-                // b. Render Mask Shape to Mask FBO
-                this.renderMaskShape(mask, this.fbos.mask);
+                // b. Prepare Mask
+                if (mask.type === 'bitmap' && mask.canvas) {
+                    this.uploadMaskTexture(mask.canvas);
+                } else {
+                    this.renderMaskShape(mask, this.fbos.mask);
+                }
 
                 // c. Composite & Swap
                 this.renderCompositeMask(this.textures.main, this.textures.local, this.textures.mask, this.fbos.local);
@@ -1188,6 +1192,27 @@ class WebGLEngine {
         gl.uniform1i(gl.getUniformLocation(this.programs.mask, 'u_invert'), mask.invert ? 1 : 0);
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    uploadMaskTexture(canvas) {
+        const gl = this.gl;
+        // Upload canvas to this.textures.mask (which is attached to fbos.mask)
+        // We bind to valid texture unit to update it
+        gl.activeTexture(gl.TEXTURE2);
+        gl.bindTexture(gl.TEXTURE_2D, this.textures.mask);
+
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        // Note: Canvas might need resizing if it doesn't match FBO size?
+        // Ideally MaskEditor canvas matches Render resolution.
+        // If not, we rely on texImage2D to handle it (might be slow if resizing every frame)
+
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
+
+        // Ensure parameters
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     }
 
     renderCompositeMask(baseTex, localTex, maskTex, targetFbo) {

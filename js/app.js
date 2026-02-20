@@ -237,6 +237,12 @@ class UntitledStudio {
 
         // Footer Modals
         this.initFooter();
+
+        // Keyboard Shortcuts
+        this.setupKeyboardShortcuts();
+
+        // Load Persisted LUTs
+        this.loadPersistedLUTs();
     }
 
     initFooter() {
@@ -430,6 +436,124 @@ class UntitledStudio {
     }
 
 
+
+    initAITools() {
+        const btnMagicEraser = document.getElementById('btn-ai-inpainting');
+        const btnSmartSelect = document.getElementById('btn-ai-segmentation');
+
+        // Create hidden file input for manual model upload
+        const modelInput = document.createElement('input');
+        modelInput.type = 'file';
+        modelInput.accept = '.onnx';
+        modelInput.style.display = 'none';
+        document.body.appendChild(modelInput);
+
+        let pendingModelType = null;
+
+        modelInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && pendingModelType) {
+                this.showToast(`Loading ${file.name}...`);
+                if (window.aiEngine) {
+                    window.aiEngine.loadModel(pendingModelType, file);
+                }
+                modelInput.value = ''; // Reset
+            }
+        });
+
+        // Event Listeners for AI Engine
+        window.addEventListener('ai-model-loading', (e) => {
+            const progress = e.detail.progress || 0;
+            const progressText = progress > 0 ? ` (${progress}%)` : '';
+            this.showToast(`Downloading AI Model (${e.detail.model})${progressText}...`);
+            document.body.classList.add('cursor-wait');
+
+            // Update button text
+            if (e.detail.model === 'inpainting' && btnMagicEraser) {
+                btnMagicEraser.textContent = `LOADING${progressText}`;
+                btnMagicEraser.disabled = true;
+            }
+            if (e.detail.model === 'segmentation' && btnSmartSelect) {
+                btnSmartSelect.textContent = `LOADING${progressText}`;
+                btnSmartSelect.disabled = true;
+            }
+        });
+
+        window.addEventListener('ai-model-loaded', (e) => {
+            this.showToast(`AI Model Ready: ${e.detail.model}`);
+            document.body.classList.remove('cursor-wait');
+
+            // Visual indication on buttons
+            if (e.detail.model === 'inpainting') {
+                if (btnMagicEraser) {
+                    btnMagicEraser.textContent = 'ACTIVE';
+                    btnMagicEraser.classList.remove('bg-white/10');
+                    btnMagicEraser.classList.add('bg-hot-pink', 'text-white', 'border-hot-pink');
+                    btnMagicEraser.disabled = false;
+                }
+                // Show controls
+                const controls = document.getElementById('controls-inpainting');
+                if (controls) controls.classList.remove('hidden');
+            }
+
+            if (e.detail.model === 'segmentation') {
+                if (btnSmartSelect) {
+                    btnSmartSelect.textContent = 'ACTIVE';
+                    btnSmartSelect.classList.remove('bg-white/10');
+                    btnSmartSelect.classList.add('bg-moonstone', 'text-black', 'border-moonstone');
+                    btnSmartSelect.disabled = false;
+                }
+                // Show controls
+                const controls = document.getElementById('controls-segmentation');
+                if (controls) controls.classList.remove('hidden');
+            }
+        });
+
+        window.addEventListener('ai-model-error', (e) => {
+            document.body.classList.remove('cursor-wait');
+            const { model, downloadUrl } = e.detail;
+
+            // Reset buttons
+            if (model === 'inpainting' && btnMagicEraser) {
+                btnMagicEraser.textContent = 'LOAD MODEL (~20MB)';
+                btnMagicEraser.disabled = false;
+            }
+            if (model === 'segmentation' && btnSmartSelect) {
+                btnSmartSelect.textContent = 'LOAD MODEL (~15MB)';
+                btnSmartSelect.disabled = false;
+            }
+
+            // Show interactive toast/alert asking for manual upload
+            if (confirm(`Automatic download failed for ${model}. \n\nDo you have the .onnx file locally?\n\n(If not, download it from: ${downloadUrl})`)) {
+                pendingModelType = model;
+                modelInput.click();
+            }
+        });
+
+        if (btnMagicEraser) {
+            btnMagicEraser.addEventListener('click', () => {
+                if (window.aiEngine) {
+                    if (!window.aiEngine.modelState.inpainting) {
+                        window.aiEngine.loadModel('inpainting');
+                    } else {
+                        this.showToast('Magic Eraser already active');
+                    }
+                }
+            });
+        }
+
+        if (btnSmartSelect) {
+            btnSmartSelect.addEventListener('click', () => {
+                if (window.aiEngine) {
+                    if (!window.aiEngine.modelState.segmentation) {
+                        window.aiEngine.loadModel('segmentation');
+                    } else {
+                        this.showToast('Smart Select already active');
+                    }
+                }
+            });
+        }
+    }
 
     initScopes() {
         const hud = document.getElementById('scopes-hud');
@@ -654,6 +778,7 @@ class UntitledStudio {
 
             this.initWorker();
             this.initHistogram();
+            this.initExif(); // EXIF Panel
             this.initToneCurve();
             this.initHSL(); // Selective Color
             this.initColorWheels(); // Color Grading
@@ -675,6 +800,8 @@ class UntitledStudio {
 
             this.initThemeEngine();    // Restoration
             this.initTerminalViewer(); // Phase VII
+            this.initAITools();        // Phase I: Neural Darkroom
+            this.initLocalAdjustments(); // Phase II: Local Adjustments
             this.initSpectral();        // Initialize Receipt Scanner
             if (window.ReceiptScannerClass) {
                 this.receiptScanner = new window.ReceiptScannerClass(this);
@@ -1462,6 +1589,106 @@ class UntitledStudio {
         }
     }
 
+    initExif() {
+        // Legacy listener - keeping for safety but moving logic to public method
+        const toggleBtn = document.getElementById('info-toggle-btn');
+        if (toggleBtn) {
+            // Remove old listeners to be safe (clone node approach is heavy, just add new one)
+            // We'll rely on the onclick attribute or this listener.
+        }
+    }
+
+    toggleExif(e) {
+        if (e) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        const panel = document.getElementById('exif-panel');
+        const toggleBtn = document.getElementById('info-toggle-btn');
+
+        if (!panel || !toggleBtn) return;
+
+        panel.classList.toggle('hidden');
+        const isHidden = panel.classList.contains('hidden');
+
+        if (!isHidden) {
+            toggleBtn.classList.remove('text-gray-400');
+            toggleBtn.classList.add('text-hot-pink');
+            toggleBtn.classList.add('bg-white/10'); // Add active bg
+            // Update current image data
+            if (this.activeIndex >= 0 && this.images[this.activeIndex]) {
+                this.updateExifPanel(this.images[this.activeIndex].exif);
+            }
+        } else {
+            toggleBtn.classList.add('text-gray-400');
+            toggleBtn.classList.remove('text-hot-pink');
+            toggleBtn.classList.remove('bg-white/10');
+        }
+
+        this.hapticFeedback('light');
+    }
+
+    updateExifPanel(exif) {
+        const container = document.getElementById('exif-content');
+        if (!container) return;
+
+        if (!exif || Object.keys(exif).length === 0) {
+            container.innerHTML = '<div class="text-center text-gray-500 italic py-1">NO DATA</div>';
+            return;
+        }
+
+        // Helper to safe-get values
+        const getVal = (key, suffix = '') => {
+            if (exif[key]) return `${exif[key]}${suffix}`;
+            return '-';
+        };
+
+        // Format Exposure Time efficiently (e.g. 0.0166 -> 1/60)
+        let shutter = '-';
+        if (exif.ExposureTime) {
+            const val = parseFloat(exif.ExposureTime);
+            if (val < 1) {
+                shutter = `1/${Math.round(1 / val)}`;
+            } else {
+                shutter = `${val}"`;
+            }
+        }
+
+        // Build HTML - Compact for HUD (w-48)
+        const rows = [
+            { label: 'ISO', val: getVal('ISOSpeedRatings') },
+            { label: 'ƒ/', val: exif.FNumber ? `${exif.FNumber}` : '-' },
+            { label: 'S', val: shutter },
+            { label: 'FL', val: getVal('FocalLength', 'mm') },
+            { label: 'CAM', val: getVal('Model') },
+            { label: 'LENS', val: getVal('LensModel') || getVal('Lens') },
+            { label: 'DATE', val: getVal('DateTimeOriginal').split(' ')[0] || '-' } // Date only
+        ];
+
+        let html = '';
+        // Use a flex row layout for very compact display or simple key-value pairs
+        // For 192px, maybe a single line per item "ISO 400" is better, or a tight grid.
+        // Let's stick to a tight grid but with abbreviated labels.
+        html += '<div class="grid grid-cols-[30px_1fr] gap-x-2 gap-y-0.5">';
+
+        rows.forEach(row => {
+            if (row.val !== '-' && row.val !== 'undefined') {
+                html += `
+                    <div class="text-gray-500 text-right font-bold">${row.label}</div>
+                    <div class="text-moonstone truncate" title="${row.val}">${row.val}</div>
+                `;
+            }
+        });
+        html += '</div>';
+
+        if (html === '<div class="grid grid-cols-[30px_1fr] gap-x-2 gap-y-0.5"></div>') {
+            container.innerHTML = '<div class="text-center text-gray-500 italic py-1">METADATA SCRUBBED</div>';
+        } else {
+            container.innerHTML = html;
+        }
+    }
+
     hexToRgb(hex) {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? [
@@ -1568,11 +1795,14 @@ class UntitledStudio {
         on(this.elements.newRollBtn, 'click', () => this.createNewRoll());
         on(this.elements.fileInput, 'change', (e) => this.handleFileSelect(e));
 
-        // LUT Import
-        // (Assuming these elements exist in this.elements)
+        // LUT Management
         if (this.elements.importLutBtn) {
             on(this.elements.importLutBtn, 'click', () => this.elements.lutInput?.click());
-            on(this.elements.lutInput, 'change', (e) => this.handleLutSelect(e));
+        }
+        if (this.elements.lutInput) {
+            on(this.elements.lutInput, 'change', (e) => this.handleLUTUpload(e));
+        }
+        if (this.elements.removeLutBtn) {
             on(this.elements.removeLutBtn, 'click', () => this.removeLUT());
         }
 
@@ -1584,12 +1814,6 @@ class UntitledStudio {
             on(this.elements.removeTextureBtn, 'click', () => this.removeTexture());
         }
 
-        if (this.elements.lutInput) {
-            on(this.elements.lutInput, 'change', (e) => this.handleLUTUpload(e));
-        }
-        if (this.elements.removeLutBtn) {
-            on(this.elements.removeLutBtn, 'click', () => this.removeLUT());
-        }
 
         // Drag and drop
         if (this.elements.canvasContainer) {
@@ -2383,6 +2607,40 @@ class UntitledStudio {
             }).catch(err => console.error('Auto-save failed:', err));
         });
 
+        // Extract EXIF Asynchronously
+        if (window.EXIF && !isRaw) {
+            // Wrap existing EXIF.js
+            EXIF.getData(file, () => {
+                const allTags = EXIF.getAllTags(file);
+                // Filter relevant tags
+                const relevant = {
+                    Make: allTags.Make,
+                    Model: allTags.Model,
+                    ExposureTime: allTags.ExposureTime,
+                    FNumber: allTags.FNumber,
+                    ISOSpeedRatings: allTags.ISOSpeedRatings,
+                    FocalLength: allTags.FocalLength,
+                    DateTimeOriginal: allTags.DateTimeOriginal,
+                    LensModel: allTags.LensModel || allTags.Lens
+                };
+
+                // Update in memory
+                const targetImg = this.images.find(i => i.id === id);
+                if (targetImg) {
+                    targetImg.exif = relevant;
+                    // If currently active, update UI
+                    if (this.activeIndex !== -1 && this.images[this.activeIndex].id === id) {
+                        this.updateExifPanel(relevant);
+                        // Also update Gallery View if active
+                        this.updateGalleryPreview();
+                    }
+                }
+
+                // Update in DB (light update)
+                storage.updateImage(id, { exif: relevant });
+            });
+        }
+
         return imageData;
     }
 
@@ -2650,6 +2908,9 @@ class UntitledStudio {
         if (this.terminalViewer && this.terminalViewer.isActive) {
             this.refreshTerminal();
         }
+
+        // Update EXIF Panel
+        this.updateExifPanel(imageData.exif);
     }
 
     async refreshTerminal() {
@@ -4191,6 +4452,203 @@ class UntitledStudio {
         }
     }
 
+    initLocalAdjustments() {
+        // UI Elements
+        const btnAdd = document.getElementById('btn-add-mask');
+        const btnClear = document.getElementById('btn-clear-masks');
+        const btnShowOverlay = document.getElementById('btn-show-overlay');
+        const btnInvert = document.getElementById('btn-invert-mask');
+        const brushSize = document.getElementById('brush-size');
+        const brushSoft = document.getElementById('brush-softness');
+        const toolPaint = document.getElementById('tool-paint');
+        const toolErase = document.getElementById('tool-erase');
+        const localAdjContainer = document.getElementById('local-adjustments-container');
+
+        // State
+        this.localState = {
+            isPainting: false,
+            activeMaskId: null,
+            brushSize: 100,
+            brushSoftness: 0.5,
+            isEraser: false
+        };
+
+        // Helpers
+        const updateBrushConfig = () => {
+            if (this.engine && this.engine.masks) {
+                const mask = this.engine.masks.find(m => m.id === this.localState.activeMaskId);
+                if (mask && mask.editor) {
+                    mask.editor.brushConfig.size = this.localState.brushSize;
+                    mask.editor.brushConfig.hardness = 1.0 - this.localState.brushSoftness;
+                    mask.editor.brushConfig.isEraser = this.localState.isEraser;
+                }
+            }
+        };
+
+        // 1. Add Mask
+        if (btnAdd) {
+            btnAdd.addEventListener('click', () => {
+                if (!this.engine) return;
+
+                // Initialize Mask array if logic not present in engine
+                if (!this.engine.masks) this.engine.masks = [];
+
+                const id = 'mask_' + Date.now();
+                const width = this.engine.canvas.width || 1024;
+                const height = this.engine.canvas.height || 1024;
+
+                // Create Editor
+                const editor = new MaskEditor(width, height);
+                // Default: Clear (Black)
+                editor.clearMask();
+
+                const newMask = {
+                    id: id,
+                    type: 'bitmap',
+                    enabled: true,
+                    editor: editor,
+                    canvas: editor.canvas, // Ref to canvas for upload
+                    adjustments: { exposure: 0 } // Default adjustment
+                };
+
+                this.engine.masks.push(newMask);
+                this.localState.activeMaskId = id;
+                this.engine.activeMaskId = id;
+
+                // Activate UI
+                localAdjContainer.classList.remove('opacity-50', 'pointer-events-none');
+                this.showToast('New Mask Added');
+
+                // Set initial upload
+                this.engine.uploadMaskTexture(editor.canvas);
+                this.engine.requestRender();
+            });
+        }
+
+        // 2. Brush Events
+        if (brushSize) {
+            brushSize.addEventListener('input', (e) => {
+                this.localState.brushSize = parseInt(e.target.value);
+                document.getElementById('brush-size-val').textContent = this.localState.brushSize;
+                updateBrushConfig();
+            });
+        }
+        if (brushSoft) {
+            brushSoft.addEventListener('input', (e) => {
+                this.localState.brushSoftness = parseInt(e.target.value) / 100;
+                document.getElementById('brush-soft-val').textContent = parseInt(e.target.value);
+                updateBrushConfig();
+            });
+        }
+
+        // 3. Tool Toggles
+        if (toolPaint) {
+            toolPaint.addEventListener('click', () => {
+                this.localState.isEraser = false;
+                toolPaint.classList.add('border-hot-pink', 'shadow-[0_0_10px_rgba(255,0,153,0.3)]', 'font-bold');
+                toolErase.classList.remove('border-hot-pink', 'shadow-[0_0_10px_rgba(255,0,153,0.3)]', 'font-bold', 'text-white');
+                toolErase.classList.add('text-gray-400');
+                updateBrushConfig();
+            });
+        }
+        if (toolErase) {
+            toolErase.addEventListener('click', () => {
+                this.localState.isEraser = true;
+                toolErase.classList.add('border-hot-pink', 'shadow-[0_0_10px_rgba(255,0,153,0.3)]', 'font-bold', 'text-white');
+                toolErase.classList.remove('text-gray-400');
+                toolPaint.classList.remove('border-hot-pink', 'shadow-[0_0_10px_rgba(255,0,153,0.3)]', 'font-bold');
+                updateBrushConfig();
+            });
+        }
+
+        // 4. Painting Logic (Canvas Interaction)
+        this.setupPaintingInteraction();
+
+        // 5. Local Adjustment Sliders
+        const localExposure = document.getElementById('local-exposure');
+        if (localExposure) {
+            localExposure.addEventListener('input', (e) => {
+                if (!this.localState.activeMaskId) return;
+                const mask = this.engine.masks.find(m => m.id === this.localState.activeMaskId);
+                if (mask) {
+                    mask.adjustments.exposure = parseFloat(e.target.value);
+                    mask.adjustments.enabled = true; // Ensure logic knows
+                    this.engine.requestRender();
+
+                    // Update value display
+                    const display = document.querySelector(`span[data-for="local-exposure"]`);
+                    if (display) display.textContent = parseFloat(e.target.value).toFixed(2);
+                }
+            });
+        }
+
+        // Overlay Toggle
+        if (btnShowOverlay) {
+            btnShowOverlay.addEventListener('click', () => {
+                if (this.engine) {
+                    this.engine.setShowMaskOverlay(!this.engine.showMaskOverlay);
+                    btnShowOverlay.classList.toggle('bg-red-500');
+                    btnShowOverlay.classList.toggle('text-white');
+                }
+            });
+        }
+    }
+
+    setupPaintingInteraction() {
+        // We need to listen to the canvas container or canvas itself
+        // Ensure we only paint when 'local' tab is active
+        const container = document.getElementById('canvas-container'); // Need to find correct container
+
+        const handlePointer = (e) => {
+            // Check if Local Tab is active
+            const localBtn = document.getElementById('rail-local-btn');
+            if (!localBtn || !localBtn.classList.contains('active')) return;
+
+            if (!this.localState.activeMaskId || !this.engine) return;
+
+            const mask = this.engine.masks.find(m => m.id === this.localState.activeMaskId);
+            if (!mask) return;
+
+            e.preventDefault(); // Prevent scrolling
+
+            const rect = this.engine.canvas.getBoundingClientRect();
+            // Calculate UV (0-1)
+            // Note: Canvas might contain image with "object-fit: contain" logic inside WebGL.
+            // But WebGLEngine renders to full canvas.
+            // If the Image aspect ratio differs from Canvas aspect ratio, we have dead zones.
+            // My WebGLEngine implementation renders FULL canvas to fit image (lines 535-536 in webgl-engine).
+            // So UV matches Canvas UV.
+
+            const u = (e.clientX - rect.left) / rect.width;
+            const v = 1.0 - ((e.clientY - rect.top) / rect.height); // WebGL Texture Y is flipped?
+            // MaskEditor usually expects top-left 0,0.
+            // Check MaskEditor paint implementation.
+            // ctx.arc(x, y ...). y = v * height.
+            // If I pass inverted V, I paint on bottom.
+            // WebGL textures usually 0,0 is bottom-left. Canvas 0,0 is top-left.
+            // So YES, I should invert Y for WebGL, BUT MaskEditor uses 2D Canvas.
+            // 2D Canvas 0,0 is Top-Left.
+            // So I should pass raw Y (from top).
+            const vCanvas = (e.clientY - rect.top) / rect.height;
+
+            if (e.buttons === 1) {
+                // Paint
+                mask.editor.paint(u, vCanvas);
+                // Upload
+                this.engine.uploadMaskTexture(mask.editor.canvas);
+                this.engine.requestRender();
+            }
+        };
+
+        if (this.engine && this.engine.canvas) {
+            this.engine.canvas.addEventListener('pointerdown', handlePointer);
+            this.engine.canvas.addEventListener('pointermove', handlePointer);
+        }
+
+        // Also need to handle touch specifically if pointer events fail?
+        // Pointer events should cover mouse/touch.
+    }
+
     updateUIState() {
         const hasImages = this.images.length > 0;
         const hasActiveImage = this.activeIndex >= 0;
@@ -5055,7 +5513,7 @@ class UntitledStudio {
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
             const text = event.target.result;
             try {
                 const lut = this.lutParser.parse(text);
@@ -5078,6 +5536,16 @@ class UntitledStudio {
                     const opVal = document.querySelector('[data-for="lutOpacity"]');
                     if (opSlider) opSlider.value = 100;
                     if (opVal) opVal.textContent = "1.00";
+                }
+
+                // Persist to DB
+                if (window.storage) {
+                    try {
+                        await window.storage.saveLUT(file.name, text);
+                        this.showToast('LUT Persisted to Library');
+                    } catch (dbErr) {
+                        console.warn('Failed to persist LUT', dbErr);
+                    }
                 }
 
             } catch (err) {
@@ -5270,9 +5738,10 @@ class UntitledStudio {
             'color': 'group-color',
             'fx': 'group-fx',
             'transform': 'group-transform',
+            'ai-tools': 'group-ai-tools',
+            'local': 'group-local',
             'presets': 'group-presets'
         };
-
         // Tool Bindings
         const toolMap = {
             'rail-undo-btn': () => this.history.undo(),
@@ -5334,6 +5803,8 @@ class UntitledStudio {
                     'color': 'COLOR GRADING',
                     'fx': 'EFFECTS & OPTICS',
                     'transform': 'GEOMETRY',
+                    'ai-tools': 'NEURAL DARKROOM',
+                    'local': 'LOCAL ADJUSTMENTS',
                     'presets': 'FILM LOOKS'
                 };
                 const subtitleEl = document.getElementById('panel-subtitle');
@@ -5380,6 +5851,16 @@ class UntitledStudio {
         if (typeof HistoryManager !== 'undefined') {
             this.history = new HistoryManager();
             this.history.onStateChange = (state) => this.renderHistoryPanel(state);
+
+            // Snapshot Button
+            const btnSnap = document.getElementById('btn-create-snapshot');
+            if (btnSnap) {
+                btnSnap.addEventListener('click', () => {
+                    const name = prompt('Snapshot Name:', 'Version ' + (this.history.snapshots.length + 1));
+                    if (name) this.history.createSnapshot(name);
+                });
+            }
+
             console.log('✓ History Initialized');
         } else {
             console.warn('HistoryManager not loaded');
@@ -5388,6 +5869,47 @@ class UntitledStudio {
     }
 
     renderHistoryPanel(state) {
+        // 1. Render Snapshots
+        const snapList = document.getElementById('snapshot-list');
+        const snapEmpty = document.getElementById('snapshot-empty');
+
+        if (snapList && state.snapshots) {
+            snapList.innerHTML = '';
+            if (state.snapshots.length === 0) {
+                if (snapEmpty) snapEmpty.classList.remove('hidden');
+            } else {
+                if (snapEmpty) snapEmpty.classList.add('hidden');
+                // Render newest first
+                [...state.snapshots].reverse().forEach(snap => {
+                    const el = document.createElement('div');
+                    el.className = 'flex items-center justify-between p-2 bg-white/5 rounded border border-white/5 hover:border-hot-pink/50 group transition-all';
+                    el.innerHTML = `
+                        <div class="cursor-pointer flex-1">
+                            <div class="text-[10px] font-bold text-white group-hover:text-hot-pink transition-colors">${snap.name}</div>
+                            <div class="text-[9px] text-gray-500">${new Date(snap.timestamp).toLocaleTimeString()}</div>
+                        </div>
+                        <button class="delete-snap-btn text-gray-600 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity" data-id="${snap.id}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    `;
+                    // Restore click
+                    el.querySelector('div').addEventListener('click', () => {
+                        this.history.restoreSnapshot(snap.id);
+                        this.showToast(`Restored: ${snap.name}`);
+                    });
+                    // Delete click
+                    el.querySelector('.delete-snap-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (confirm('Delete snapshot?')) {
+                            this.history.deleteSnapshot(snap.id);
+                        }
+                    });
+                    snapList.appendChild(el);
+                });
+            }
+        }
+
+        // 2. Render History List
         const list = document.getElementById('history-list');
         if (!list) return;
 
@@ -5440,6 +5962,52 @@ class UntitledStudio {
                 qVal.textContent = e.target.value + '%';
             });
         }
+
+        // Toggle Watermark Inputs
+        const wmToggle = document.getElementById('watermark-toggle');
+        const wmControls = document.getElementById('watermark-controls');
+        if (wmToggle && wmControls) {
+            wmToggle.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    wmControls.classList.remove('opacity-50', 'pointer-events-none');
+                } else {
+                    wmControls.classList.add('opacity-50', 'pointer-events-none');
+                }
+            });
+        }
+
+        // LUT Export
+        const btnLUT = document.getElementById('btn-export-lut');
+        if (btnLUT) {
+            btnLUT.addEventListener('click', async () => {
+                if (!this.engine) return;
+
+                btnLUT.innerHTML = '<span class="animate-spin text-moonstone">↻</span> GENERATING...';
+
+                try {
+                    // Check availability
+                    if (!window.LUTExporter) {
+                        // Dynamically load if needed, or assume loaded
+                        console.error('LUTExporter not loaded');
+                        this.showToast('Error: LUT Module Missing');
+                        return;
+                    }
+
+                    const exporter = new window.LUTExporter(this.engine);
+                    const adjustments = this.engine.getAdjustments(); // Ensure method exists or access prop
+                    // WebGLEngine has getAdjustments() (Line 914)
+
+                    await exporter.downloadLUT(adjustments, 'Untitled_Grade_' + Date.now());
+
+                    this.showToast('LUT Exported Successfully (.CUBE)');
+                } catch (e) {
+                    console.error('LUT Export failed', e);
+                    this.showToast('LUT Export Failed');
+                } finally {
+                    btnLUT.innerHTML = '<i class="ph ph-cube text-moonstone group-hover:scale-110 transition-transform"></i><span class="text-sm font-mono text-gray-300 group-hover:text-white">EXPORT AS .CUBE LUT</span>';
+                }
+            });
+        }
     }
 
     exportImage() {
@@ -5449,6 +6017,68 @@ class UntitledStudio {
 
         if (!this.engine || !this.engine.gl) return;
 
+        // Watermark Logic
+        const wmEnabled = document.getElementById('watermark-toggle')?.checked;
+        const drawCallback = wmEnabled ? (ctx, width, height) => {
+            const text = document.getElementById('watermark-text').value || 'Untitled Studio';
+            const opacity = document.getElementById('watermark-opacity').value / 100;
+            const sizeRaw = document.getElementById('watermark-size').value; // 10-100
+
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+
+            // Calculate size - scale relative to image height
+            // Base size: 3% of height for value 30
+            const fontSize = Math.max(12, height * (sizeRaw / 1000));
+
+            ctx.font = `bold ${fontSize}px "Share Tech Mono", monospace, sans-serif`;
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'bottom';
+
+            // Shadow for visibility
+            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            ctx.shadowBlur = fontSize * 0.2;
+            ctx.shadowOffsetX = fontSize * 0.05;
+            ctx.shadowOffsetY = fontSize * 0.05;
+
+            const padding = width * 0.03; // 3% padding
+            ctx.fillText(text, width - padding, height - padding);
+
+            ctx.restore();
+        } : null;
+
+        // Use ExportManager
+        if (this.exportManager) {
+            const modal = document.getElementById('export-modal');
+            const progressBar = document.getElementById('export-overall-bar');
+            const statusText = document.getElementById('export-status');
+
+            if (modal) modal.classList.remove('hidden');
+
+            this.exportManager.exportImage(format, quality, 'original', (progress) => {
+                if (progressBar) progressBar.style.width = progress + '%';
+                if (statusText) {
+                    if (progress < 40) statusText.textContent = 'Rendering High-Res...';
+                    else if (progress < 80) statusText.textContent = 'Applying Effects...';
+                    else if (progress < 95) statusText.textContent = 'Encoding Image...';
+                    else statusText.textContent = 'Finalizing...';
+                }
+            }, drawCallback)
+                .then(() => {
+                    this.showToast('Image Exported Successfully');
+                    if (modal) modal.classList.add('hidden');
+                    document.getElementById('export-settings-modal').classList.add('hidden');
+                })
+                .catch(e => {
+                    console.error('Export failed', e);
+                    this.showToast('Export Failed: ' + e.message);
+                    if (modal) modal.classList.add('hidden');
+                });
+            return;
+        }
+
+        // Fallback (Direct Canvas)
         const canvas = this.engine.gl.canvas;
         const mime = format === 'png' ? 'image/png' : 'image/jpeg';
         const dataURL = canvas.toDataURL(mime, quality);
@@ -5519,13 +6149,115 @@ class UntitledStudio {
         }
     }
 
-}
-// Handle B key release for Before/After
-document.addEventListener('keyup', (e) => {
-    if ((e.key === 'b' || e.key === 'B') && window.app) {
-        window.app.showOriginal(false);
+    async loadPersistedLUTs() {
+        if (!window.storage) return;
+        try {
+            const luts = await window.storage.getAllLUTs();
+            if (luts && luts.length > 0) {
+                console.log(`✓ Loading ${luts.length} persisted LUTs`);
+                if (!window.FilmPresets.custom) window.FilmPresets.custom = [];
+
+                luts.forEach(lut => {
+                    window.FilmPresets.custom.push({
+                        name: lut.name,
+                        category: 'custom',
+                        lutData: lut.data,
+                        isCustomLUT: true
+                    });
+                });
+
+                // If presets UI already initialized, it might need a refresh 
+                // but usually loadPersistedLUTs is called during init.
+            }
+        } catch (e) {
+            console.error('Failed to load persisted LUTs', e);
+        }
     }
-});
+
+    setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // Ignore if typing in an input or textarea
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            const key = e.key.toLowerCase();
+            const isCtrl = e.ctrlKey || e.metaKey;
+
+            // 1. Undo / Redo
+            if (isCtrl && key === 'z') {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    this.history?.redo();
+                    this.showToast('Redo ↻');
+                } else {
+                    this.history?.undo();
+                    this.showToast('Undo ↺');
+                }
+            }
+            if (isCtrl && key === 'y') {
+                e.preventDefault();
+                this.history?.redo();
+                this.showToast('Redo ↻');
+            }
+
+            // 2. Tab Switching (1-8)
+            if (key >= '1' && key <= '8') {
+                const tabs = document.querySelectorAll('.rail-icon[data-tab]');
+                const index = parseInt(key) - 1;
+                if (tabs[index]) {
+                    tabs[index].click();
+                }
+            }
+
+            // 3. Brush Size ([ and ])
+            if (key === '[') {
+                const sizeSlider = document.getElementById('mask-brush-size');
+                if (sizeSlider) {
+                    sizeSlider.value = Math.max(1, parseInt(sizeSlider.value) - 5);
+                    sizeSlider.dispatchEvent(new Event('input'));
+                }
+            }
+            if (key === ']') {
+                const sizeSlider = document.getElementById('mask-brush-size');
+                if (sizeSlider) {
+                    sizeSlider.value = Math.min(200, parseInt(sizeSlider.value) + 5);
+                    sizeSlider.dispatchEvent(new Event('input'));
+                }
+            }
+
+            // 4. Split View (V)
+            if (key === 'v') {
+                this.toggleSplitView();
+            }
+
+            // 5. Histogram (H)
+            if (key === 'h') {
+                const btn = document.getElementById('toggle-scopes-btn');
+                btn?.click();
+            }
+
+            // 6. Export Settings (S)
+            if (key === 's') {
+                const modal = document.getElementById('export-settings-modal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    this.showToast('Export Settings');
+                }
+            }
+
+            // 7. Before/After (B)
+            if (key === 'b') {
+                this.showOriginal(true);
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key.toLowerCase() === 'b') {
+                this.showOriginal(false);
+            }
+        });
+    }
+
+}
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {

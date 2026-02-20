@@ -2,6 +2,15 @@
 
 All notable changes to Untitled Studio will be documented in this file.
 
+## [3.0.1] - 2026-02-21
+
+### Bug Fixes & Structural Repairs
+- **FX Subtabs Fix**: Resolved a critical nesting bug where three extra `</div>` tags after the Grain subpanel prematurely closed the entire FX group, making Atmosphere, Digital, Texture, Creative, Frame, and LUT subpanels unreachable.
+- **Geometry Tab Restoration**: Fixed HTML nesting that was hiding the Transform group. Added a "Geometry & Transform" header for clarity.
+- **Import Button Restoration**: Re-implemented the `#placeholder-container` and `#import-hero-btn` in the main canvas area, restoring the initial import UI.
+- **File Input Restoration**: Restored the hidden `<input type="file" id="file-input">` element required for the native file picker.
+- **Sidebar Structure**: Corrected premature closure of `#panel-content` and `#control-panel` which was hiding several tabs.
+
 ## [3.0.0] - 2026-02-15
 
 ### Major Release: Sidebar & Theme Overhaul

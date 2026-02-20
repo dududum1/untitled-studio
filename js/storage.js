@@ -71,6 +71,12 @@ class StorageManager {
                     textureStore.createIndex('name', 'name', { unique: true });
                 }
 
+                // v3: LUTs store - for user uploaded .cube files
+                if (!db.objectStoreNames.contains('luts')) {
+                    const lutStore = db.createObjectStore('luts', { keyPath: 'id', autoIncrement: true });
+                    lutStore.createIndex('name', 'name', { unique: true });
+                }
+
                 console.log('✓ IndexedDB schema created/updated');
             };
         });
@@ -328,6 +334,36 @@ class StorageManager {
             const request = store.delete(id);
 
             request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    /**
+     * Save a custom LUT
+     */
+    async saveLUT(name, data) {
+        await this.ensuringReady();
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['luts'], 'readwrite');
+            const store = transaction.objectStore('luts');
+            const request = store.add({ name, data, createdAt: Date.now() });
+
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    /**
+     * Get all custom LUTs
+     */
+    async getAllLUTs() {
+        await this.ensuringReady();
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['luts'], 'readonly');
+            const store = transaction.objectStore('luts');
+            const request = store.getAll();
+
+            request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
     }

@@ -426,10 +426,14 @@
         }
     </script>
     <!-- Custom Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+    <script src="js/ai-engine.js"></script>
+    <script src="js/mask-editor.js"></script>
     <script src="js/lut-parser.js"></script>
     <script src="js/yodica-generator.js"></script>
     <script src="js/washi-generator.js"></script>
     <script src="js/hanalogital-generator.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="css/styles.css?v=21">
 </head>
@@ -467,6 +471,10 @@
                     <button class="rail-icon" data-tab="transform" title="Transform">
                         <i class="ph ph-crop"></i>
                     </button>
+                    <!-- NEW: AI Tools -->
+                    <button class="rail-icon" data-tab="ai-tools" title="Neural Darkroom">
+                        <i class="ph ph-brain"></i>
+                    </button>
                     <button class="rail-icon" data-tab="presets" title="Presets">
                         <i class="ph ph-bookmarks"></i>
                     </button>
@@ -493,6 +501,9 @@
                     </button>
                     <button class="rail-icon" id="rail-receipt-btn" title="Receipt Scanner">
                         <i class="ph ph-receipt"></i>
+                    </button>
+                    <button class="rail-icon" id="rail-local-btn" data-tab="local" title="Local Adjustments">
+                        <i class="ph ph-paint-brush"></i>
                     </button>
                     <div class="w-8 h-px bg-white/5 my-2"></div>
 
@@ -535,7 +546,7 @@
 
         <!-- 2. CONTROL PANEL (Drawer) -->
         <aside id="control-panel">
-            <div class="panel-header flex flex-col gap-1 mb-6 px-1 select-none">
+            <div class="panel-header relative flex flex-col gap-1 mb-6 px-1 select-none">
                 <h1 class="font-bold text-2xl tracking-tighter text-white/90 leading-none flex items-center gap-2">
                     UNTITLED
                     <span class="text-hot-pink">STUDIO</span>
@@ -547,10 +558,16 @@
                     <span id="panel-subtitle"
                         class="text-xs font-mono text-moonstone/80 tracking-[0.2em] uppercase">LIGHT & TONE</span>
                 </div>
+                <!-- Info Toggle Moved to Histogram -->
                 <div class="w-full h-px bg-gradient-to-r from-white/10 to-transparent mt-4"></div>
             </div>
 
             <div id="panel-content" class="flex-1 overflow-y-auto scrollbar-hide pb-20">
+
+                <!-- EXIF METADATA PANEL MOVED TO HUD -->
+
+                <!-- PANELS INJECTED HERE VIA JS OR STATIC -->
+
                 <!-- PANELS INJECTED HERE VIA JS OR STATIC -->
                 <!-- Placeholder for now, Logic will toggle visibility -->
 
@@ -610,6 +627,133 @@
                         </div>
                     </div>
                 </div>
+                <!-- AI TOOLS GROUP -->
+                <div id="group-ai-tools" class="control-group">
+                    <div id="ai-panel" class="panel">
+                        <div class="mb-4 text-sm text-gray-400">
+                            <p class="mb-2">Neural Darkroom <span
+                                    class="text-hot-pink text-[10px] border border-hot-pink/30 px-1 rounded">BETA</span>
+                            </p>
+                            <p class="text-xs opacity-70">Powered by client-side AI. runs 100% offline.</p>
+                        </div>
+
+                        <!-- Magic Eraser -->
+                        <div
+                            class="mb-6 p-4 bg-white/5 rounded-lg border border-white/10 hover:border-hot-pink/30 transition-colors">
+                            <h3 class="font-bold text-white mb-2 flex items-center gap-2">
+                                <i class="ph ph-eraser text-hot-pink"></i> Magic Eraser
+                            </h3>
+                            <p class="text-xs text-gray-400 mb-3">Remove unwanted objects or defects.</p>
+                            <button id="btn-ai-inpainting"
+                                class="w-full py-2 bg-white/10 hover:bg-hot-pink hover:text-white rounded border border-white/10 transition-all font-mono text-xs tracking-wider">
+                                LOAD MODEL (~20MB)
+                            </button>
+                            <div class="hidden mt-3" id="controls-inpainting">
+                                <div class="flex gap-2">
+                                    <button
+                                        class="flex-1 py-1.5 bg-hot-pink text-white rounded text-xs font-bold">BRUSH</button>
+                                    <button
+                                        class="flex-1 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded text-xs">ERASE</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Smart Select -->
+                        <div
+                            class="mb-6 p-4 bg-white/5 rounded-lg border border-white/10 hover:border-moonstone/30 transition-colors">
+                            <h3 class="font-bold text-white mb-2 flex items-center gap-2">
+                                <i class="ph ph-selection-foreground text-moonstone"></i> Smart Select
+                            </h3>
+                            <p class="text-xs text-gray-400 mb-3">Auto-detect main subject.</p>
+                            <button id="btn-ai-segmentation"
+                                class="w-full py-2 bg-white/10 hover:bg-moonstone hover:text-black rounded border border-white/10 transition-all font-mono text-xs tracking-wider">
+                                LOAD MODEL (~15MB)
+                            </button>
+                            <div class="hidden mt-3" id="controls-segmentation">
+                                <button class="w-full py-2 bg-moonstone text-black font-bold rounded text-xs">SELECT
+                                    SUBJECT</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LOCAL ADJUSTMENTS GROUP -->
+                <div id="group-local" class="control-group">
+                    <div id="local-panel" class="panel">
+                        <div class="mb-4 text-sm text-gray-400 flex justify-between items-center">
+                            <p>Local Adjustments</p>
+                            <span class="text-[10px] bg-white/10 px-1 rounded">MASKING</span>
+                        </div>
+
+                        <!-- Mask Management -->
+                        <div class="mb-4 flex gap-2">
+                            <button id="btn-add-mask"
+                                class="flex-1 py-2 bg-white/10 hover:bg-white/20 text-white rounded text-xs font-mono border border-white/5 transition-colors">+
+                                NEW MASK</button>
+                            <button id="btn-clear-masks"
+                                class="px-3 py-2 bg-white/5 hover:bg-red-500/20 text-red-400 rounded text-xs border border-white/5 transition-colors"
+                                title="Delete All"><i class="ph ph-trash"></i></button>
+                        </div>
+
+                        <!-- Visibility / Overlay -->
+                        <div class="mb-4 flex gap-2">
+                            <button id="btn-show-overlay"
+                                class="flex-1 py-1.5 bg-red-500/10 text-xs text-red-400 border border-red-500/30 rounded hover:bg-red-500/20 transition-colors">
+                                <i class="ph ph-eye"></i> SHOW OVERLAY
+                            </button>
+                            <button id="btn-invert-mask"
+                                class="flex-1 py-1.5 bg-white/5 text-xs text-gray-400 hover:text-white rounded border border-white/5 hover:border-white/20 transition-colors">
+                                <i class="ph ph-arrows-left-right"></i> INVERT
+                            </button>
+                        </div>
+
+                        <!-- Brush Controls -->
+                        <div id="mask-tools" class="mb-6 p-3 bg-white/5 rounded border border-white/10">
+                            <div class="flex justify-between mb-2">
+                                <label class="text-xs text-gray-400">Brush Size</label>
+                                <span id="brush-size-val" class="text-xs font-mono">100</span>
+                            </div>
+                            <input type="range" id="brush-size" class="studio-slider mb-3" min="10" max="300"
+                                value="100">
+
+                            <div class="flex justify-between mb-2">
+                                <label class="text-xs text-gray-400">Softness</label>
+                                <span id="brush-soft-val" class="text-xs font-mono">50</span>
+                            </div>
+                            <input type="range" id="brush-softness" class="studio-slider mb-3" min="0" max="100"
+                                value="50">
+
+                            <div class="flex gap-2 mt-2">
+                                <button id="tool-paint"
+                                    class="flex-1 py-1.5 bg-hot-pink text-white rounded text-xs font-bold border border-hot-pink shadow-[0_0_10px_rgba(255,0,153,0.3)]">PAINT</button>
+                                <button id="tool-erase"
+                                    class="flex-1 py-1.5 bg-white/5 text-gray-400 hover:text-white rounded text-xs border border-white/5">ERASE</button>
+                            </div>
+                        </div>
+
+                        <!-- Adjustments for Active Mask -->
+                        <div class="opacity-50 pointer-events-none transition-opacity" id="local-adjustments-container">
+                            <div class="slider-group">
+                                <div class="slider-header"><label>Exposure</label><span class="slider-value"
+                                        data-for="local-exposure">0.00</span></div>
+                                <input type="range" id="local-exposure" class="studio-slider" min="-2" max="2"
+                                    step="0.01" value="0">
+                            </div>
+                            <div class="slider-group">
+                                <div class="slider-header"><label>Contrast</label><span class="slider-value"
+                                        data-for="local-contrast">0</span></div>
+                                <input type="range" id="local-contrast" class="studio-slider" min="-50" max="50"
+                                    step="1" value="0">
+                            </div>
+                            <div class="slider-group">
+                                <div class="slider-header"><label>Temperature</label><span class="slider-value"
+                                        data-for="local-temp">0</span></div>
+                                <input type="range" id="local-temp" class="studio-slider" min="-50" max="50" step="1"
+                                    value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- CURVE GROUP -->
                 <div id="group-curve" class="control-group">
@@ -654,33 +798,6 @@
                 <!-- COLOR GROUP -->
                 <div id="group-color" class="control-group">
                     <div id="color-panel" class="panel">
-                        <!-- Custom LUT -->
-                        <div class="mb-6 pb-4 border-b border-glass-border">
-                            <div class="flex items-center justify-between mb-3">
-                                <label class="text-sm font-semibold text-gray-300">3D LUT (.cube)</label>
-                                <div class="flex gap-2">
-                                    <button id="remove-lut-btn"
-                                        class="text-sm text-red-400 hover:text-red-300 hidden">Remove</button>
-                                    <button id="import-lut-btn"
-                                        class="text-sm bg-glass hover:bg-glass-border px-2 py-1 rounded text-moonstone">+
-                                        Import</button>
-                                    <input type="file" id="lut-input" accept=".cube" hidden>
-                                </div>
-                            </div>
-                            <div id="lut-controls" class="hidden">
-                                <div class="slider-group">
-                                    <div class="slider-header">
-                                        <label>Opacity</label>
-                                        <span class="slider-value" data-for="lutOpacity"
-                                            data-scrub="lutOpacity">1.0</span>
-                                    </div>
-                                    <input type="range" id="lutOpacity" class="studio-slider" min="0" max="100" step="1"
-                                        value="100">
-                                </div>
-                                <div id="lut-name" class="text-xs text-gray-500 mt-1 truncate"></div>
-                            </div>
-                        </div>
-
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div class="slider-group">
                                 <div class="slider-header">
@@ -836,9 +953,9 @@
                         </div>
 
                         <!-- Sub-tab Navigation (Pill Style) -->
-                        <div class="flex gap-3 mb-6 overflow-x-auto scrollbar-hide pb-1 border-b border-glass-border">
+                        <div class="flex gap-2 mb-6 overflow-x-auto scrollbar-hide pb-1 border-b border-glass-border">
                             <button
-                                class="fx-subtab-btn active px-3 py-1.5 rounded-lg bg-white/10 text-white text-xs font-semibold hover:bg-white/20 transition-all"
+                                class="fx-subtab-btn px-3 py-1.5 rounded-lg text-gray-400 text-xs font-semibold hover:bg-white/10 hover:text-white transition-all active bg-white/10 text-white"
                                 data-subtab="optics">Optics</button>
                             <button
                                 class="fx-subtab-btn px-3 py-1.5 rounded-lg text-gray-400 text-xs font-semibold hover:bg-white/10 hover:text-white transition-all"
@@ -858,6 +975,9 @@
                             <button
                                 class="fx-subtab-btn px-3 py-1.5 rounded-lg text-gray-400 text-xs font-semibold hover:bg-white/10 hover:text-white transition-all"
                                 data-subtab="frame">Frame</button>
+                            <button
+                                class="fx-subtab-btn px-3 py-1.5 rounded-lg text-gray-400 text-xs font-semibold hover:bg-white/10 hover:text-white transition-all"
+                                data-subtab="lut">LUT</button>
                         </div>
 
                         <!-- FRAME SUB-PANEL (Advanced Borders) -->
@@ -1028,24 +1148,9 @@
                                         step="1" value="0">
                                 </div>
 
-                                <!-- LUT Export -->
-                                <div class="mt-4 pt-4 border-t border-glass-border">
-                                    <button id="export-lut-btn"
-                                        class="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-moonstone/30 to-hot-pink/30 
-                                       text-white text-sm font-semibold hover:from-moonstone/50 hover:to-hot-pink/50 
-                                       border border-moonstone/30 transition-all flex items-center justify-center gap-2">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                        </svg>
-                                        Export as .cube LUT
-                                    </button>
-                                    <p class="text-sm text-gray-500 mt-2 text-center">Save your color grade for
-                                        video editors
-                                    </p>
-                                </div>
                             </div>
-                        </div> <!-- End fx-grain -->
+                        </div>
+
                         <!-- Effects sub-panels continue below -->
 
                         <!-- 3. VIBE SUB-PANEL -->
@@ -1620,12 +1725,59 @@
                                 </div>
                             </div> <!-- End gallery pt-4 wrapper -->
                         </div> <!-- End fx-frame -->
+
+                        <!-- 7. LUT SUB-PANEL -->
+                        <div id="fx-lut" class="fx-subpanel hidden">
+                            <div class="mb-6 pb-4 border-b border-glass-border">
+                                <div class="flex items-center justify-between mb-3">
+                                    <label class="text-sm font-semibold text-gray-300">3D LUT (.cube)</label>
+                                    <div class="flex gap-2">
+                                        <button id="remove-lut-btn"
+                                            class="text-sm text-red-400 hover:text-red-300 hidden">Remove</button>
+                                        <button id="import-lut-btn"
+                                            class="text-sm bg-glass hover:bg-glass-border px-2 py-1 rounded text-moonstone">+
+                                            Import</button>
+                                        <input type="file" id="lut-input" accept=".cube" hidden>
+                                    </div>
+                                </div>
+                                <div id="lut-controls" class="hidden">
+                                    <div class="slider-group">
+                                        <div class="slider-header">
+                                            <label>Opacity</label>
+                                            <span class="slider-value" data-for="lutOpacity"
+                                                data-scrub="lutOpacity">1.0</span>
+                                        </div>
+                                        <input type="range" id="lutOpacity" class="studio-slider" min="0" max="100"
+                                            step="1" value="100">
+                                    </div>
+                                    <div id="lut-name" class="text-xs text-gray-500 mt-1 truncate"></div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 pt-4">
+                                <h3 class="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">Export LUT
+                                </h3>
+                                <button id="export-lut-btn" class="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-moonstone/30 to-hot-pink/30 
+                                   text-white text-sm font-semibold hover:from-moonstone/50 hover:to-hot-pink/50 
+                                   border border-moonstone/30 transition-all flex items-center justify-center gap-2">
+                                    <i class="ph ph-download-simple"></i>
+                                    Export as .cube LUT
+                                </button>
+                                <p class="text-[10px] text-gray-500 mt-2 text-center italic">
+                                    Save your custom color grade for use in Premiere, Resolve, or Photoshop.
+                                </p>
+                            </div>
+                        </div>
                     </div> <!-- End effects-panel -->
-                </div>
+                </div> <!-- End group-fx -->
+
 
                 <!-- TRANSFORM GROUP -->
                 <div id="group-transform" class="control-group">
                     <div id="crop-panel" class="panel">
+                        <div class="mb-4 text-sm text-gray-400">
+                            <p>Geometry & Transform</p>
+                        </div>
                         <div class="flex flex-wrap gap-4">
                             <div>
                                 <label class="text-sm text-gray-500 mb-2 block">Aspect Ratio</label>
@@ -1887,6 +2039,9 @@
 
                 </div>
 
+
+
+
                 <!-- Brand Credit (Sticky Footer) -->
                 <div
                     class="brand-credit px-4 py-4 border-t border-glass-border select-none bg-[#121212]/50 backdrop-blur-md grid grid-cols-3 gap-2">
@@ -1917,7 +2072,8 @@
                     <button id="close-about-btn" class="text-gray-500 hover:text-white">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
+                                d="M6 18L18 6M6 6l12 12">
+                            </path>
                         </svg>
                     </button>
                 </div>
@@ -1943,7 +2099,8 @@
                     <button id="close-changelog-btn" class="text-gray-500 hover:text-white">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
+                                d="M6 18L18 6M6 6l12 12">
+                            </path>
                         </svg>
                     </button>
                 </div>
@@ -1975,9 +2132,9 @@
 
         <!-- ========== HISTORY SIDEBAR ========== -->
         <aside id="history-sidebar"
-            class="fixed top-20 right-0 w-64 h-[calc(100vh-20rem)] bg-glass backdrop-blur-glass border-l border-glass-border transform translate-x-full transition-transform z-40">
+            class="fixed top-20 right-0 w-64 h-[calc(100vh-20rem)] bg-glass backdrop-blur-glass border-l border-glass-border transform translate-x-full transition-transform z-40 flex flex-col">
             <div class="flex items-center justify-between p-4 border-b border-glass-border">
-                <h3 class="font-semibold text-sm">History</h3>
+                <h3 class="font-semibold text-sm">History & Versions</h3>
                 <button id="close-history-btn" class="p-1 rounded hover:bg-glass">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1985,7 +2142,24 @@
                     </svg>
                 </button>
             </div>
-            <div id="history-list" class="overflow-y-auto h-full p-2">
+
+            <!-- Snapshots Section -->
+            <div class="p-3 border-b border-glass-border bg-black/20">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Snapshots</h4>
+                    <button id="btn-create-snapshot"
+                        class="text-[10px] bg-hot-pink/10 hover:bg-hot-pink/20 text-hot-pink px-2 py-1 rounded transition-colors border border-hot-pink/20">+
+                        SAVE</button>
+                </div>
+                <div id="snapshot-list" class="space-y-1 max-h-32 overflow-y-auto scrollbar-hide empty:hidden">
+                    <!-- Snapshots injected here -->
+                </div>
+                <div id="snapshot-empty" class="text-[10px] text-gray-600 italic text-center py-2">No snapshots saved
+                </div>
+            </div>
+
+            <!-- Scrollable History -->
+            <div id="history-list" class="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-white/10">
                 <!-- History items will be inserted here -->
             </div>
         </aside>
@@ -1995,6 +2169,52 @@
 
             <div id="main-stage"
                 class="relative w-full h-full flex items-center justify-center bg-midnight transition-colors duration-700">
+
+                <!-- Hero Placeholder (Import Target) -->
+                <div id="placeholder-container"
+                    class="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-auto">
+                    <div class="relative group cursor-pointer" id="import-hero-btn">
+                        <!-- Retro Holographic Card -->
+                        <div
+                            class="w-64 h-80 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-3xl rounded-[2rem] border border-white/20 shadow-2xl flex flex-col items-center justify-center transition-all duration-500 group-hover:scale-105 group-hover:border-hot-pink/50 group-hover:shadow-[0_0_50px_rgba(237,39,136,0.3)] perspective-1000">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-tr from-hot-pink/5 to-moonstone/5 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity">
+                            </div>
+
+                            <!-- Glitchy Icon -->
+                            <div class="mb-6 relative">
+                                <i
+                                    class="ph ph-image-square text-6xl text-white/20 group-hover:text-hot-pink transition-colors relative z-10"></i>
+                                <i
+                                    class="ph ph-image-square text-6xl text-cyan-400 absolute top-0 left-0 opacity-0 group-hover:opacity-100 group-hover:animate-pulse -translate-x-1"></i>
+                            </div>
+
+                            <h2 class="text-white font-bold tracking-tighter text-2xl mb-1">UNTITLED</h2>
+                            <p class="text-[10px] text-hot-pink tracking-[0.4em] font-mono mb-8">STUDIO // v3.0</p>
+
+                            <div
+                                class="px-4 py-2 bg-white/10 rounded-full border border-white/20 text-[10px] font-bold tracking-widest text-gray-300 group-hover:bg-hot-pink group-hover:text-white group-hover:border-hot-pink transition-all">
+                                IMPORT PHOTO
+                            </div>
+                        </div>
+
+                        <!-- Ambient Glow -->
+                        <div
+                            class="absolute -inset-4 bg-hot-pink/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex flex-col items-center gap-2 animate-bounce-slow">
+                        <p class="text-[10px] text-gray-500 font-mono tracking-widest uppercase">Drag & Drop Any Image
+                        </p>
+                        <div class="flex gap-4">
+                            <span class="text-[8px] text-gray-700">RAW</span>
+                            <span class="text-[8px] text-gray-700">LOG</span>
+                            <span class="text-[8px] text-gray-700">HEIC</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="canvas-container"
                     class="relative w-full h-full flex items-center justify-center overflow-hidden">
                     <canvas id="gl-canvas"
@@ -2036,19 +2256,35 @@
                             class="w-48 rounded-lg overflow-hidden bg-midnight/50 backdrop-blur-sm border border-glass-border pointer-events-auto">
                             <canvas id="histogram-canvas" width="192" height="112"></canvas>
                             <div class="flex items-center justify-between px-2 py-1.5 border-t border-glass-border">
-                                <button id="auto-enhance-btn"
-                                    class="flex items-center gap-1 px-2 py-1 rounded bg-hot-pink/20 hover:bg-hot-pink/40 text-hot-pink text-xs font-bold transition-all"
-                                    title="Auto-Enhance (Magic Wand)">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path
-                                            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
-                                    </svg>
-                                    Auto
-                                </button>
+                                <div class="flex items-center gap-2">
+                                    <button id="auto-enhance-btn"
+                                        class="flex items-center gap-1 px-2 py-1 rounded bg-hot-pink/20 hover:bg-hot-pink/40 text-hot-pink text-xs font-bold transition-all"
+                                        title="Auto-Enhance (Magic Wand)">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path
+                                                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
+                                        </svg>
+                                        Auto
+                                    </button>
+                                    <button id="info-toggle-btn" onclick="window.app && window.app.toggleExif(event)"
+                                        class="w-6 h-6 flex items-center justify-center rounded hover:bg-white/10 text-gray-400 hover:text-white transition-all cursor-pointer relative z-50"
+                                        title="Toggle EXIF Info">
+                                        <i class="ph ph-info text-sm"></i>
+                                    </button>
+                                </div>
                                 <label class="flex items-center gap-1 text-xs text-gray-400 cursor-pointer">
                                     <input type="checkbox" id="clipping-toggle" class="accent-hot-pink w-3 h-3">
                                     Clip
                                 </label>
+                            </div>
+                        </div>
+
+                        <!-- EXIF Panel (Floating) -->
+                        <div id="exif-panel"
+                            class="hidden w-48 bg-midnight/50 backdrop-blur-sm border border-glass-border rounded-lg p-2 font-mono text-[9px] text-phosphor-green pointer-events-auto">
+                            <div id="exif-content" class="space-y-1">
+                                <!-- Populated by JS -->
+                                <div class="text-center text-gray-500 italic">NO DATA</div>
                             </div>
                         </div>
 
@@ -2340,6 +2576,45 @@
                     <input type="range" id="export-quality" class="studio-slider" min="50" max="100" value="95">
                 </div>
 
+                <!-- Watermark Section -->
+                <div class="space-y-3 pt-4 border-t border-glass-border">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs text-gray-500 uppercase tracking-[0.2em]">Watermark</label>
+                        <label class="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
+                            <input type="checkbox" id="watermark-toggle" class="accent-hot-pink w-3 h-3">
+                            Enable
+                        </label>
+                    </div>
+                    <div id="watermark-controls" class="space-y-3 opacity-50 pointer-events-none transition-opacity">
+                        <input type="text" id="watermark-text" placeholder="© Your Name"
+                            class="w-full bg-white/5 border border-glass-border rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-hot-pink">
+
+                        <div class="flex gap-2">
+                            <div class="flex-1">
+                                <label class="text-[10px] text-gray-500 mb-1 block">Opacity</label>
+                                <input type="range" id="watermark-opacity" class="studio-slider w-full" min="10"
+                                    max="100" value="80">
+                            </div>
+                            <div class="flex-1">
+                                <label class="text-[10px] text-gray-500 mb-1 block">Size</label>
+                                <input type="range" id="watermark-size" class="studio-slider w-full" min="10" max="100"
+                                    value="30">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LUT Export Section -->
+                <div class="pt-4 border-t border-glass-border">
+                    <button id="btn-export-lut"
+                        class="w-full flex items-center justify-center gap-2 py-3 bg-white/5 hover:bg-white/10 active:bg-white/20 border border-white/10 rounded-xl transition-all group">
+                        <i class="ph ph-cube text-moonstone group-hover:scale-110 transition-transform"></i>
+                        <span class="text-sm font-mono text-gray-300 group-hover:text-white">EXPORT AS .CUBE LUT</span>
+                    </button>
+                    <p class="text-[10px] text-gray-600 text-center mt-2">Generate 33-point HALD for use in Premiere,
+                        DaVinci, etc.</p>
+                </div>
+
                 <!-- Metadata -->
                 <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-glass-border">
                     <div class="flex items-center gap-3">
@@ -2404,7 +2679,7 @@
     <script src="js/yodica-generator.js"></script>
     <!-- script src="js/textures.js?v=14"></script> -->
     <script src="js/sonic-engine.js"></script>
-    <script src="js/app.js?v=16"></script>
+    <script src="js/app.js?v=17"></script>
 
     <!-- Global CRT Overlay -->
     <div id="crt-overlay"
@@ -2587,6 +2862,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     <script src="js/receipt-generator.js"></script>
     <script src="js/receipt-scanner.js"></script>
+    <!-- Hidden File Input -->
+    <input type="file" id="file-input" multiple accept="image/*" class="hidden">
 
 
     <!-- Service Worker Registration -->
