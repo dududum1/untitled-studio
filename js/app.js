@@ -2637,7 +2637,7 @@ class UntitledStudio {
                 }
 
                 // Update in DB (light update)
-                storage.updateImage(id, { exif: relevant });
+                if (targetImg) storage.saveImage(targetImg);
             });
         }
 
