@@ -395,8 +395,131 @@
 
             /* Ensure theme drawer is above safe area */
             .theme-drawer {
-                bottom: calc(85px + env(safe-area-inset-bottom, 12px)) !important;
+                bottom: calc(85px + env(safe-area-bottom, 12px)) !important;
             }
+        }
+
+        /* BRUTALIST TOOLTIP SYSTEM */
+        .brutalist-tooltip {
+            position: absolute;
+            z-index: 9999;
+            pointer-events: none;
+            background-color: var(--terminal-bg);
+            border: 1px solid var(--terminal-green);
+            box-shadow: 4px 4px 0px var(--terminal-green);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            max-width: 250px;
+            font-family: 'JetBrains Mono', 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            border-radius: 0;
+            /* Sharp corners */
+            opacity: 0;
+            transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+            transform: translateY(4px);
+            /* Ensure it stays above everything */
+            margin-top: -8px;
+            margin-left: 12px;
+        }
+
+        .brutalist-tooltip.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Tooltip Trigger Icon styles */
+        .tooltip-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            margin-left: 4px;
+            font-family: monospace;
+            font-size: 10px;
+            font-weight: bold;
+            color: #666;
+            border: 1px solid transparent;
+            cursor: help;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .tooltip-trigger:hover,
+        .tooltip-trigger:focus {
+            color: var(--terminal-green);
+            border-color: var(--terminal-green);
+            outline: none;
+        }
+
+        /* ── AI Model Loading Progress ──────────────────────────────────── */
+        .ai-phase-label {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .ai-pct-label {
+            font-family: 'Inter', 'JetBrains Mono', monospace;
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* 1 px track → fills smoothly with white */
+        .ai-bar-track {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .ai-bar-fill {
+            height: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 999px;
+            transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: width;
+        }
+
+        /* Spinner: thin arc, slow rotation */
+        .ai-spinner {
+            animation: ai-spin 1.6s linear infinite;
+            transform-origin: center;
+        }
+
+        @keyframes ai-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Soft red error text */
+        .ai-error-text {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 10px;
+            color: #f87171;
+            line-height: 1.5;
+        }
+
+        .ai-retry-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            color: inherit;
+            font: inherit;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .ai-retry-btn:hover {
+            color: #fca5a5;
         }
     </style>
 
@@ -628,7 +751,9 @@
                 <div id="group-ai-tools" class="control-group">
                     <div id="ai-panel" class="panel">
                         <div class="mb-4 text-sm text-gray-400">
-                            <p class="mb-2">Neural Darkroom <span
+                            <p class="mb-2 flex items-center">Neural Darkroom<span class="tooltip-trigger" tabindex="0"
+                                    data-tooltip="Processes AI tasks (like masking and subject detection) entirely on your local device. Fast, private, and works completely offline."
+                                    aria-label="More Info">[?]</span> <span
                                     class="text-hot-pink text-[10px] border border-hot-pink/30 px-1 rounded">BETA</span>
                             </p>
                             <p class="text-xs opacity-70">Powered by client-side AI. runs 100% offline.</p>
@@ -641,10 +766,45 @@
                                 <i class="ph ph-eraser text-hot-pink"></i> Magic Eraser
                             </h3>
                             <p class="text-xs text-gray-400 mb-3">Remove unwanted objects or defects.</p>
-                            <button id="btn-ai-inpainting"
-                                class="w-full py-2 bg-white/10 hover:bg-hot-pink hover:text-white rounded border border-white/10 transition-all font-mono text-xs tracking-wider">
-                                LOAD MODEL (~20MB)
-                            </button>
+
+                            <!-- State 0: Idle -->
+                            <div id="ai-idle-inpainting">
+                                <button id="btn-ai-inpainting"
+                                    class="w-full py-2.5 bg-white/8 hover:bg-hot-pink/20 hover:border-hot-pink/50 text-gray-300 hover:text-white rounded-lg border border-white/10 transition-all duration-300 text-xs tracking-widest uppercase">
+                                    Load Model <span class="opacity-50 text-[10px] ml-1">(~20 MB)</span>
+                                </button>
+                            </div>
+
+                            <!-- State 1: Loading progress -->
+                            <div id="ai-progress-inpainting" class="hidden py-1">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span id="ai-phase-inpainting" class="ai-phase-label">DOWNLOADING</span>
+                                    <span id="ai-pct-inpainting" class="ai-pct-label">0%</span>
+                                </div>
+                                <!-- Thin progress bar (shown while downloading) -->
+                                <div class="ai-bar-track" id="ai-bar-track-inpainting">
+                                    <div class="ai-bar-fill" id="ai-bar-inpainting" style="width:0%"></div>
+                                </div>
+                                <!-- Spinner (shown while initializing) -->
+                                <div id="ai-spinner-wrap-inpainting" class="hidden flex justify-center mt-2">
+                                    <svg class="ai-spinner" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                        <circle cx="10" cy="10" r="8" stroke="rgba(255,255,255,0.12)"
+                                            stroke-width="1.5" />
+                                        <path d="M10 2 A8 8 0 0 1 18 10" stroke="white" stroke-width="1.5"
+                                            stroke-linecap="round" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- State 2: Error -->
+                            <div id="ai-error-inpainting" class="hidden py-1">
+                                <p class="ai-error-text" id="ai-error-msg-inpainting">Network error.
+                                    <button class="ai-retry-btn underline" data-model="inpainting">Tap to
+                                        retry.</button>
+                                </p>
+                            </div>
+
+                            <!-- State 3: Controls (ready) -->
                             <div class="hidden mt-3" id="controls-inpainting">
                                 <div class="flex gap-2">
                                     <button id="btn-ai-brush"
@@ -666,10 +826,43 @@
                                 <i class="ph ph-selection-foreground text-moonstone"></i> Smart Select
                             </h3>
                             <p class="text-xs text-gray-400 mb-3">Auto-detect main subject.</p>
-                            <button id="btn-ai-segmentation"
-                                class="w-full py-2 bg-white/10 hover:bg-moonstone hover:text-black rounded border border-white/10 transition-all font-mono text-xs tracking-wider">
-                                LOAD MODEL (~15MB)
-                            </button>
+
+                            <!-- State 0: Idle -->
+                            <div id="ai-idle-segmentation">
+                                <button id="btn-ai-segmentation"
+                                    class="w-full py-2.5 bg-white/8 hover:bg-moonstone/20 hover:border-moonstone/50 text-gray-300 hover:text-white rounded-lg border border-white/10 transition-all duration-300 text-xs tracking-widest uppercase">
+                                    Load Model <span class="opacity-50 text-[10px] ml-1">(~15 MB)</span>
+                                </button>
+                            </div>
+
+                            <!-- State 1: Loading progress -->
+                            <div id="ai-progress-segmentation" class="hidden py-1">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span id="ai-phase-segmentation" class="ai-phase-label">DOWNLOADING</span>
+                                    <span id="ai-pct-segmentation" class="ai-pct-label">0%</span>
+                                </div>
+                                <div class="ai-bar-track" id="ai-bar-track-segmentation">
+                                    <div class="ai-bar-fill" id="ai-bar-segmentation" style="width:0%"></div>
+                                </div>
+                                <div id="ai-spinner-wrap-segmentation" class="hidden flex justify-center mt-2">
+                                    <svg class="ai-spinner" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                        <circle cx="10" cy="10" r="8" stroke="rgba(255,255,255,0.12)"
+                                            stroke-width="1.5" />
+                                        <path d="M10 2 A8 8 0 0 1 18 10" stroke="white" stroke-width="1.5"
+                                            stroke-linecap="round" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- State 2: Error -->
+                            <div id="ai-error-segmentation" class="hidden py-1">
+                                <p class="ai-error-text">
+                                    <button class="ai-retry-btn underline" data-model="segmentation">Tap to
+                                        retry.</button>
+                                </p>
+                            </div>
+
+                            <!-- State 3: Controls (ready) -->
                             <div class="hidden mt-3" id="controls-segmentation">
                                 <button id="btn-ai-select"
                                     class="w-full py-2 bg-moonstone text-black font-bold rounded text-xs">SELECT
@@ -871,7 +1064,9 @@
                         <!-- Vectorscope -->
                         <div class="mt-6">
                             <h3 class="text-sm font-semibold text-gray-400 mb-3 flex items-center justify-between">
-                                <span>Vectorscope</span>
+                                <span class="flex items-center">Vectorscope<span class="tooltip-trigger" tabindex="0"
+                                        data-tooltip="A graphing tool that plots the colors in your image. The angle tells you the hue (color), and the distance from the center tells you the saturation (intensity)."
+                                        aria-label="More Info">[?]</span></span>
                                 <button id="toggle-vectorscope"
                                     class="text-xs bg-white/5 px-2 py-1 rounded hover:bg-white/10 transition">Show/Hide</button>
                             </h3>
@@ -884,7 +1079,10 @@
 
                         <!-- HSL Mixer -->
                         <div class="mt-6">
-                            <h3 class="text-sm font-semibold text-gray-400 mb-3">HSL Mixer</h3>
+                            <h3 class="text-sm font-semibold text-gray-400 mb-3 flex items-center">HSL Mixer<span
+                                    class="tooltip-trigger" tabindex="0"
+                                    data-tooltip="Stands for Hue, Saturation, and Luminance. Lets you isolate a specific color (like the blues in the sky) and change its shade, intensity, or brightness without affecting the rest of the photo."
+                                    aria-label="More Info">[?]</span></h3>
                             <div class="flex gap-2 mb-4">
                                 <button class="hsl-channel active" data-channel="hue">Hue</button>
                                 <button class="hsl-channel" data-channel="sat">Saturation</button>
@@ -931,33 +1129,13 @@
                 <!-- FX GROUP -->
                 <div id="group-fx" class="control-group">
                     <div id="effects-panel" class="panel">
-                        <!-- OUTPUT TRANSFORM (PRINT STOCK) -->
-                        <div class="mb-6 pb-4 border-b border-glass-border">
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="text-sm text-hot-pink font-bold tracking-wider uppercase">Output
-                                    Transform</label>
-                                <span class="text-xs text-gray-500">Cinema Print Emulation</span>
-                            </div>
-                            <div class="flex bg-glass rounded-lg p-1 border border-glass-border">
-                                <button
-                                    class="flex-1 py-1.5 text-sm rounded hover:bg-white/10 transition-all print-stock-btn active bg-hot-pink/20 text-hot-pink font-semibold shadow-[0_0_10px_rgba(237,39,136,0.2)]"
-                                    data-stock="0">Standard</button>
-                                <button
-                                    class="flex-1 py-1.5 text-sm rounded hover:bg-white/10 transition-all print-stock-btn text-gray-400"
-                                    data-stock="1">Kodak 2383</button>
-                                <button
-                                    class="flex-1 py-1.5 text-sm rounded hover:bg-white/10 transition-all print-stock-btn text-gray-400"
-                                    data-stock="2">Fuji 3513</button>
-                                <button
-                                    class="flex-1 py-1.5 text-sm rounded hover:bg-white/10 transition-all print-stock-btn text-gray-400"
-                                    data-stock="3">Cineon Log</button>
-                            </div>
-                        </div>
-
                         <!-- Sub-tab Navigation (Pill Style) -->
-                        <div class="flex gap-2 mb-6 overflow-x-auto scrollbar-hide pb-1 border-b border-glass-border">
+                        <div class="flex flex-wrap gap-2 mb-6 pb-2 border-b border-glass-border">
                             <button
                                 class="fx-subtab-btn px-3 py-1.5 rounded-lg text-gray-400 text-xs font-semibold hover:bg-white/10 hover:text-white transition-all active bg-white/10 text-white"
+                                data-subtab="cinema">Cinema</button>
+                            <button
+                                class="fx-subtab-btn px-3 py-1.5 rounded-lg text-gray-400 text-xs font-semibold hover:bg-white/10 hover:text-white transition-all"
                                 data-subtab="optics">Optics</button>
                             <button
                                 class="fx-subtab-btn px-3 py-1.5 rounded-lg text-gray-400 text-xs font-semibold hover:bg-white/10 hover:text-white transition-all"
@@ -982,12 +1160,47 @@
                                 data-subtab="lut">LUT</button>
                         </div>
 
-                        <!-- FRAME SUB-PANEL (Advanced Borders) -->
-                        <!-- Duplicate Frame Removed -->
+                        <!-- 0. CINEMA SUB-PANEL (OUTPUT TRANSFORM) -->
+                        <div id="fx-cinema" class="fx-subpanel active">
+                            <div class="mb-6">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label
+                                        class="text-sm text-hot-pink font-bold tracking-wider uppercase flex items-center">Output
+                                        Transform<span class="tooltip-trigger" tabindex="0"
+                                            data-tooltip="The final stage of the color pipeline. It maps your edited colors to match the physical characteristics of classic motion picture film."
+                                            aria-label="More Info">[?]</span></label>
+                                    <span class="text-xs text-gray-500">Cinema Print Emulation</span>
+                                </div>
+                                <div
+                                    class="flex flex-col sm:flex-row bg-glass rounded-lg border border-glass-border overflow-hidden">
+                                    <button
+                                        class="flex-1 py-2 text-sm hover:bg-white/10 transition-all print-stock-btn active bg-hot-pink/20 text-hot-pink font-semibold shadow-[0_0_10px_rgba(237,39,136,0.2)]"
+                                        data-stock="0">Standard</button>
+                                    <button
+                                        class="flex-1 py-2 text-sm hover:bg-white/10 transition-all print-stock-btn text-gray-400 border-t sm:border-t-0 sm:border-l border-white/5"
+                                        data-stock="1">Kodak 2383<span class="tooltip-trigger" tabindex="0"
+                                            data-tooltip="A legendary cinematic print film stock known for warm, rich skin tones and deep, teal shadows. Think modern Hollywood blockbusters."
+                                            aria-label="More Info">[?]</span></button>
+                                    <button
+                                        class="flex-1 py-2 text-sm hover:bg-white/10 transition-all print-stock-btn text-gray-400 border-t sm:border-t-0 sm:border-l border-white/5"
+                                        data-stock="2">Fuji 3513<span class="tooltip-trigger" tabindex="0"
+                                            data-tooltip="A cinematic print stock that yields cooler, softer contrast with beautiful, pastel-like greens and magentas."
+                                            aria-label="More Info">[?]</span></button>
+                                    <button
+                                        class="flex-1 py-2 text-sm hover:bg-white/10 transition-all print-stock-btn text-gray-400 border-t sm:border-t-0 sm:border-l border-white/5"
+                                        data-stock="3">Cineon Log<span class="tooltip-trigger" tabindex="0"
+                                            data-tooltip="A flat, washed-out color profile designed to retain maximum shadow and highlight detail, mimicking raw, unscanned film negatives."
+                                            aria-label="More Info">[?]</span></button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-3">Applies predefined color mapping designed to
+                                    emulate classic motion picture print film stocks. Apply this early in your workflow.
+                                </p>
+                            </div>
+                        </div>
 
                         <!-- 1. OPTICS SUB-PANEL -->
                         <div id="fx-optics"
-                            class="fx-subpanel active grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            class="fx-subpanel hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div class="slider-group">
                                 <div class="slider-header">
                                     <label>Dehaze</label>
@@ -1030,7 +1243,10 @@
                             </div>
                             <div class="slider-group">
                                 <div class="slider-header">
-                                    <label>Lens Fringing</label>
+                                    <label class="flex items-center">Lens Fringing<span class="tooltip-trigger"
+                                            tabindex="0"
+                                            data-tooltip="Simulates chromatic aberration—the slight purple or green color-splitting on the edges of objects caused by imperfect vintage glass."
+                                            aria-label="More Info">[?]</span></label>
                                     <span class="slider-value" data-for="chromaticAberration"
                                         data-scrub="chromaticAberration">0</span>
                                 </div>
@@ -1039,7 +1255,10 @@
                             </div>
                             <div class="slider-group">
                                 <div class="slider-header">
-                                    <label>Barrel Distortion</label>
+                                    <label class="flex items-center">Barrel Distortion<span class="tooltip-trigger"
+                                            tabindex="0"
+                                            data-tooltip="Bends the edges of the image outward, mimicking the curved, distorted look of ultra-wide or fisheye lenses."
+                                            aria-label="More Info">[?]</span></label>
                                     <span class="slider-value" data-for="barrelDistortion"
                                         data-scrub="barrelDistortion">0</span>
                                 </div>
@@ -1053,7 +1272,10 @@
                             class="fx-subpanel hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div class="slider-group">
                                 <div class="slider-header">
-                                    <label>Grain Mode</label>
+                                    <label class="flex items-center">Grain Mode<span class="tooltip-trigger"
+                                            tabindex="0"
+                                            data-tooltip="Emulsion (Negative): Mimics the organic, irregular structure of light-sensitive silver halide crystals found in real analog film.&#10;Analog (35mm Scan): Simulates the specific texture, density, and slight color shifts introduced when physical film is run through a lab scanner."
+                                            aria-label="More Info">[?]</span></label>
                                 </div>
                                 <select id="grainType"
                                     class="w-full bg-glass border border-glass-border rounded text-sm text-gray-300 p-2">
@@ -1117,7 +1339,10 @@
 
                             <!-- Dithering Engine -->
                             <div class="mt-4 pt-4 border-t border-glass-border">
-                                <label class="text-sm text-gray-500 mb-2 block">Dithering (Lo-Fi)</label>
+                                <label class="text-sm text-gray-500 mb-2 flex items-center">Dithering (Lo-Fi)<span
+                                        class="tooltip-trigger" tabindex="0"
+                                        data-tooltip="A technique that uses dots of different colors or shades to simulate missing colors and create a retro, lo-fi look.&#10;&#10;Floyd-Steinberg: A classic algorithm that disperses pixels to create smooth gradients in limited color palettes.&#10;Atkinson: A high-contrast dithering method originally created for early Apple Macintoshes. Great for retro looks.&#10;Bayer 4x4: A structured, grid-like pixel pattern used in old video games and early digital cameras."
+                                        aria-label="More Info">[?]</span></label>
                                 <div class="slider-group mb-2">
                                     <div class="slider-header">
                                         <label>Algorithm</label>
@@ -1179,7 +1404,10 @@
                                 </div>
                                 <div class="slider-group">
                                     <div class="slider-header">
-                                        <label>Halation</label>
+                                        <label class="flex items-center">Halation<span class="tooltip-trigger"
+                                                tabindex="0"
+                                                data-tooltip="Simulates the red, glowing bleed that happens when bright light hits the back of physical analog film."
+                                                aria-label="More Info">[?]</span></label>
                                         <span class="slider-value" data-for="halation" data-scrub="halation">0</span>
                                     </div>
                                     <input type="range" id="halation" class="studio-slider" min="0" max="100" step="1"
@@ -1187,7 +1415,10 @@
                                 </div>
                                 <div class="slider-group">
                                     <div class="slider-header">
-                                        <label>Mist Diffusion</label>
+                                        <label class="flex items-center">Mist Diffusion<span class="tooltip-trigger"
+                                                tabindex="0"
+                                                data-tooltip="Scatters light around the brightest parts of the image, creating the soft, dreamy glow of a physical Pro-Mist lens filter."
+                                                aria-label="More Info">[?]</span></label>
                                         <span class="slider-value" data-for="diffusion" data-scrub="diffusion">0</span>
                                     </div>
                                     <input type="range" id="diffusion" class="studio-slider" min="0" max="100" step="1"
@@ -1224,8 +1455,10 @@
                                     <!-- SPECTRAL IMAGING (Phase VIII) -->
                                     <div class="mb-4 pt-4 border-t border-glass-border">
                                         <label
-                                            class="text-sm text-gray-400 font-bold mb-2 block uppercase tracking-wider">Spectral
-                                            Vision</label>
+                                            class="text-sm text-gray-400 font-bold mb-2 flex items-center uppercase tracking-wider">Spectral
+                                            Vision<span class="tooltip-trigger" tabindex="0"
+                                                data-tooltip="Maps image brightness to false-color thermal and infrared spectrums."
+                                                aria-label="More Info">[?]</span></label>
                                         <div class="flex bg-glass rounded-lg p-1 border border-glass-border mb-3">
                                             <button
                                                 class="flex-1 py-1.5 text-sm rounded hover:bg-white/10 transition-all spectral-mode-btn active bg-hot-pink/20 text-hot-pink font-semibold"
@@ -1295,7 +1528,10 @@
 
                                         <div class="slider-group">
                                             <div class="slider-header">
-                                                <label>Entropy (Seed)</label>
+                                                <label class="flex items-center">Entropy (Seed)<span
+                                                        class="tooltip-trigger" tabindex="0"
+                                                        data-tooltip="The mathematical starting point for randomized effects like light leaks or glitches. Change this number to generate a completely new random pattern."
+                                                        aria-label="More Info">[?]</span></label>
                                                 <span class="slider-value" data-for="lightLeakEntropy"
                                                     data-scrub="lightLeakEntropy">0</span>
                                             </div>
@@ -1373,7 +1609,9 @@
 
                             <div class="slider-group">
                                 <div class="slider-header">
-                                    <label>ASCII</label>
+                                    <label class="flex items-center">ASCII<span class="tooltip-trigger" tabindex="0"
+                                            data-tooltip="Converts the brightness values of your image into raw text characters, creating a classic retro-terminal or hacker aesthetic."
+                                            aria-label="More Info">[?]</span></label>
                                     <span class="slider-value" data-for="asciiSize" data-scrub="asciiSize">0</span>
                                 </div>
                                 <input type="range" id="asciiSize" class="studio-slider" min="0" max="2" step="0.01"
@@ -1405,7 +1643,9 @@
 
                             <div class="slider-group">
                                 <div class="slider-header">
-                                    <label>Posterize</label>
+                                    <label class="flex items-center">Posterize<span class="tooltip-trigger" tabindex="0"
+                                            data-tooltip="Dramatically reduces the number of colors in your image, creating flat, graphic bands of color similar to vintage screen-printed posters."
+                                            aria-label="More Info">[?]</span></label>
                                     <span class="slider-value" data-for="posterize" data-scrub="posterize">0</span>
                                 </div>
                                 <input type="range" id="posterize" class="studio-slider" min="0" max="100" step="1"
@@ -1497,7 +1737,10 @@
                                     </div>
                                     <div class="slider-group">
                                         <div class="slider-header">
-                                            <label>Gate Weave</label>
+                                            <label class="flex items-center">Gate Weave<span class="tooltip-trigger"
+                                                    tabindex="0"
+                                                    data-tooltip="Simulates the mechanical jitter of physical film running through a vintage projector."
+                                                    aria-label="More Info">[?]</span></label>
                                             <span class="slider-value" data-for="filmGateWeave"
                                                 data-scrub="filmGateWeave">0</span>
                                         </div>
@@ -1603,8 +1846,10 @@
                             <div class="h-px bg-white/10 my-6"></div>
 
                             <!-- TILT SHIFT -->
-                            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Tilt-Shift
-                            </h3>
+                            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
+                                Tilt-Shift<span class="tooltip-trigger" tabindex="0"
+                                    data-tooltip="Simulates a specialized lens that blurs the top and bottom of the frame, tricking the eye into seeing the scene as a tiny, miniature diorama."
+                                    aria-label="More Info">[?]</span></h3>
 
                             <div class="space-y-4">
                                 <div class="slider-group">
@@ -1732,7 +1977,10 @@
                         <div id="fx-lut" class="fx-subpanel hidden">
                             <div class="mb-6 pb-4 border-b border-glass-border">
                                 <div class="flex items-center justify-between mb-3">
-                                    <label class="text-sm font-semibold text-gray-300">3D LUT (.cube)</label>
+                                    <label class="text-sm font-semibold text-gray-300 flex items-center">3D LUT
+                                        (.cube)<span class="tooltip-trigger" tabindex="0"
+                                            data-tooltip="A standard 3D file format that saves all your color grading data so you can use it in Premiere, Resolve, or Photoshop."
+                                            aria-label="More Info">[?]</span></label>
                                     <div class="flex gap-2">
                                         <button id="remove-lut-btn"
                                             class="text-sm text-red-400 hover:text-red-300 hidden">Remove</button>

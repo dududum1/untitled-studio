@@ -20,7 +20,10 @@ class AIEngine {
     }
 
     /**
-     * Load a model from CDN
+     * Load a model from CDN using ReadableStream for progress tracking.
+     * Dispatches ai-model-progress events with { phase, percent }:
+     *   phase='downloading'  — percent: 0-99 (or null if Content-Length missing)
+     *   phase='initializing' — WASM compilation is about to start
      * @param {string} modelType - 'segmentation' | 'inpainting'
      */
     async loadModel(modelType, manualFile = null) {
@@ -29,12 +32,10 @@ class AIEngine {
 
         const modelConfig = {
             segmentation: {
-                // MODNet is robust for portrait/object segmentation
                 path: 'https://huggingface.co/Xenova/modnet/resolve/main/onnx/model_quantized.onnx?download=true',
                 name: 'MODNet (Quantized)'
             },
             inpainting: {
-                // LaMa (Carve/LaMa-ONNX) - Publicly accessible
                 path: 'https://huggingface.co/Carve/LaMa-ONNX/resolve/main/lama_fp32.onnx?download=true',
                 name: 'LaMa (FP32)'
             }
@@ -42,49 +43,76 @@ class AIEngine {
 
         const config = modelConfig[modelType];
         if (!config) {
-            console.error(`❌ [AI Engine] Unknown model type: ${modelType}`);
+            console.error(`[AI Engine] Unknown model type: ${modelType}`);
+            this.modelState.isLoading = false;
             return;
         }
 
-        console.log(`⏳ [AI Engine] Loading ${config.name}...`);
+        // Helper: dispatch progress events
+        const dispatch = (phase, percent = null) =>
+            window.dispatchEvent(new CustomEvent('ai-model-progress', {
+                detail: { model: modelType, phase, percent }
+            }));
 
-        // Notify UI of start
+        console.log(`[AI Engine] Loading ${config.name}...`);
         window.dispatchEvent(new CustomEvent('ai-model-loading', { detail: { model: modelType } }));
 
         try {
-            const sessionOption = { executionProviders: ['wasm'] }; // Fallback to Wasm for stability
+            const sessionOption = { executionProviders: ['wasm'] };
 
-            // 1. Try Manual File if provided
+            // ── Path A: Local file ────────────────────────────────────────────
             if (manualFile) {
-                console.log(`📂 [AI Engine] Loading from local file: ${manualFile.name}`);
+                console.log(`[AI Engine] Loading from local file: ${manualFile.name}`);
+                dispatch('downloading', 100);
+                dispatch('initializing');
+                await new Promise(r => setTimeout(r, 50)); // yield one paint frame
                 const buffer = await manualFile.arrayBuffer();
                 this.session = await ort.InferenceSession.create(buffer, sessionOption);
-            }
-            // 2. Try URL Download
-            else {
-                this.session = await ort.InferenceSession.create(config.path, sessionOption);
+
+                // ── Path B: Streaming CDN download ────────────────────────────────
+            } else {
+                const response = await fetch(config.path);
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+                const contentLength = parseInt(response.headers.get('Content-Length') || '0', 10);
+                const reader = response.body.getReader();
+                const chunks = [];
+                let downloaded = 0;
+
+                // Phase 1: stream + report
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    chunks.push(value);
+                    downloaded += value.byteLength;
+                    // Cap at 99 so 100% only shows after init
+                    const pct = contentLength
+                        ? Math.min(Math.round((downloaded / contentLength) * 100), 99)
+                        : null;
+                    dispatch('downloading', pct);
+                }
+
+                // Merge chunks into a single buffer
+                const merged = new Uint8Array(downloaded);
+                let pos = 0;
+                for (const chunk of chunks) { merged.set(chunk, pos); pos += chunk.byteLength; }
+
+                // Phase 2: WASM compilation
+                dispatch('initializing');
+                await new Promise(r => setTimeout(r, 50)); // yield repaint
+                this.session = await ort.InferenceSession.create(merged.buffer, sessionOption);
             }
 
             this.modelState.isLoaded = true;
             this.modelState.currentModel = modelType;
-            console.log(`✅ [AI Engine] ${config.name} Ready`);
-
-            // Notify UI Success
+            console.log(`[AI Engine] ${config.name} Ready`);
             window.dispatchEvent(new CustomEvent('ai-model-loaded', { detail: { model: modelType } }));
 
         } catch (e) {
-            console.error(`❌ [AI Engine] Failed to load model:`, e);
-
-            // Notify UI Failure (so we can show manual upload button)
+            console.error(`[AI Engine] Model load failed:`, e);
             window.dispatchEvent(new CustomEvent('ai-model-error', {
-                detail: {
-                    model: modelType,
-                    error: e.message,
-                    downloadUrl: config.path
-                }
+                detail: { model: modelType, error: e.message, downloadUrl: config?.path }
             }));
-
-            this.showToast("Failed to load AI Model. Try manual upload.");
         } finally {
             this.modelState.isLoading = false;
         }

@@ -2,6 +2,27 @@
 
 All notable changes to Untitled Studio will be documented in this file.
 
+## [3.1.0] - 2026-02-21
+
+### AI Model Loading Progress
+- **ReadableStream Fetch**: Replaced the blocking `ort.InferenceSession.create(url)` call with a `fetch` + `ReadableStream` pipeline that tracks every chunk against `Content-Length` to calculate exact download percentage.
+- **Two-Phase Loading States**: Download phase reports 0-99%, then immediately transitions to an "Initializing" state before the CPU-heavy WASM compilation step, preventing the UI from appearing frozen.
+- **3-State Widget**: The "Load Model" button for both Magic Eraser and Smart Select is replaced during loading by a minimalist inline progress component and re-replaced by the tool controls on success.
+- **Progress Bar**: 1px height horizontal track with a `cubic-bezier` fill transition for smooth, premium-feeling animation.
+- **Initializing Spinner**: Thin-arc SVG circle replaces the bar once the download hits 100%, rotating at 1.6s per cycle during WASM compilation.
+- **Error Handling**: Network or parse failures show a soft-red inline "Tap to retry." link that resets state without reloading the page.
+
+### Tooltip System
+- **Inline Help Triggers**: Added `[?]` icons next to 20+ technical labels across all panels including Vectorscope, HSL Mixer, Output Transform, film stock buttons (Kodak 2383, Fuji 3513, Cineon Log), Lens Fringing, Barrel Distortion, Mist Diffusion, Tilt-Shift, Grain Mode, Dithering (Lo-Fi), Halation, Gate Weave, Spectral Vision, Neural Darkroom, ASCII, Posterize, Entropy (Seed), and 3D LUT.
+- **Portal Architecture**: A single tooltip element is appended to `document.body` and positioned absolutely, preventing any clipping from `overflow: hidden` scroll containers.
+- **Event Delegation**: A single `mouseover`/`focusin` listener on `document.body` handles all triggers, keeping initialization cost near-zero.
+- **Delay**: 200ms hover debounce prevents tooltip flash when moving the cursor quickly across the panel.
+- **Viewport Collision**: Tooltip auto-repositions to avoid viewport edges on both axes.
+- **Accessibility**: Triggers are focusable via `tabindex="0"` and `aria-describedby` is set dynamically on show.
+
+### Bug Fixes
+- **Web Worker Crash**: Wrapped `new Worker('js/worker.js')` in the `UntitledStudio` constructor with a `try/catch`. Under the `file://` protocol the browser throws a `SecurityError` before `this.init()` runs, leaving all UI event listeners unattached. The app now falls back to main-thread image processing gracefully.
+
 ## [3.0.1] - 2026-02-21
 
 ### Bug Fixes & Structural Repairs

@@ -22,6 +22,24 @@ class UntitledStudio {
 
 
         // State
+        this.undoStack = [];
+        this.redoStack = [];
+
+        // UI State
+        this.activePanel = 'tone-panel';
+        this.isFullscreen = false;
+
+        // Background Image Processor Worker
+        // Background Image Processor Worker
+        try {
+            this.imageWorker = new Worker('js/worker.js');
+            this.imageWorker.onmessage = (e) => this.handleWorkerMessage(e);
+        } catch (e) {
+            console.warn("Failed to initialize Web Worker (likely running via file://). Falling back to main thread.", e);
+            this.imageWorker = null;
+        }
+        this.workerResolvers = new Map();
+
         this.images = [];
         this.rolls = []; // Multi-roll support
         this.activeRollId = null;
@@ -393,28 +411,28 @@ class UntitledStudio {
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣶⣬⣅⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠒⠤⣀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠤⡖⣯⡐⠺⡜⠤⠈⣻⢱⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠁⠢⢄
 ⠀⠀⠀⠀⠀⢀⣀⣠⣤⣤⣴⣶⣶⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣷⣿⣶⣷⣤⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠢⡀
-⣠⣤⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣌⠢⡀
-⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀⠀⢠⣿⣷⡵⡀
-⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⡀⠀⠀⠀⠀⢸⣿⣿⣿⣧
-⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡄⠀⠀⠀⣼⣿⣿⣿⣿⡄
-⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠛⠛⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣆⠀⢠⣿⣿⣿⣿⣿⣧
-⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⡿⠟⠉⠀⠀⠀⢀⡔⠁⠀⠀⠀⠈⢉⢟⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣚⣿⣿⣿⣿⣿⣯⡄
-⣿⣿⣿⣿⣿⡿⠋⢁⠞⠉⠀⠀⠀⠀⠀⣰⡟⠀⠀⠀⠀⢀⠔⠁⡎⠀⠀⠀⠉⠛⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣱⠟⣿⣿⣿⣿⣣
-⣿⣿⣿⡿⠋⠀⠀⠃⠀⠀⠀⠀⠀⢀⠞⡝⠀⠀⠀⠀⣰⣃⠀⠸⠀⠀⠀⠀⠀⠀⠀⠀⠙⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣬⠽⣿⣿⣿⡿
-⣿⣿⠟⠀⠀⠀⠀⠀⠀⠀⠀⠀⣔⠁⢰⠀⠀⠀⢀⠎⠀⠀⠉⡇⠀⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣠⣿⣿⣿⣿⡇
-⡿⠃⠀⠀⠀⠀⠀⠀⠀⠀⢠⠞⠛⠿⡆⡄⠀⢠⡂⠀⠀⠀⢰⠀⠀⢀⡞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠉⠻⣿⣿⣤
-⠁⠀⠀⠀⡘⠀⠀⢀⠀⡰⠡⠀⠀⢀⣏⣇⢠⣷⣌⠢⡀⠀⢸⠀⠀⠎⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠈⠻⢿⣆
-⠀⠀⠀⢠⠃⠀⢀⡎⡘⠀⠀⡆⣰⠿⢿⣿⣿⣿⣿⣷⣌⠂⢸⠀⡜⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⠀⠙⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣇⠀⠀⠀⡙⡝⢅⠒
-⠀⠀⠀⣾⠀⠀⠎⡗⠀⠀⠀⠈⠣⢔⠂⢌⠙⢿⣿⣏⠃⠀⠸⢠⠁⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⢂⡼⠋⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⡇⠐⠜
-⠀⠀⢰⣿⠀⡜⠀⠃⠀⠀⠀⠀⠀⠀⠈⠒⠧⣊⠟⠁⠀⠀⠀⡞⠀⢸⡄⠀⠀⠀⠀⠀⠀⠀⠀⣎⣾⡀⠃⠀⠀⠀⠈⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀⢱⠀⠀⡗
-⠀⡇⣾⢿⢰⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⡗⡀⠀⠀⠀⠀⡐⠀⣼⠋⠈⢣⡆⠀⠀⢠⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣇⠀⠀⢆⠀⠇
-⠀⣧⣿⡎⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠃⠐⡄⠀⠀⠀⡇⢀⠃⠀⠀⠀⠇⠀⠀⣼⠀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠘⠌
-⠀⣿⣯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠦⡀⠀⣿⢘⢂⠀⠀⢰⠄⠀⢀⡇⢀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇
-⠀⢿⡏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⣪⣼⣦⣿⣿⣷⣕⢄⡈⠀⠠⢺⡇⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷
-⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠤⠤⢀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢼⡉⠙⠻⣿⣿⣿⡿⣷⢃⠔⠁⣿⢧⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-⠀⠈⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⢍⢢⠈⢻⣿⠇⠘⢿⣦⣰⣿⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄
-⠀⠀⢿⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⠥⡼⣋⠠⠐⠛⠛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇
-⡀⠀⠸⣿⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇
+⣠⣤⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣌⠢⡀
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀⠀⢠⣿⣷⡵⡀
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⡀⠀⠀⠀⠀⢸⣿⣿⣿⣧
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡄⠀⠀⠀⣼⣿⣿⣿⣿⡄
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠛⠛⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣆⠀⢠⣿⣿⣿⣿⣿⣧
+⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⡿⠟⠉⠀⠀⠀⢀⡔⠁⠀⠀⠀⠈⢉⢟⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣚⣿⣿⣿⣿⣿⣯⡄
+⣿⣿⣿⣿⣿⡿⠋⢁⠞⠉⠀⠀⠀⠀⠀⣰⡟⠀⠀⠀⠀⢀⠔⠁⡎⠀⠀⠀⠉⠛⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣱⠟⣿⣿⣿⣿⣣
+⣿⣿⣿⡿⠋⠀⠀⠃⠀⠀⠀⠀⠀⢀⠞⡝⠀⠀⠀⠀⣰⣃⠀⠸⠀⠀⠀⠀⠀⠀⠀⠀⠙⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣬⠽⣿⣿⣿⡿
+⣿⣿⠟⠀⠀⠀⠀⠀⠀⠀⠀⠀⣔⠁⢰⠀⠀⠀⢀⠎⠀⠀⠉⡇⠀⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣠⣿⣿⣿⣿⡇
+⡿⠃⠀⠀⠀⠀⠀⠀⠀⠀⢠⠞⠛⠿⡆⡄⠀⢠⡂⠀⠀⠀⢰⠀⠀⢀⡞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠉⠻⣿⣿⣤
+⠁⠀⠀⠀⡘⠀⠀⢀⠀⡰⠡⠀⠀⢀⣏⣇⢠⣷⣌⠢⡀⠀⢸⠀⠀⠎⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠈⠻⢿⣆
+⠀⠀⠀⢠⠃⠀⢀⡎⡘⠀⠀⡆⣰⠿⢿⣿⣿⣿⣿⣷⣌⠂⢸⠀⡜⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⠀⠙⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⡙⡝⢅⠒
+⠀⠀⠀⣾⠀⠀⠎⡗⠀⠀⠀⠈⠣⢔⠂⢌⠙⢿⣿⣏⠃⠀⠸⢠⠁⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⢂⡼⠋⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⡇⠐⠜
+⠀⠀⢰⣿⠀⡜⠀⠃⠀⠀⠀⠀⠀⠀⠈⠒⠧⣊⠟⠁⠀⠀⠀⡞⠀⢸⡄⠀⠀⠀⠀⠀⠀⠀⠀⣎⣾⡀⠃⠀⠀⠀⠈⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀⢱⠀⠀⡗
+⠀⡇⣾⢿⢰⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⡗⡀⠀⠀⠀⠀⡐⠀⣼⠋⠈⢣⡆⠀⠀⢠⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣇⠀⠀⢆⠀⠇
+⠀⣧⣿⡎⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠃⠐⡄⠀⠀⠀⡇⢀⠃⠀⠀⠀⠇⠀⠀⣼⠀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠘⠌
+⠀⣿⣯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠦⡀⠀⣿⢘⢂⠀⠀⢰⠄⠀⢀⡇⢀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇
+⠀⢿⡏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⣪⣼⣦⣿⣿⣷⣕⢄⡈⠀⠠⢺⡇⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷
+⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠤⠤⢀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢼⡉⠙⠻⣿⣿⣿⡿⣷⢃⠔⠁⣿⢧⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⠀⠈⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⢍⢢⠈⢻⣿⠇⠘⢿⣦⣰⣿⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄
+⠀⠀⢿⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⠥⡼⣋⠠⠐⠛⠛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇
+⡀⠀⠸⣿⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇
 ⣱⡄⠀⢻⣿⣳⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠇
 ⡷⣿⣦⣀⢿⣷⠈⠢⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠆⠀⢠⡿⠯⣠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟
 ⡇⠈⠛⢿⣿⣷⣄⣀⠈⠐⢄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⠊⠀⠀⣀⠏⠀⠀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠁
@@ -461,96 +479,111 @@ class UntitledStudio {
             }
         });
 
-        // Event Listeners for AI Engine
-        window.addEventListener('ai-model-loading', (e) => {
-            const progress = e.detail.progress || 0;
-            const progressText = progress > 0 ? ` (${progress}%)` : '';
-            this.showToast(`Downloading AI Model (${e.detail.model})${progressText}...`);
-            document.body.classList.add('cursor-wait');
+        // ── AI Model Loading: 3-State UI Machine ────────────────────────────
+        //
+        // States: idle → progress → ready | error
+        // Driven by events dispatched from ai-engine.js
 
-            // Update button text
-            if (e.detail.model === 'inpainting' && btnMagicEraser) {
-                btnMagicEraser.textContent = `LOADING${progressText}`;
-                btnMagicEraser.disabled = true;
+        const aiModelUI = (modelType) => ({
+            idle: () => {
+                document.getElementById(`ai-idle-${modelType}`)?.classList.remove('hidden');
+                document.getElementById(`ai-progress-${modelType}`)?.classList.add('hidden');
+                document.getElementById(`ai-error-${modelType}`)?.classList.add('hidden');
+            },
+            startLoading: () => {
+                document.getElementById(`ai-idle-${modelType}`)?.classList.add('hidden');
+                document.getElementById(`ai-progress-${modelType}`)?.classList.remove('hidden');
+                document.getElementById(`ai-error-${modelType}`)?.classList.add('hidden');
+                // Reset bar
+                const bar = document.getElementById(`ai-bar-${modelType}`);
+                if (bar) bar.style.width = '0%';
+                const pct = document.getElementById(`ai-pct-${modelType}`);
+                if (pct) pct.textContent = '—';
+                const phase = document.getElementById(`ai-phase-${modelType}`);
+                if (phase) phase.textContent = 'DOWNLOADING';
+            },
+            setProgress: (percent) => {
+                const bar = document.getElementById(`ai-bar-${modelType}`);
+                const pct = document.getElementById(`ai-pct-${modelType}`);
+                // percent can be null (indeterminate) or 0-99
+                if (bar) bar.style.width = percent != null ? `${percent}%` : '40%';
+                if (pct) pct.textContent = percent != null ? `${percent}%` : '...';
+                // Show bar, hide spinner
+                document.getElementById(`ai-bar-track-${modelType}`)?.classList.remove('hidden');
+                document.getElementById(`ai-spinner-wrap-${modelType}`)?.classList.add('hidden');
+            },
+            setInitializing: () => {
+                const bar = document.getElementById(`ai-bar-${modelType}`);
+                if (bar) bar.style.width = '100%';
+                const pct = document.getElementById(`ai-pct-${modelType}`);
+                if (pct) pct.textContent = '100%';
+                const phase = document.getElementById(`ai-phase-${modelType}`);
+                if (phase) phase.textContent = 'INITIALIZING';
+                // Swap bar → spinner
+                document.getElementById(`ai-bar-track-${modelType}`)?.classList.add('hidden');
+                document.getElementById(`ai-spinner-wrap-${modelType}`)?.classList.remove('hidden');
+            },
+            showReady: () => {
+                document.getElementById(`ai-progress-${modelType}`)?.classList.add('hidden');
+                document.getElementById(`controls-${modelType}`)?.classList.remove('hidden');
+                document.body.classList.remove('cursor-wait');
+            },
+            showError: () => {
+                document.getElementById(`ai-progress-${modelType}`)?.classList.add('hidden');
+                document.getElementById(`ai-error-${modelType}`)?.classList.remove('hidden');
+                document.getElementById(`ai-idle-${modelType}`)?.classList.remove('hidden');
+                document.body.classList.remove('cursor-wait');
             }
-            if (e.detail.model === 'segmentation' && btnSmartSelect) {
-                btnSmartSelect.textContent = `LOADING${progressText}`;
-                btnSmartSelect.disabled = true;
+        });
+
+        window.addEventListener('ai-model-loading', (e) => {
+            document.body.classList.add('cursor-wait');
+            aiModelUI(e.detail.model).startLoading();
+        });
+
+        window.addEventListener('ai-model-progress', (e) => {
+            const { model, phase, percent } = e.detail;
+            const ui = aiModelUI(model);
+            if (phase === 'downloading') {
+                ui.setProgress(percent);
+            } else if (phase === 'initializing') {
+                ui.setInitializing();
             }
         });
 
         window.addEventListener('ai-model-loaded', (e) => {
-            this.showToast(`AI Model Ready: ${e.detail.model}`);
-            document.body.classList.remove('cursor-wait');
-
-            // Visual indication on buttons
-            if (e.detail.model === 'inpainting') {
-                if (btnMagicEraser) {
-                    btnMagicEraser.textContent = 'ACTIVE';
-                    btnMagicEraser.classList.remove('bg-white/10');
-                    btnMagicEraser.classList.add('bg-hot-pink', 'text-white', 'border-hot-pink');
-                    btnMagicEraser.disabled = false;
-                }
-                // Show controls
-                const controls = document.getElementById('controls-inpainting');
-                if (controls) controls.classList.remove('hidden');
-            }
-
-            if (e.detail.model === 'segmentation') {
-                if (btnSmartSelect) {
-                    btnSmartSelect.textContent = 'ACTIVE';
-                    btnSmartSelect.classList.remove('bg-white/10');
-                    btnSmartSelect.classList.add('bg-moonstone', 'text-black', 'border-moonstone');
-                    btnSmartSelect.disabled = false;
-                }
-                // Show controls
-                const controls = document.getElementById('controls-segmentation');
-                if (controls) controls.classList.remove('hidden');
-            }
+            aiModelUI(e.detail.model).showReady();
+            this.showToast('AI Model ready.');
         });
 
         window.addEventListener('ai-model-error', (e) => {
-            document.body.classList.remove('cursor-wait');
-            const { model, downloadUrl } = e.detail;
-
-            // Reset buttons
-            if (model === 'inpainting' && btnMagicEraser) {
-                btnMagicEraser.textContent = 'LOAD MODEL (~20MB)';
-                btnMagicEraser.disabled = false;
-            }
-            if (model === 'segmentation' && btnSmartSelect) {
-                btnSmartSelect.textContent = 'LOAD MODEL (~15MB)';
-                btnSmartSelect.disabled = false;
-            }
-
-            // Show interactive toast/alert asking for manual upload
-            if (confirm(`Automatic download failed for ${model}. \n\nDo you have the .onnx file locally?\n\n(If not, download it from: ${downloadUrl})`)) {
-                pendingModelType = model;
+            aiModelUI(e.detail.model).showError();
+            // Prompt for manual file if online fetch failed
+            if (confirm(`Download failed.\n\nDo you have the .onnx file locally? (If not, get it from Hugging Face)\n\nURL: ${e.detail.downloadUrl || ''}`)) {
+                pendingModelType = e.detail.model;
                 modelInput.click();
+            }
+        });
+
+        // Retry buttons (event delegation)
+        document.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('ai-retry-btn')) return;
+            const modelType = e.target.dataset.model;
+            if (modelType && window.aiEngine) {
+                aiModelUI(modelType).idle();
+                window.aiEngine.loadModel(modelType);
             }
         });
 
         if (btnMagicEraser) {
             btnMagicEraser.addEventListener('click', () => {
-                if (window.aiEngine) {
-                    if (window.aiEngine.modelState.currentModel !== 'inpainting' || !window.aiEngine.modelState.isLoaded) {
-                        window.aiEngine.loadModel('inpainting');
-                    } else {
-                        this.showToast('Magic Eraser already active');
-                    }
-                }
+                if (window.aiEngine) window.aiEngine.loadModel('inpainting');
             });
         }
 
         if (btnSmartSelect) {
             btnSmartSelect.addEventListener('click', () => {
-                if (window.aiEngine) {
-                    if (window.aiEngine.modelState.currentModel !== 'segmentation' || !window.aiEngine.modelState.isLoaded) {
-                        window.aiEngine.loadModel('segmentation');
-                    } else {
-                        this.showToast('Smart Select ready');
-                    }
-                }
+                if (window.aiEngine) window.aiEngine.loadModel('segmentation');
             });
         }
 
@@ -1499,6 +1532,20 @@ class UntitledStudio {
         }
     }
 
+    handleWorkerMessage(e) {
+        const { id, success, bitmap, error, metadata, fileData, isRaw } = e.data;
+
+        const resolver = this.workerResolvers.get(id);
+        if (!resolver) return;
+
+        if (success) {
+            resolver.resolve({ bitmap, metadata, fileData, isRaw });
+        } else {
+            resolver.reject(new Error(error));
+        }
+
+        this.workerResolvers.delete(id);
+    }
 
 
     initHistogram() {
@@ -2619,9 +2666,13 @@ class UntitledStudio {
 
         const filesToImport = imageFiles.slice(0, remaining);
 
-        for (const file of filesToImport) {
-            await this.addImage(file);
-        }
+        this.showToast(`Importing ${filesToImport.length} file(s)...`);
+
+        // Start processing all files concurrently via worker or async
+        const promises = filesToImport.map(file => this.addImage(file));
+
+        // We wait for all to finish so we can select the first one imported if none was active
+        const results = await Promise.allSettled(promises);
 
         if (this.activeIndex === -1 && this.images.length > 0) {
             this.selectImage(0);
@@ -2719,11 +2770,12 @@ class UntitledStudio {
 
     async addImage(file) {
         const id = Date.now() + Math.random().toString(36).substr(2, 9);
-
-        // Check if this is a RAW file and decode it
         let processedFile = file;
         let isRaw = false;
 
+        // Note: For now, if it's RAW, we still decode on the main thread
+        // because the WebAssembly RawDecoder modifies the main window/DOM and isn't
+        // completely worker-safe yet without a major refactor.
         if (window.RawDecoder && window.RawDecoder.isRawFile(file)) {
             isRaw = true;
             const formatName = window.RawDecoder.getFormatName(file.name);
@@ -2742,7 +2794,33 @@ class UntitledStudio {
             }
         }
 
-        const thumbnailUrl = await this.createThumbnail(processedFile);
+        // --- Offload ImageBitmap Creation to Worker ---
+        let bitmap = null;
+        try {
+            // Create a promise that the worker will resolve
+            const workerPromise = new Promise((resolve, reject) => {
+                this.workerResolvers.set(id, { resolve, reject });
+            });
+
+            // Send the file to the worker
+            this.imageWorker.postMessage({ id, file: processedFile });
+
+            // Wait for worker to finish drawing
+            const result = await workerPromise;
+            bitmap = result.bitmap;
+        } catch (err) {
+            console.warn("Worker creation failed, falling back to main thread:", err);
+            // Fallback to main thread if worker fails or is not available
+            try {
+                bitmap = await createImageBitmap(processedFile);
+            } catch (e) {
+                console.error("Failed to create ImageBitmap on main thread:", e);
+                this.showToast(`Failed to load image: ${file.name}`, 'error');
+                return null;
+            }
+        }
+
+        const thumbnailUrl = await this.createThumbnail(processedFile, bitmap);
 
         // Cache URL immediately
         const url = URL.createObjectURL(processedFile);
@@ -2805,20 +2883,15 @@ class UntitledStudio {
                     LensModel: allTags.LensModel || allTags.Lens
                 };
 
-                // Update in memory
-                const targetImg = this.images.find(i => i.id === id);
-                if (targetImg) {
-                    targetImg.exif = relevant;
-                    // If currently active, update UI
-                    if (this.activeIndex !== -1 && this.images[this.activeIndex].id === id) {
-                        this.updateExifPanel(relevant);
-                        // Also update Gallery View if active
-                        this.updateGalleryPreview();
+                // Only save if we found something useful (Make or DateTime)
+                if (relevant.Make || relevant.DateTimeOriginal) {
+                    const img = this.images.find(img => img.id === id);
+                    if (img) img.exif = relevant;
+
+                    if (this.images[this.activeIndex]?.id === id) {
+                        this.updateMetadataUI(relevant);
                     }
                 }
-
-                // Update in DB (light update)
-                if (targetImg) storage.saveImage(targetImg);
             });
         }
 
@@ -6440,7 +6513,104 @@ class UntitledStudio {
 
 }
 
+class TooltipSystem {
+    constructor() {
+        this.tooltip = document.createElement('div');
+        this.tooltip.className = 'brutalist-tooltip';
+        this.tooltip.setAttribute('role', 'tooltip');
+        this.tooltip.id = 'global-tooltip';
+        document.body.appendChild(this.tooltip);
+
+        this.hideTimeout = null;
+        this.showTimeout = null;
+        this.activeTrigger = null;
+
+        this.init();
+    }
+
+    init() {
+        // Use event delegation for dynamic elements
+        document.body.addEventListener('mouseover', this.handleHover.bind(this));
+        document.body.addEventListener('mouseout', this.handleOut.bind(this));
+        document.body.addEventListener('focusin', this.handleHover.bind(this));
+        document.body.addEventListener('focusout', this.handleOut.bind(this));
+    }
+
+    handleHover(e) {
+        const trigger = e.target.closest('.tooltip-trigger');
+        if (!trigger) return;
+
+        const content = trigger.getAttribute('data-tooltip');
+        if (!content) return;
+
+        // Ensure screen readers can hear it
+        trigger.setAttribute('aria-describedby', 'global-tooltip');
+
+        clearTimeout(this.hideTimeout);
+        this.activeTrigger = trigger;
+
+        // Delay to prevent flashing when moving mouse quickly over elements
+        this.showTimeout = setTimeout(() => {
+            if (this.activeTrigger === trigger) {
+                this.show(trigger, content);
+            }
+        }, 200);
+    }
+
+    handleOut(e) {
+        const trigger = e.target.closest('.tooltip-trigger');
+        if (!trigger) return;
+
+        trigger.removeAttribute('aria-describedby');
+
+        clearTimeout(this.showTimeout);
+        this.hideTimeout = setTimeout(() => {
+            this.hide();
+        }, 100);
+    }
+
+    show(trigger, content) {
+        // Replace newlines with <br> for HTML rendering
+        this.tooltip.innerHTML = content.replace(/\n/g, '<br>');
+        this.tooltip.classList.add('visible');
+        this.positionTooltip(trigger);
+    }
+
+    hide() {
+        this.tooltip.classList.remove('visible');
+        this.activeTrigger = null;
+    }
+
+    positionTooltip(trigger) {
+        const rect = trigger.getBoundingClientRect();
+        const tooltipRect = this.tooltip.getBoundingClientRect();
+
+        // Default position: Bottom-Right of the trigger icon
+        let top = rect.bottom + window.scrollY;
+        let left = rect.right + window.scrollX;
+
+        // Viewport collision detection
+        const padding = 10;
+
+        // Too far right?
+        if (left + tooltipRect.width > window.innerWidth - padding) {
+            left = rect.left + window.scrollX - tooltipRect.width - 8; // Move to left side
+            // If still too far left, align right edge
+            if (left < padding) left = window.innerWidth - tooltipRect.width - padding;
+        }
+
+        // Too far down?
+        if (top + tooltipRect.height > window.innerHeight - padding) {
+            top = rect.top + window.scrollY - tooltipRect.height - 8; // Move above
+        }
+
+        this.tooltip.style.left = `${left}px`;
+        this.tooltip.style.top = `${top}px`;
+    }
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new UntitledStudio();
+    window.tooltipSystem = new TooltipSystem();
 });
