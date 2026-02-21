@@ -485,6 +485,15 @@ class WebGLEngine {
             }
         });
     }
+
+    /**
+     * Direct injection of an ImageSource (like an ImageBitmap)
+     */
+    setImageSource(imageSource) {
+        if (!imageSource) return;
+        this.processImage(imageSource);
+    }
+
     processImage(img) {
         const gl = this.gl;
         this.currentImage = img;
@@ -494,8 +503,9 @@ class WebGLEngine {
         const maxWidth = container ? container.clientWidth - 32 : window.innerWidth - 32;
         const maxHeight = container ? container.clientHeight - 32 : window.innerHeight - 320;
 
-        let width = img.naturalWidth;
-        let height = img.naturalHeight;
+        // Handle both HTMLImageElement and ImageBitmap
+        let width = img.naturalWidth !== undefined ? img.naturalWidth : img.width;
+        let height = img.naturalHeight !== undefined ? img.naturalHeight : img.height;
 
         // Calculate CSS display size
         const scale = Math.min(1, maxWidth / width, maxHeight / height);

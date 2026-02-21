@@ -548,7 +548,188 @@ class UntitledStudio {
                     if (window.aiEngine.modelState.currentModel !== 'segmentation' || !window.aiEngine.modelState.isLoaded) {
                         window.aiEngine.loadModel('segmentation');
                     } else {
-                        this.showToast('Smart Select already active');
+                        this.showToast('Smart Select ready');
+                    }
+                }
+            });
+        }
+
+        // --- NEW: Inner Tool Bindings ---
+        const btnAiSelect = document.getElementById('btn-ai-select');
+        if (btnAiSelect) {
+            btnAiSelect.addEventListener('click', async () => {
+                if (!window.aiEngine || !window.aiEngine.modelState.isLoaded) return;
+
+                // Switch back to original to get clean image for segmentation
+                const wasOriginal = this.showOriginalState;
+                if (!wasOriginal) this.showOriginal(true);
+
+                // Wait for render
+                await new Promise(r => requestAnimationFrame(r));
+
+                // Send current canvas to AI
+                const maskBitmap = await window.aiEngine.runSmartSelect(this.engine.canvas);
+
+                // Restore state
+                if (!wasOriginal) this.showOriginal(false);
+
+                if (maskBitmap) {
+                    // Create a new local adjustment mask from the AI result
+                    if (!this.engine.masks) this.engine.masks = [];
+
+                    const id = 'ai_mask_' + Date.now();
+                    const maskCanvas = document.createElement('canvas');
+                    maskCanvas.width = maskBitmap.width;
+                    maskCanvas.height = maskBitmap.height;
+                    maskCanvas.getContext('2d').drawImage(maskBitmap, 0, 0);
+
+                    // Create MaskEditor instance to manage it
+                    const editor = new MaskEditor(maskBitmap.width, maskBitmap.height);
+                    editor.ctx.drawImage(maskCanvas, 0, 0);
+
+                    const newMask = {
+                        id: id,
+                        type: 'bitmap',
+                        enabled: true,
+                        editor: editor,
+                        canvas: editor.canvas,
+                        adjustments: { exposure: 0 }
+                    };
+
+                    this.engine.masks.push(newMask);
+                    this.localState.activeMaskId = id;
+                    this.engine.activeMaskId = id;
+
+                    // Switch UI to Local tab so they can edit the selected subject
+                    const localBtn = document.getElementById('rail-local-btn');
+                    if (localBtn) localBtn.click();
+
+                    this.engine.uploadMaskTexture(editor.canvas);
+                    this.engine.requestRender();
+                }
+            });
+        }
+
+        const btnAiBrush = document.getElementById('btn-ai-brush');
+        const btnAiErase = document.getElementById('btn-ai-erase');
+        const btnAiApply = document.getElementById('btn-ai-apply-erase');
+
+        if (btnAiBrush && btnAiErase && btnAiApply) {
+            let isPainting = false;
+            let activeTool = 'brush'; // 'brush' or 'erase'
+
+            btnAiBrush.addEventListener('click', () => {
+                activeTool = 'brush';
+                btnAiBrush.classList.add('border-hot-pink', 'shadow-[0_0_10px_rgba(255,0,153,0.3)]');
+                btnAiBrush.classList.remove('bg-white/10');
+                btnAiBrush.classList.add('bg-hot-pink');
+
+                btnAiErase.classList.remove('border-hot-pink', 'shadow-[0_0_10px_rgba(255,0,153,0.3)]', 'bg-hot-pink');
+                btnAiErase.classList.add('bg-white/10');
+
+                if (this.aiEraserMask) {
+                    this.aiEraserMask.brushConfig.isEraser = false;
+                }
+            });
+
+            btnAiErase.addEventListener('click', () => {
+                activeTool = 'erase';
+                btnAiErase.classList.add('border-hot-pink', 'shadow-[0_0_10px_rgba(255,0,153,0.3)]');
+                btnAiErase.classList.remove('bg-white/10');
+                btnAiErase.classList.add('bg-hot-pink');
+
+                btnAiBrush.classList.remove('border-hot-pink', 'shadow-[0_0_10px_rgba(255,0,153,0.3)]', 'bg-hot-pink');
+                btnAiBrush.classList.add('bg-white/10');
+
+                if (this.aiEraserMask) {
+                    this.aiEraserMask.brushConfig.isEraser = true;
+                }
+            });
+
+            // Set up pointer capture for AI tab
+            if (this.engine && this.engine.canvas) {
+                const handlePointer = (e) => {
+                    const aiBtn = document.getElementById('rail-ai-btn');
+                    if (!aiBtn || !aiBtn.classList.contains('active')) return;
+
+                    // Only intercept if we are in the inpainting controls
+                    const controls = document.getElementById('controls-inpainting');
+                    if (!controls || controls.classList.contains('hidden')) return;
+
+                    e.preventDefault();
+
+                    // Initialize temporary mask editor if it doesn't exist
+                    if (!this.aiEraserMask) {
+                        const w = this.engine.canvas.width || 1024;
+                        const h = this.engine.canvas.height || 1024;
+                        this.aiEraserMask = new MaskEditor(w, h);
+                        this.aiEraserMask.brushConfig = {
+                            size: 40,
+                            hardness: 0.5,
+                            opacity: 1.0,
+                            isEraser: activeTool === 'erase' // Initialize based on current button sync
+                        };
+                        this.aiEraserMask.clearMask();
+                        // Turn on red overlay in WebGL to see mask while painting
+                        this.engine.setShowMaskOverlay(true);
+                        btnAiApply.classList.remove('hidden');
+                    }
+
+                    const rect = this.engine.canvas.getBoundingClientRect();
+                    const u = (e.clientX - rect.left) / rect.width;
+                    const vCanvas = (e.clientY - rect.top) / rect.height;
+
+                    if (e.buttons === 1) {
+                        this.aiEraserMask.paint(u, vCanvas);
+                        // We borrow the Local Adjustments texture slot to show the red overlay
+                        this.engine.uploadMaskTexture(this.aiEraserMask.canvas);
+                        this.engine.requestRender();
+                    }
+                };
+
+                this.engine.canvas.addEventListener('pointerdown', handlePointer);
+                this.engine.canvas.addEventListener('pointermove', handlePointer);
+            }
+
+            btnAiApply.addEventListener('click', async () => {
+                if (!window.aiEngine || !window.aiEngine.modelState.isLoaded || !this.aiEraserMask) return;
+
+                // Get original image without edits
+                const wasOriginal = this.showOriginalState;
+                if (!wasOriginal) this.showOriginal(true);
+                await new Promise(r => requestAnimationFrame(r));
+
+                // Run inference
+                const inpaintedBitmap = await window.aiEngine.runMagicEraser(
+                    this.engine.canvas,
+                    this.aiEraserMask.canvas
+                );
+
+                if (!wasOriginal) this.showOriginal(false);
+
+                if (inpaintedBitmap) {
+                    // Inject the new base image back into the engine
+                    // To do this non-destructively, we should update the original Image object
+                    // But an ImageBitmap is an ImageSource, we can upload it as the main texture
+                    try {
+                        // Create a temporary canvas to get a Blob for storage
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = inpaintedBitmap.width;
+                        tempCanvas.height = inpaintedBitmap.height;
+                        tempCanvas.getContext('2d').drawImage(inpaintedBitmap, 0, 0);
+
+                        // Replace the texture in WebGL engine
+                        this.engine.setImageSource(inpaintedBitmap);
+
+                        // Clean up mask
+                        this.aiEraserMask = null;
+                        this.engine.uploadMaskTexture(null); // Clear overlay
+                        this.engine.setShowMaskOverlay(false);
+                        btnAiApply.classList.add('hidden');
+
+                        this.showToast('✅ Base image updated', 'success');
+                    } catch (e) {
+                        console.error("Failed to commit AI result:", e);
                     }
                 }
             });

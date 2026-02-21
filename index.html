@@ -647,11 +647,15 @@
                             </button>
                             <div class="hidden mt-3" id="controls-inpainting">
                                 <div class="flex gap-2">
-                                    <button
-                                        class="flex-1 py-1.5 bg-hot-pink text-white rounded text-xs font-bold">BRUSH</button>
-                                    <button
+                                    <button id="btn-ai-brush"
+                                        class="flex-1 py-1.5 bg-hot-pink text-white rounded text-xs font-bold active">BRUSH</button>
+                                    <button id="btn-ai-erase"
                                         class="flex-1 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded text-xs">ERASE</button>
                                 </div>
+                                <button id="btn-ai-apply-erase"
+                                    class="w-full mt-2 py-2 bg-hot-pink/20 hover:bg-hot-pink text-white font-bold rounded text-xs transition-colors hidden">
+                                    APPLY ERASER
+                                </button>
                             </div>
                         </div>
 
@@ -667,7 +671,8 @@
                                 LOAD MODEL (~15MB)
                             </button>
                             <div class="hidden mt-3" id="controls-segmentation">
-                                <button class="w-full py-2 bg-moonstone text-black font-bold rounded text-xs">SELECT
+                                <button id="btn-ai-select"
+                                    class="w-full py-2 bg-moonstone text-black font-bold rounded text-xs">SELECT
                                     SUBJECT</button>
                             </div>
                         </div>
